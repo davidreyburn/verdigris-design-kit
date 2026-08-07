@@ -163,20 +163,33 @@
         }
       }
       const r = box.getBoundingClientRect();
-      const min = Math.min(r.width, r.height);
+      /* Rounded, because getBoundingClientRect is fractional: a genuine 44px
+         control measures 43.996 under fractional device pixel ratios, and a
+         bare `< 44` then reports every compliant target as a near-miss. That
+         false positive filled the notes list with "44x44" entries, which is
+         the fastest way to train someone to ignore the notes. */
+      const min = Math.round(Math.min(r.width, r.height) * 100) / 100;
+      const EPS = 0.5;
       const rec = {
         selector: describe(el),
         size: Math.round(r.width) + 'x' + Math.round(r.height),
         measuredAs: box === el ? 'the control' : 'its label'
       };
-      if (min < 24) tiny.push(rec);
-      else if (min < 44) small.push(rec);
+      if (min < 24 - EPS) tiny.push(rec);
+      else if (min < 44 - EPS) small.push(rec);
     });
+    /* LIMITATION, stated so the notes are not mistaken for failures: this
+       does not implement 2.5.5's Spacing exception, under which an undersized
+       target still conforms if a 44px circle centred on it does not overlap
+       another target's circle. Narrow nav links separated by a wide gap
+       satisfy that and will still appear below. Treat `notes` as "worth
+       looking at", not as a verdict; only `fails` is a measured failure. */
     return {
       name: 'Target size (2.5.8 AA / 2.5.5 AAA)',
       checked: els.length,
       fails: tiny,                       // under 24 is an AA failure
-      notes: small.map(s => Object.assign({ level: 'AA passes, AAA does not' }, s))
+      notes: small.map(s => Object.assign(
+        { level: 'under 44 in one dimension — check 2.5.5 Spacing before calling it a failure' }, s))
     };
   }
 

@@ -12,14 +12,47 @@
           "name": "VdHero",
           "tagName": "vd-hero",
           "customElement": true,
-          "superclass": { "name": "HTMLElement" },
+          "superclass": {
+            "name": "HTMLElement"
+          },
           "description": "Page hero. Renders a display line, an optional sub-line, and the generative topolang field behind them. The field is masked to a capped alpha across the text column so the display line stays AAA over the brightest cell the palette can produce; nothing inside the hero may use the muted text value.",
           "attributes": [
-            { "name": "thesis", "type": { "text": "string" }, "description": "The display line. Required." },
-            { "name": "sub", "type": { "text": "string" }, "description": "Optional sub-line, one register down." },
-            { "name": "seed", "type": { "text": "number" }, "description": "topolang seed. Fixed per page, so every visitor sees the same sequence at the same moment." },
-            { "name": "field", "type": { "text": "'on' | 'off'" }, "default": "'on'", "description": "Set to 'off' to suppress the generative field entirely." },
-            { "name": "caption", "type": { "text": "string" }, "description": "Credit line rendered beneath the field." }
+            {
+              "name": "thesis",
+              "type": {
+                "text": "string"
+              },
+              "description": "The display line. Required."
+            },
+            {
+              "name": "sub",
+              "type": {
+                "text": "string"
+              },
+              "description": "Optional sub-line, one register down."
+            },
+            {
+              "name": "seed",
+              "type": {
+                "text": "number"
+              },
+              "description": "topolang seed. Fixed per page, so every visitor sees the same sequence at the same moment."
+            },
+            {
+              "name": "field",
+              "type": {
+                "text": "'on' | 'off'"
+              },
+              "default": "'on'",
+              "description": "Set to 'off' to suppress the generative field entirely."
+            },
+            {
+              "name": "caption",
+              "type": {
+                "text": "string"
+              },
+              "description": "Credit line rendered beneath the field."
+            }
           ]
         },
         {
@@ -27,14 +60,46 @@
           "name": "VdSystemCard",
           "tagName": "vd-system-card",
           "customElement": true,
-          "superclass": { "name": "HTMLElement" },
+          "superclass": {
+            "name": "HTMLElement"
+          },
           "description": "A work item. Hairline box, no fill. The whole card is clickable via a click handler that guards text selection rather than a stretched overlay link, so the prose stays selectable and middle-click still works on the title itself.",
           "attributes": [
-            { "name": "index", "type": { "text": "string" }, "description": "Ordinal, e.g. '01'. Rendered in the structure colour." },
-            { "name": "kicker", "type": { "text": "string" }, "description": "Category line above the title." },
-            { "name": "title", "type": { "text": "string" }, "description": "Card title. Becomes the link text." },
-            { "name": "href", "type": { "text": "string" }, "description": "Destination. The whole card targets this." },
-            { "name": "proof", "type": { "text": "string" }, "description": "Pipe-separated metric pairs, e.g. 'agents:4|adopted:2026'. Values starting with a digit take the data colour; anything else takes the emphasis text colour, because the data accent is numerals only." }
+            {
+              "name": "index",
+              "type": {
+                "text": "string"
+              },
+              "description": "Ordinal, e.g. '01'. Rendered in the structure colour."
+            },
+            {
+              "name": "kicker",
+              "type": {
+                "text": "string"
+              },
+              "description": "Category line above the title."
+            },
+            {
+              "name": "title",
+              "type": {
+                "text": "string"
+              },
+              "description": "Card title. Becomes the link text."
+            },
+            {
+              "name": "href",
+              "type": {
+                "text": "string"
+              },
+              "description": "Destination. The whole card targets this."
+            },
+            {
+              "name": "proof",
+              "type": {
+                "text": "string"
+              },
+              "description": "Pipe-separated metric pairs, e.g. 'agents:4|adopted:2026'. Values starting with a digit take the data colour; anything else takes the emphasis text colour, because the data accent is numerals only."
+            }
           ]
         },
         {
@@ -42,14 +107,44 @@
           "name": "VdNoteCard",
           "tagName": "vd-note-card",
           "customElement": true,
-          "superclass": { "name": "HTMLElement" },
+          "superclass": {
+            "name": "HTMLElement"
+          },
           "description": "A writing item in a ruled list. Hover and focus-within raise a sunken surface plus a 2px inset left bar. The accent is a left bar rather than the horizontal rules because in a ruled list the rules are shared boundaries — accenting your own borders outlines the last item on two sides and every other item on one.",
           "attributes": [
-            { "name": "date", "type": { "text": "string" }, "description": "ISO-ish publication date, e.g. '2026-08'." },
-            { "name": "length", "type": { "text": "string" }, "description": "Word count, e.g. '2,400 words'." },
-            { "name": "title", "type": { "text": "string" } },
-            { "name": "href", "type": { "text": "string" } },
-            { "name": "dek", "type": { "text": "string" }, "description": "Standfirst paragraph." }
+            {
+              "name": "date",
+              "type": {
+                "text": "string"
+              },
+              "description": "ISO-ish publication date, e.g. '2026-08'."
+            },
+            {
+              "name": "length",
+              "type": {
+                "text": "string"
+              },
+              "description": "Word count, e.g. '2,400 words'."
+            },
+            {
+              "name": "title",
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "name": "href",
+              "type": {
+                "text": "string"
+              }
+            },
+            {
+              "name": "dek",
+              "type": {
+                "text": "string"
+              },
+              "description": "Standfirst paragraph."
+            }
           ]
         },
         {
@@ -57,10 +152,15 @@
           "name": "VdForm",
           "tagName": "vd-form",
           "customElement": true,
-          "superclass": { "name": "HTMLElement" },
+          "superclass": {
+            "name": "HTMLElement"
+          },
           "description": "Wraps a native form and replaces the browser's validation bubble with inline messages. Progressive enhancement over the Constraint Validation API: novalidate is set from JS, so with scripting off the browser's own enforcement still applies. Validates on blur, then re-validates on every input once a field has been blurred. On submit, focus moves to the first invalid control — there is no summary block, by decision.",
           "slots": [
-            { "name": "", "description": "A single <form> element containing .vd-field blocks." }
+            {
+              "name": "",
+              "description": "A single <form> element containing .vd-field blocks."
+            }
           ]
         },
         {
@@ -68,13 +168,40 @@
           "name": "VdSwatch",
           "tagName": "vd-swatch",
           "customElement": true,
-          "superclass": { "name": "HTMLElement" },
+          "superclass": {
+            "name": "HTMLElement"
+          },
           "description": "Renders a token as a colour chip with its contrast ratio computed live from the resolved custom property. The ratio is never typed in, so the docs cannot drift from the tokens.",
           "attributes": [
-            { "name": "token", "type": { "text": "string" }, "description": "Custom property to measure, e.g. '--vd-blue-400'." },
-            { "name": "against", "type": { "text": "string" }, "default": "'--vd-ink-000'", "description": "Ground to measure against. Use '--vd-paper-000' for the light set." },
-            { "name": "min", "type": { "text": "number" }, "description": "Threshold to judge against: 7 for text, 3 for non-text, 0 for decorative and exempt." },
-            { "name": "note", "type": { "text": "string" }, "description": "What the token is for." }
+            {
+              "name": "token",
+              "type": {
+                "text": "string"
+              },
+              "description": "Custom property to measure, e.g. '--vd-blue-400'."
+            },
+            {
+              "name": "against",
+              "type": {
+                "text": "string"
+              },
+              "default": "'--vd-ink-000'",
+              "description": "Ground to measure against. Use '--vd-paper-000' for the light set."
+            },
+            {
+              "name": "min",
+              "type": {
+                "text": "number"
+              },
+              "description": "Threshold to judge against: 7 for text, 3 for non-text, 0 for decorative and exempt."
+            },
+            {
+              "name": "note",
+              "type": {
+                "text": "string"
+              },
+              "description": "What the token is for."
+            }
           ]
         },
         {
@@ -82,10 +209,18 @@
           "name": "VdCode",
           "tagName": "vd-code",
           "customElement": true,
-          "superclass": { "name": "HTMLElement" },
+          "superclass": {
+            "name": "HTMLElement"
+          },
           "description": "Code block with a filename header and a copy button.",
           "attributes": [
-            { "name": "file", "type": { "text": "string" }, "description": "Filename shown in the header." }
+            {
+              "name": "file",
+              "type": {
+                "text": "string"
+              },
+              "description": "Filename shown in the header."
+            }
           ]
         },
         {
@@ -93,10 +228,18 @@
           "name": "VdRedact",
           "tagName": "vd-redact",
           "customElement": true,
-          "superclass": { "name": "HTMLElement" },
+          "superclass": {
+            "name": "HTMLElement"
+          },
           "description": "Turns an IP or confidentiality constraint into a visible design decision rather than an omission. The reason is carried by aria-label and by the title tooltip; print.css prints it inline, because on paper there is no hover to reveal it. Redactions stay redacted when printed.",
           "attributes": [
-            { "name": "data-reason", "type": { "text": "string" }, "description": "Why this is redacted. Announced, and printed." }
+            {
+              "name": "data-reason",
+              "type": {
+                "text": "string"
+              },
+              "description": "Why this is redacted. Announced, and printed."
+            }
           ]
         },
         {
@@ -104,10 +247,18 @@
           "name": "VdToc",
           "tagName": "vd-toc",
           "customElement": true,
-          "superclass": { "name": "HTMLElement" },
+          "superclass": {
+            "name": "HTMLElement"
+          },
           "description": "Builds a table of contents from the headings of another element and tracks the active section. Indexes one document only.",
           "attributes": [
-            { "name": "for", "type": { "text": "string" }, "description": "Selector for the element whose headings to index." }
+            {
+              "name": "for",
+              "type": {
+                "text": "string"
+              },
+              "description": "Selector for the element whose headings to index."
+            }
           ]
         },
         {
@@ -115,19 +266,86 @@
           "name": "VdThemeToggle",
           "tagName": "vd-theme-toggle",
           "customElement": true,
-          "superclass": { "name": "HTMLElement" },
+          "superclass": {
+            "name": "HTMLElement"
+          },
           "description": "Sun/moon glyph button, 44x44. prefers-color-scheme decides by default; an explicit choice overrides it in both directions and persists to localStorage. The CSS does the actual switching on specificity alone, so with JS off the OS preference still works and only the toggle disappears.",
           "events": [
-            { "name": "vd-theme", "type": { "text": "CustomEvent" }, "description": "Fired on window when the resolved theme changes. Anything that cannot read custom properties — currently the topolang canvas — listens for this." }
+            {
+              "name": "vd-theme",
+              "type": {
+                "text": "CustomEvent"
+              },
+              "description": "Fired on window when the resolved theme changes. Anything that cannot read custom properties — currently the topolang canvas — listens for this."
+            }
           ]
+        },
+        {
+          "kind": "class",
+          "name": "VdNav",
+          "tagName": "vd-nav",
+          "customElement": false,
+          "superclass": {
+            "name": "HTMLElement"
+          },
+          "description": "Page navigation bar. Sticky at the top with z-index 50; --vd-nav-h names its height so anything that must clear it stays in sync. CSS-only: no JS, no registration. Expects .vd-nav__inner containing .vd-nav__mark, a .vd-nav__list of links, and vd-theme-toggle outside the list.",
+          "attributes": [
+            {
+              "name": "aria-current",
+              "type": {
+                "text": "string"
+              },
+              "description": "Set on the link for the current page. The active underline is driven by this attribute, not by a class."
+            }
+          ]
+        },
+        {
+          "kind": "class",
+          "name": "VdFooter",
+          "tagName": "vd-footer",
+          "customElement": false,
+          "superclass": {
+            "name": "HTMLElement"
+          },
+          "description": "Page footer. CSS-only. Expects .vd-footer__inner with link groups and a .vd-footer__sig block. Footer links use .vd-tag rather than bare anchors — a standalone link is not exempt from 2.5.8 and a bare one measures 52x18."
+        },
+        {
+          "kind": "class",
+          "name": "VdQuote",
+          "tagName": "vd-quote",
+          "customElement": false,
+          "superclass": {
+            "name": "HTMLElement"
+          },
+          "description": "Pull-quote: your own line, lifted out. Takes the editorial teal left rule. Distinct from a bare <blockquote>, which is someone else's words and is deliberately quieter. Contains a <blockquote> and an optional <figcaption> for attribution. CSS-only."
+        },
+        {
+          "kind": "class",
+          "name": "VdFigure",
+          "tagName": "vd-figure",
+          "customElement": false,
+          "superclass": {
+            "name": "HTMLElement"
+          },
+          "description": "A captioned image. CSS-only. Adds a caption and vertical rhythm — it does NOT add a frame, and neither does a bare image. The difference between the two is the caption. Both are max-width constrained; the bare-image rule is a 1.4.10 fix rather than a style. Contains an <img> or <svg> and a <figcaption>."
+        },
+        {
+          "kind": "class",
+          "name": "VdMeta",
+          "tagName": "vd-meta",
+          "customElement": false,
+          "superclass": {
+            "name": "HTMLElement"
+          },
+          "description": "Metadata strip: a flex row of values separated by hairline rules, in the mono face. CSS-only. Below 860px it becomes a single-column list with bottom borders rather than wrapping, because wrapping leaves a rule hanging in space."
         }
       ]
     }
   ],
   "checkedAgainst": {
-    "file": "verdigris/verdigris.js",
+    "file": "verdigris/verdigris.js and verdigris/verdigris.css",
     "version": "1.7.0",
-    "date": "2026-08-06",
-    "note": "Hand-authored. Re-verify against the defs array at the bottom of verdigris.js whenever an element is added or an attribute changes."
+    "date": "2026-08-07",
+    "note": "Hand-authored. 14 vd-* tags exist: 9 are registered custom elements in the defs array at the bottom of verdigris.js, and 5 are CSS-only styling hooks with no JS (customElement:false below). An earlier check compared this file against the registered elements only and reported an exact match while missing all five. Verify against BOTH the defs array and the vd-* selectors in verdigris.css."
   }
 }

@@ -288,8 +288,11 @@ from the running CSS. To check this table has not gone stale, diff it against
 
 | Class | What it does |
 |---|---|
-| `.vd-prose` | Body copy, capped at `--vd-measure` |
+| `.vd-prose` | Body copy, capped at `--vd-measure`. Also carries the document primitives: lists, `hr`, bare `img`, bare `blockquote`, `dl` |
 | `.vd-prose--lead` | One register up, for a standfirst |
+| `.vd-article__title` | Article or resume h1. One register below the hero display line |
+| `.vd-article__dek` | Standfirst. Capped shorter than the measure so it reads as a summary |
+| `.vd-article__body` | The article body wrapper |
 | `.vd-label` | Uppercase mono micro-label. Section eyebrows, field labels, table keys |
 | `.vd-mono` | Mono face with tabular figures |
 | `.vd-cite` | Inline superscript marker. Takes `--vd-editorial` |
@@ -336,6 +339,18 @@ from the running CSS. To check this table has not gone stale, diff it against
 | `.vd-empty` | Empty state block |
 | `.vd-empty__value` `.vd-empty__label` `.vd-empty__note` | The instrument reading zero |
 
+### Reader and resume
+
+| Class | What it does |
+|---|---|
+| `.vd-notes` | Endnote block. Numbered from `--vd-editorial`, with `:target` highlighting |
+| `.vd-notes__list` `.vd-notes__back` | The list, and the back-link that makes an endnote usable |
+| `.vd-endmatter` | End of an article: previous/next, contact line, last-updated |
+| `.vd-endmatter__nav` `.vd-endmatter__dir` `.vd-endmatter__note` | Its parts. Hidden in print — on paper there is nothing to navigate to |
+| `.vd-role` | A resume entry. Date column, content column, so every date lands on one edge |
+| `.vd-role__when` `.vd-role__head` `.vd-role__title` `.vd-role__org` `.vd-role__body` | Its parts |
+| `.vd-resume` | On `<main>`. **Do not remove** — `print.css` targets it for the page-scoped print exceptions |
+
 ### Tables
 
 | Class | What it does |
@@ -363,6 +378,35 @@ from the running CSS. To check this table has not gone stale, diff it against
 
 Classes marked `__` are internals written by a custom element. You will rarely author them by
 hand; they are listed so you can target them and so the surface is not a mystery.
+
+## Document primitives
+
+`.vd-prose` styles the elements an author types without reaching for a component. Three of these
+decisions are load-bearing rather than cosmetic:
+
+**A bare `<img>` is max-width constrained.** This is a 1.4.10 fix. Only `vd-figure img` had it, so
+a 900px screenshot in a 320px column pushed the whole document sideways — the reflow guarantee
+depended on authors remembering to wrap every image. No border and no radius: framing was never
+the job, and after Calibration 06 `vd-figure` does not frame either. **The difference between the
+two is the caption, not the box.**
+
+**List markers are muted, a stated exception to the ordinal rule.** An ordinal is structure and
+takes green — card indices do. A list marker is also an ordinal, but frequency changes what a
+colour means: a fifteen-item list would put more green on screen than the rest of the page. The
+marker hangs outside the measure so list text stays flush with surrounding paragraphs, and
+ordered lists use zero-padded tabular numerals so 9 and 10 align.
+
+**No margin between list items.** `--vd-space-h` is half a line, and with it ten of twenty-three
+elements measured 15px off the 30px grid. The published spacing rule permits halves so it was
+legal, but the rhythm demo shows lines on a shared grid and a half-step would falsify that for
+lists. The hanging marker supplies the separation.
+
+An `<hr>` in prose is **space, not a line** — consistent with the section divider being removed.
+Use `.vd-rule` when a visible hairline is the point.
+
+A bare `<blockquote>` is someone else's words: indent and a hairline, no teal. `vd-quote` is a
+pull-quote — your own line, lifted out, in the editorial colour. Two devices, deliberately
+different, because if they matched teal would stop being rare.
 
 ## Verify it yourself
 

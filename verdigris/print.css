@@ -117,4 +117,41 @@
   /* A skeleton is a statement about the network, not about the document.
      Printed, it is four grey bars that mean nothing. */
   .vd-skeleton{display:none !important}
+
+  /* ── page breaks ──────────────────────────────────────────────────────
+     Calibration 06 §05. These were all unset, which meant the first real
+     print of a long document would have found them the hard way. */
+  p,li{orphans:3;widows:3}
+  /* A role splitting across a page break is the most likely print failure on
+     a resume, and the most damaging: the dates end up on one page and the
+     work on the next. */
+  .vd-role{break-inside:avoid;page-break-inside:avoid;padding:8pt 0}
+  .vd-role__when{color:#4a463f}
+  /* A bullet breaking mid-sentence across pages. */
+  .vd-prose li{break-inside:avoid;page-break-inside:avoid}
+  /* A caption stranded on the page after its image says nothing. */
+  vd-figure,vd-figure figcaption{break-inside:avoid;page-break-inside:avoid}
+  vd-figure img{break-after:avoid;page-break-after:avoid}
+  /* An endnote list is worth printing — a citation is the reason it exists —
+     but it should not be orphaned from the article. */
+  .vd-notes{break-before:avoid;page-break-before:avoid}
+
+  /* ── the resume ───────────────────────────────────────────────────────
+     The one document where print IS the deliverable, so it gets rules the
+     rest of the site does not need.
+
+     URLs are suppressed HERE ONLY. The site-wide rule prints link
+     destinations because a printed underline pointing nowhere is useless —
+     that reasoning still holds for an article's citations. On a resume every
+     bullet would carry a URL and the page becomes unreadable, which is the
+     opposite of the goal. Articles keep theirs; this page does not. */
+  .vd-resume a[href^="http"]::after{content:"" !important}
+  /* One page is a content constraint, not a CSS one — nothing here can make
+     too much text fit. What this does is stop the page furniture from
+     spending vertical space the content needs. */
+  .vd-resume .vd-section{padding-block:0}
+  .vd-resume .vd-section::before{display:none}
+  .vd-resume h2{margin-top:12pt}
+  /* End matter is navigation. On paper there is nothing to navigate to. */
+  .vd-endmatter__nav{display:none !important}
 }

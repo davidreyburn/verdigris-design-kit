@@ -18,10 +18,10 @@ try{var t=localStorage.getItem('verdigris-theme');
     if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}
 catch(e){}
 </script>
-<link rel="stylesheet" href="verdigris/verdigris.css?v=1.7.0">
-<link rel="stylesheet" href="verdigris/print.css?v=1.7.0">
-<script src="verdigris/topolang.js?v=1.7.0" defer></script>
-<script src="verdigris/verdigris.js?v=1.7.0" defer></script>
+<link rel="stylesheet" href="verdigris/verdigris.css?v=1.8.0">
+<link rel="stylesheet" href="verdigris/print.css?v=1.8.0">
+<script src="verdigris/topolang.js?v=1.8.0" defer></script>
+<script src="verdigris/verdigris.js?v=1.8.0" defer></script>
 <!-- Machine-readable structure, per the shared-legibility thesis. The same
      structure a screen reader walks is the structure an agent parses. -->
 <script type="application/ld+json">
@@ -82,6 +82,7 @@ catch(e){}
            colour beside a quantity in data colour is the one adjacency the
            colour separation rule forbids. -->
       <div class="vd-spread__rail">
+        <span class="vd-label">Work</span>
         <span class="vd-readout">
           <span class="vd-readout__value">04</span>
           <span class="vd-readout__key">Systems</span>
@@ -93,7 +94,6 @@ catch(e){}
       </div>
 
       <div class="vd-spread__body">
-        <span class="vd-label">Work</span>
         <h2 id="work-h">Four systems</h2>
         <p class="vd-prose vd-prose--lead" style="margin-top:var(--vd-space-1)">
           Each of these is running, not proposed. Where an employer owns the work,
@@ -152,6 +152,7 @@ catch(e){}
       <!-- "03 Published" is a COUNT, so it is data and takes lime. It was
            previously marked as an ordinal, which was simply wrong. -->
       <div class="vd-spread__rail">
+        <span class="vd-label">Writing</span>
         <span class="vd-readout">
           <span class="vd-readout__value">03</span>
           <span class="vd-readout__key">Published</span>
@@ -163,8 +164,7 @@ catch(e){}
       </div>
 
       <div class="vd-spread__body">
-        <span class="vd-label">Field Notes</span>
-        <h2 id="notes-h">Writing</h2>
+        <h2 id="notes-h">Field Notes</h2>
 
         <div style="margin-top:var(--vd-space-2)">
           <vd-note-card date="2026-08" length="2,400 words"
@@ -191,6 +191,7 @@ catch(e){}
     <div class="vd-spread">
       <!-- AAA is a grade, not a measurement, so it cannot take lime. -->
       <div class="vd-spread__rail">
+        <span class="vd-label">About</span>
         <span class="vd-readout">
           <span class="vd-readout__value vd-readout__value--grade">AAA</span>
           <span class="vd-readout__key">Contrast</span>
@@ -202,7 +203,6 @@ catch(e){}
       </div>
 
       <div class="vd-spread__body">
-        <span class="vd-label">About</span>
         <h2 id="about-h">The operator-designer</h2>
 
         <div class="vd-prose" style="margin-top:var(--vd-space-1)">
@@ -248,7 +248,7 @@ catch(e){}
         <li><a class="vd-tag" href="#">GitHub</a></li>
         <li><a class="vd-tag" href="#">LinkedIn</a></li>
         <li><a class="vd-tag" href="docs/">Design system</a></li>
-        <li><a class="vd-tag" href="#">Résumé</a></li>
+        <li><a class="vd-tag" href="resume.html">Résumé</a></li>
       </ul>
     </div>
     <div class="vd-footer__sig">

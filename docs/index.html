@@ -11,13 +11,13 @@ try{var t=localStorage.getItem('verdigris-theme');
     if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}
 catch(e){}
 </script>
-<link rel="stylesheet" href="../verdigris/verdigris.css?v=1.7.0">
-<link rel="stylesheet" href="../verdigris/print.css?v=1.7.0">
-<script src="../verdigris/topolang.js?v=1.7.0" defer></script>
-<script src="../verdigris/verdigris.js?v=1.7.0" defer></script>
+<link rel="stylesheet" href="../verdigris/verdigris.css?v=1.8.0">
+<link rel="stylesheet" href="../verdigris/print.css?v=1.8.0">
+<script src="../verdigris/topolang.js?v=1.8.0" defer></script>
+<script src="../verdigris/verdigris.js?v=1.8.0" defer></script>
 <!-- The audit is shipped, not a dev-only tool: open the console and run
      verdigrisAudit() to re-measure every conformance claim on this page. -->
-<script src="../verdigris/audit.js?v=1.7.0" defer></script>
+<script src="../verdigris/audit.js?v=1.8.0" defer></script>
 <style>
   /* page-local: the docs need a couple of layout helpers the site does not */
   .doc-lede{font-size:var(--vd-size-m);line-height:var(--vd-lead-1);max-width:var(--vd-measure);
@@ -93,10 +93,9 @@ catch(e){}
         <h2 id="position">Position</h2>
         <div class="vd-prose" style="margin-top:var(--vd-space-1)">
           <p>
-            Verdigris began as a terminal colour scheme: fifteen values for syntax highlighting,
-            named for the patina on aged copper. This is its translation to the web, which is not
-            a port. A terminal palette solves one problem, telling code apart at a glance. A web
-            system solves a different one, and only some of the answers carry over.
+            Most design systems publish their palette and ask you to trust it. This one publishes
+            the measurements, including the values that fail — because a contrast claim you cannot
+            check is a decoration, not a commitment.
           </p>
           <p>
             Three commitments shape everything else. <strong>AAA contrast on all text</strong>,
@@ -105,6 +104,12 @@ catch(e){}
             fifteen-colour ancestry from turning into noise. And <strong>every claim testable</strong>
             — the tables on this page are computed from the live tokens, and where a claim turned out
             to be false it is corrected here in public rather than quietly deleted.
+          </p>
+          <p>
+            The fifteen-colour ancestry is literal. Verdigris began as a terminal colour scheme,
+            named for the patina on aged copper. This is its translation to the web, which is not a
+            port: a terminal palette solves one problem, telling code apart at a glance, and a web
+            system solves a different one. Only some of the answers carry over.
           </p>
           <p>
             This page used to open with a fourth: <strong>dark only</strong>, stated as a position
@@ -143,7 +148,7 @@ catch(e){}
         <vd-swatch token="--vd-lime-400" note="live and measured data" min="7"></vd-swatch>
         <vd-swatch token="--vd-green-400" note="structure — rules, marks, region state" min="7"></vd-swatch>
         <vd-swatch token="--vd-red-400" note="error text" min="7"></vd-swatch>
-        <vd-swatch token="--vd-teal-500" note="editorial voice — quote rules, captions, marginalia" min="7"></vd-swatch>
+        <vd-swatch token="--vd-teal-500" note="editorial voice — quote rules, marginalia, inline cites" min="7"></vd-swatch>
 
         <h4 style="margin-top:var(--vd-space-2)">Non-text values, 3:1 required</h4>
         <p class="vd-prose" style="margin-bottom:var(--vd-space-1)">
@@ -177,14 +182,17 @@ catch(e){}
         <vd-swatch token="--vd-chalk-400" against="--vd-paper-000" note="decorative rules only, exempt" min="0"></vd-swatch>
 
         <p class="vd-prose" style="margin-top:var(--vd-space-1)">
-          Two consequences worth stating. The <strong>focus ring cannot stay lime</strong> — at
-          1.05:1 on bone it would be an invisible focus indicator, which is a conformance failure
-          rather than a matter of taste, so it becomes citron and the rule "the focus ring is the
-          data colour" stays true in both themes. And <strong>surfaces move away from the text
-          colour, not downward</strong>: the ink ramp's recessed panel is darker because bone text
-          is light, so on paper the recessed panel is <em>lighter</em>. Mirroring the direction
-          instead of the principle put every paper accent below AAA on the sunken surface — fir
-          6.73:1, citron 6.65:1, slate 6.45:1 — which is how the mistake was caught.
+          Two consequences worth stating. The first: <strong>the focus ring cannot stay lime.</strong>
+          At 1.05:1 on bone it would be an invisible focus indicator, which is a conformance failure
+          rather than a matter of taste. It becomes citron, so the rule "the focus ring is the data
+          colour" stays true in both themes.
+        </p>
+        <p class="vd-prose" style="margin-top:var(--vd-space-1)">
+          The second: <strong>surfaces move away from the text colour, not downward.</strong> The
+          ink ramp's recessed panel is darker because bone text is light, so on paper the recessed
+          panel is <em>lighter</em>. Mirroring the direction instead of the principle put every
+          paper accent below AAA on the sunken surface — fir 6.73:1, citron 6.65:1, slate 6.45:1.
+          That is how the mistake was caught.
         </p>
 
         <div class="doc-demo" style="margin-top:var(--vd-space-2)">
@@ -219,11 +227,14 @@ catch(e){}
           <p class="vd-prose" style="margin:var(--vd-space-1) 0 0">
             <strong>Link marks text; structure marks regions.</strong> The old rule gave link
             colour "links and hover affordances", which collided with structure's claim on rules
-            and state the moment a hover affordance <em>was</em> a rule. Drawing the line by what
-            is being marked resolves it: a nav item hovers in link colour because it is link text,
-            while its active indicator is structure colour because that is the item's state; a card
-            hovers in structure colour throughout, because the whole region is the target and its
-            title is not set in link colour.
+            and state the moment a hover affordance <em>was</em> a rule. Drawing the line by what is
+            being marked resolves it.
+          </p>
+          <p class="vd-prose" style="margin:var(--vd-space-1) 0 0">
+            A nav item hovers in link colour because it is link text, while its active indicator is
+            structure colour because that is the item's state. A card hovers in structure colour
+            throughout, because the whole region is the target and its title is not set in link
+            colour.
           </p>
           <p class="vd-prose" style="margin:var(--vd-space-1) 0 0">
             The data rule is enforced in code rather than by discipline:
@@ -333,7 +344,7 @@ catch(e){}
         <div class="doc-demo">
           <span class="vd-label doc-demo__label">Buttons and tags</span>
           <button class="vd-btn vd-btn--primary" type="button">Read case study</button>
-          <button class="vd-btn" type="button">Download résumé</button>
+          <a class="vd-btn" href="../resume.html">Résumé</a>
           <span class="vd-tag" style="margin-left:var(--vd-space-h)">Design systems</span>
           <span class="vd-tag">Agent experience</span>
         </div>
@@ -433,24 +444,30 @@ catch(e){}
         </p>
         <p class="vd-prose">
           <strong>A guarantee that moved.</strong> The bands used to be luminance-capped at source,
-          so the field was safe under text at any opacity. That made it too faint to be worth
-          rendering. The cap now lives in the mask instead: it holds the field to an effective 0.28
-          alpha in ink and 0.27 on paper across the text column, and only reaches full alpha past
-          it, where no text sits. The bands are consequently <em>not</em> safe at full alpha — the
-          darkest paper band alone is 1.40:1 under ink — which is fine because the mask guarantees
-          text never meets it, but it does mean the ramp and the mask alpha are a matched pair.
-          Change one without the other and the guarantee is gone.
+          so the field was safe under text at any opacity — and too faint to be worth rendering. The
+          cap now lives in the mask instead. It holds the field to an effective 0.28 alpha in ink and
+          0.27 on paper across the text column, and only reaches full alpha past it, where no text
+          sits.
+        </p>
+        <p class="vd-prose">
+          The bands are consequently <em>not</em> safe at full alpha: the darkest paper band alone is
+          1.40:1 under ink. That is fine, because the mask guarantees text never meets it — but it
+          means the ramp and the mask alpha are now a matched pair. Change one without the other and
+          the guarantee is gone.
         </p>
         <p class="vd-prose">
           <strong>Density is a compensation, not a preference.</strong> SHADE's fill set is
           <code>[' ', ' ', '.', '.', '+', '+', '#', '@']</code> — slots 0 <em>and</em> 1 are spaces,
           so a quarter of the elevation range renders as nothing by definition, and a gamma above 1
           pushes values down into exactly those two slots. Measured over 30 seconds of real drift at
-          the old gamma of 1.7: <strong>36.7% of cells blank</strong>. The clean fix would be a fill
-          set with one blank slot instead of two, but SHADE is spec-defined and editing it would
-          cost the conformance claim for a cosmetic gain. So gamma dropped to 1.15 and the sketch
-          lifts the whole range off a floor of 0.14 instead — <strong>9% blank</strong>, with a far
-          more even distribution across the glyph slots. Valleys survive; holes do not.
+          the old gamma of 1.7: <strong>36.7% of cells blank</strong>.
+        </p>
+        <p class="vd-prose">
+          The clean fix would be a fill set with one blank slot instead of two. But SHADE is
+          spec-defined, and editing it would cost the conformance claim for a cosmetic gain. So gamma
+          dropped to 1.15 and the sketch lifts the whole range off a floor of 0.14 instead —
+          <strong>9% blank</strong>, with a far more even distribution across the glyph slots.
+          Valleys survive; holes do not.
         </p>
       </section>
 
@@ -541,13 +558,18 @@ catch(e){}
         <p class="vd-prose">
           An earlier version of this page claimed green and lime "stay distinguishable under
           deuteranopia, where hue alone would fail". Measured, that is false: they simulate to the
-          <em>same hue</em>, 0.4° apart. The absolute form of the rule turned out to be
-          unsatisfiable by any chromatic palette on a dark ground — every accent is AAA against the
-          same ground, which compresses their mutual ratios to 1–2:1, and two of three dichromat
-          axes collapse hue to a single yellow–blue opposition, so at most one accent can sit on the
-          blue side. Sweeping 115°–185° at AAA on <code>--vd-ink-000</code>, the flip lands between
-          160° and 165°: no structure hue is far from both lime and blue. Structure picks a side.
-          Green picks the yellow side, which separates it from link blue and collides it with data.
+          <em>same hue</em>, 0.4° apart.
+        </p>
+        <p class="vd-prose">
+          The absolute form of the rule turned out to be unsatisfiable by any chromatic palette on a
+          dark ground. Every accent is AAA against the same ground, which compresses their mutual
+          ratios to 1–2:1, and two of three dichromat axes collapse hue to a single yellow–blue
+          opposition — so at most one accent can sit on the blue side.
+        </p>
+        <p class="vd-prose">
+          Sweeping 115°–185° at AAA on <code>--vd-ink-000</code>, the flip lands between 160° and
+          165°: no structure hue is far from both lime and blue. Structure picks a side. Green picks
+          the yellow side, which separates it from link blue and collides it with data.
         </p>
 
         <h4 style="margin-top:var(--vd-space-1)">Reachable pairs</h4>
@@ -607,21 +629,25 @@ catch(e){}
           <strong>Heading links used to be a stated deviation. They are not any more.</strong>
           System-card and note-card titles sit at 30px, and the two ways of reaching 44 were both
           rejected: 45px leading on 18px type wrecks a two-line title, and a stretched overlay link
-          breaks text selection across the card. The card itself is now the target instead — far
-          past 44&times;44 — with the click forwarded in script under three guards: a press that
-          moved more than 6px was a drag, a non-empty selection means the reader is highlighting,
-          and a target inside another interactive element handles itself. So the prose stays
-          selectable and no overlay exists.
+          breaks text selection across the card.
+        </p>
+        <p class="vd-prose">
+          The card itself is the target instead — far past 44&times;44 — with the click forwarded in
+          script under three guards: a press that moved more than 6px was a drag, a non-empty
+          selection means the reader is highlighting, and a target inside another interactive element
+          handles itself. So the prose stays selectable and no overlay exists.
         </p>
         <p class="vd-prose">
           The anchor remains the only focusable thing in the card. No <code>tabindex</code>, no
           <code>role="link"</code> on the region — that would announce the same destination twice —
           and <code>:focus-within</code> carries the visual state so keyboard and pointer get the
           identical affordance. Modifier keys survive because the event is re-dispatched rather than
-          synthesised, so ctrl and cmd click still open a tab. One gap, stated rather than papered
-          over: middle-clicking the card <em>body</em> does not open a tab, because that is browser
-          behaviour attached to a real anchor hit and cannot be synthesised. Middle-clicking the
-          title works.
+          synthesised, so ctrl and cmd click still open a tab.
+        </p>
+        <p class="vd-prose">
+          One gap, stated rather than papered over: middle-clicking the card <em>body</em> does not
+          open a tab, because that is browser behaviour attached to a real anchor hit and cannot be
+          synthesised. Middle-clicking the title works.
         </p>
         <p class="vd-prose">
           Inline links in prose are exempt under 2.5.8 and are left alone. The claim is therefore
@@ -658,8 +684,17 @@ catch(e){}
         <p class="vd-prose" style="margin-top:var(--vd-space-1)">
           Editors and frameworks can read the element API from
           <code>custom-elements.json</code> at the repository root — a Custom Elements Manifest
-          covering all nine elements, their attributes and their events. It is hand-authored; see
-          <a href="#non-goals">§09</a> for why, and for what that costs.
+          covering all fourteen elements, their attributes and their events. Nine are registered
+          custom elements; five (<code>vd-nav</code>, <code>vd-footer</code>,
+          <code>vd-quote</code>, <code>vd-figure</code>, <code>vd-meta</code>) are CSS-only
+          styling hooks with no JS, and were missing from the manifest until v1.8.0 — the check
+          that it "matched exactly" had compared it against the registered elements only, so it
+          could not have found them. It is hand-authored; see <a href="#non-goals">§09</a> for why.
+        </p>
+        <p class="vd-prose">
+          Do not start from scratch. <code>template.html</code> uses every major element once with
+          the reasoning beside it; <code>reader.html</code> and <code>resume.html</code> are the
+          two page shapes. <a href="#documents">§11</a> records what each one decided.
         </p>
         <p class="vd-prose">
           Tailwind is deliberately absent. A hand-authored system is the argument this site is
@@ -947,6 +982,108 @@ catch(e){}
         </p>
       </section>
 
+      <!-- ── documents ──────────────────────────────────────────── -->
+      <section class="vd-section">
+        <span class="vd-label">11 / Documents</span>
+        <h2 id="documents">Documents</h2>
+        <p class="doc-lede" style="margin-top:var(--vd-space-1)">
+          A design system whose remaining pages were both mostly prose had no opinion about
+          prose. Thirteen base elements were unstyled, and the only list rules in the stylesheet
+          were for navigation — a list inside a paragraph had never been rendered.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-2)">A bare image was breaking a published claim</h4>
+        <p class="vd-prose">
+          Only <code>vd-figure img</code> set <code>max-width</code>. An author writing a case
+          study and typing <code>&lt;img&gt;</code> pushed the document past the viewport: a 900px
+          screenshot in a 320px column is <strong>a 1.4.10 failure on a page whose sibling
+          advertises the opposite</strong>. The reflow guarantee rested on every author
+          remembering to reach for a component.
+        </p>
+        <p class="vd-prose">
+          Bare images are now constrained. That is a conformance fix, not a style — no border and
+          no radius, because framing was never the job.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-2)">vd-figure lost its frame</h4>
+        <p class="vd-prose">
+          This component had <strong>zero uses on any page</strong> until Calibration 06, so its
+          border and its editorial caption rule had never actually been looked at. Rendered for
+          the first time, both were wrong: a screenshot with its own edges got a double frame, and
+          a caption is a label rather than the page speaking in another voice.
+        </p>
+        <p class="vd-prose">
+          <strong>That narrows the editorial family.</strong> Section 02 gave patina teal to
+          pull-quotes, figure captions and marginalia. Captions are out; teal now marks the
+          pull-quote, <code>.vd-marginalia</code> and <code>.vd-cite</code>. What distinguishes
+          <code>vd-figure</code> from a bare image is the caption, not the box.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-2)">List markers are punctuation, not signal</h4>
+        <p class="vd-prose">
+          A stated exception to the ordinal rule. Doctrine says an ordinal is structure and takes
+          green — card indices and section numbers do. A list marker is also an ordinal, but
+          <strong>frequency changes what a colour means</strong>: a fifteen-item list would put
+          more green on screen than the rest of the page combined, and the accent works by being
+          rare. So the marker is muted and the exception is recorded rather than absorbed.
+        </p>
+        <p class="vd-prose">
+          The marker hangs outside the measure, so list text stays flush with the paragraphs above
+          and below — a list does not indent the article. Ordered lists use zero-padded tabular
+          numerals in the mono face, matching the card indices, so 9 and 10 align.
+        </p>
+        <p class="vd-prose">
+          There is no margin between items, and that is the baseline grid rather than a taste
+          call. <code>--vd-space-h</code> is half a line: with it, <strong>ten of twenty-three
+          elements measured 15px off the 30px grid.</strong> The published spacing rule permits
+          halves, so it was legal — but the rhythm demo one section up shows lines landing on a
+          shared grid, and a half-step would have made that false for lists. The hanging marker
+          supplies the separation instead.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-2)">Two quotations, two devices</h4>
+        <p class="vd-prose">
+          <code>vd-quote</code> is a pull-quote: your own line, lifted out, in the editorial
+          colour. A bare <code>&lt;blockquote&gt;</code> is someone else's words, and is
+          deliberately quieter — indent and a hairline, no teal, no size change. If they looked
+          the same, teal would stop being rare.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-2)">Page templates</h4>
+        <div class="vd-table-scroll">
+          <table class="vd-table" style="margin-top:var(--vd-space-1)">
+            <tr><th>File</th><th>Shape</th><th>Decisions worth knowing</th></tr>
+            <tr><td><code>template.html</code></td><td>Starter</td>
+                <td>Every major element once, annotated. Copy this.</td></tr>
+            <tr><td><code>reader.html</code></td><td>Case study or Field Note</td>
+                <td>Metadata in the rail, header carries only the argument. <strong>No generative
+                    field</strong> — this is a page for sustained reading. Endnotes rather than
+                    sidenotes: the rail is taken, and below 860px sidenotes would have to become
+                    endnotes anyway, so that option was two patterns wearing one name.</td></tr>
+            <tr><td><code>resume.html</code></td><td>Résumé</td>
+                <td>The one page where <strong>print is the deliverable</strong>. Date column and
+                    content column, so a career's shape reads in one pass. Site and LinkedIn
+                    only — no email, on screen or on paper, because the page is public and
+                    scrapable.</td></tr>
+          </table>
+        </div>
+
+        <h4 style="margin-top:var(--vd-space-2)">Print, finally exercised</h4>
+        <p class="vd-prose">
+          <code>print.css</code> had existed for several versions without ever being run against a
+          document where print was the point. Page-break control was entirely unset: no
+          <code>orphans</code>, no <code>widows</code>, nothing stopping a role from splitting
+          across a page or a caption from stranding on the sheet after its image. All now set.
+        </p>
+        <p class="vd-prose">
+          One page-scoped exception, stated because it looks like an oversight otherwise: the
+          resume <strong>does not print link destinations</strong>. Everywhere else it does, on
+          the reasoning that a printed underline pointing nowhere is useless — which still holds
+          for an article's citations. On a resume every bullet would carry a URL and the page
+          becomes unreadable, which is the opposite of the goal.
+        </p>
+      </section>
+
     </div>
   </div>
 </main>
@@ -956,7 +1093,7 @@ catch(e){}
     <div>
       <span class="vd-label">Verdigris</span>
       <p class="vd-mono" style="margin-top:var(--vd-space-h);color:var(--vd-text-muted)">
-        v1.7.0 · ink and paper · AAA
+        v1.8.0 · ink and paper · AAA
       </p>
     </div>
     <div class="vd-footer__sig">

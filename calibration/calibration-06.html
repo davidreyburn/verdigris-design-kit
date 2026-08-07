@@ -1,0 +1,1361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verdigris · Calibration 06 — Document primitives, reader, and resume</title>
+<style>
+/* ══════════════════════════════════════════════════════════
+   CHROME — carried from Calibration 02–05 unchanged, so
+   this reads as the next pass. Deliberately not using --vd-*
+   tokens: this page argues about those tokens.
+   ══════════════════════════════════════════════════════════ */
+:root{
+  --bg:#161614; --bg-dim:#111110; --bg-hi:#1e1d1b; --bg-sel:#2c2b28;
+  --dim:#524e48; --dim2:#8B8478; --bone:#D0CAB8; --bone-b:#E8E2D0; --white:#F0EDE4;
+  --blue:#7FA9CE; --lime:#AAFF00; --green:#44BB44; --teal:#4FB8AF;
+  --orange:#C4834A; --red:#CC5555;
+  --line:#2c2b28; --line-soft:#211f1d;
+  --f-sans:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+  --f-tech:Bahnschrift,"DIN Alternate","Segoe UI",sans-serif;
+  --f-mono:"Cascadia Mono","Cascadia Code",Consolas,ui-monospace,monospace;
+  --ease:cubic-bezier(.2,.6,.2,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--bone);font-family:var(--f-sans);font-size:15px;line-height:1.6;
+  -webkit-font-smoothing:antialiased}
+::selection{background:var(--bg-sel);color:var(--white)}
+.lbl{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim2)}
+
+#shell{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh}
+#rail{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--bg-dim);
+  border-right:1px solid var(--line);padding:20px 0 24px;display:flex;flex-direction:column}
+#rail::-webkit-scrollbar{width:7px}#rail::-webkit-scrollbar-thumb{background:var(--bg-sel)}
+.rail-head{padding:0 18px 16px;border-bottom:1px solid var(--line-soft);margin-bottom:10px}
+.rail-title{font-family:var(--f-mono);font-size:12.5px;color:var(--bone-b);letter-spacing:.05em}
+.rail-title b{color:var(--lime);font-weight:400}
+.rail-sub{font-size:11px;color:var(--dim2);margin-top:5px;line-height:1.45}
+.nav-item{display:flex;gap:10px;align-items:baseline;width:100%;text-align:left;padding:7px 18px;
+  background:none;border:0;cursor:pointer;color:var(--dim2);font-family:var(--f-sans);font-size:13.5px;
+  border-left:2px solid transparent;transition:color .15s,background .15s}
+.nav-item:hover{color:var(--bone);background:#00000030}
+.nav-item.on{color:var(--bone-b);border-left-color:var(--blue);background:#00000040}
+.nav-item .n{font-family:var(--f-mono);font-size:10.5px;color:var(--dim2);min-width:16px}
+.nav-item.on .n{color:var(--blue)}
+.nav-item .ct{margin-left:auto;font-family:var(--f-mono);font-size:10px;color:var(--dim2)}
+.nav-item.done .ct{color:var(--lime)}
+.rail-foot{margin-top:auto;padding:14px 18px 0;border-top:1px solid var(--line-soft)}
+.bar{height:3px;background:var(--bg-sel);overflow:hidden;margin-bottom:7px}
+.bar i{display:block;height:100%;background:var(--lime);width:0;transition:width .4s var(--ease)}
+.rail-foot .lbl{display:flex;justify-content:space-between}
+.mini{margin-top:11px;display:flex;gap:6px;flex-wrap:wrap}
+.mini button{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+  background:none;border:1px solid var(--line);color:var(--dim2);padding:4px 7px;cursor:pointer}
+.mini button:hover{color:var(--bone);border-color:var(--dim2)}
+
+#main{padding:0 0 110px;min-width:0}
+.wrap{max-width:900px;margin:0 auto;padding:0 40px}
+
+.sec-head{padding:58px 0 26px;margin-bottom:32px;position:relative;border-bottom:1px solid var(--line)}
+.sec-head::after{content:"";position:absolute;left:0;bottom:-1px;width:56px;height:1px;background:var(--lime)}
+.sec-num{font-family:var(--f-mono);font-size:11px;color:var(--lime);letter-spacing:.18em;margin-bottom:11px;
+  display:flex;align-items:center;gap:9px}
+.sec-num::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,#aaff0038,transparent)}
+.sec-title{font-family:var(--f-tech);font-size:38px;line-height:1.05;font-weight:400;color:var(--white);margin:0 0 13px}
+.sec-lede{font-size:15.5px;color:var(--bone);max-width:66ch;line-height:1.65;margin:0}
+.sec-lede em{color:var(--bone-b);font-style:italic}
+.sec-lede code,.q-help code,.spnote code,.warn code,.kv code{font-family:var(--f-mono);font-size:12.5px;
+  color:var(--orange);background:#0000004d;padding:1px 4px}
+
+.q{padding:28px 0;border-bottom:1px solid var(--line-soft)}
+.q:last-of-type{border-bottom:0}
+.q-top{display:flex;gap:12px;align-items:baseline;margin-bottom:5px}
+.q-id{font-family:var(--f-mono);font-size:10px;color:var(--dim2);padding-top:3px;min-width:30px}
+.q-label{font-size:17px;color:var(--bone-b);line-height:1.45;font-weight:500;margin:0}
+.q-help{font-size:13.5px;color:var(--dim2);line-height:1.6;margin:6px 0 0 42px;max-width:70ch}
+.q-help b{color:var(--bone);font-weight:500}
+.q-body{margin:16px 0 0 42px}
+@media(max-width:820px){.q-help,.q-body{margin-left:0}}
+
+textarea{width:100%;background:var(--bg-dim);border:1px solid var(--line);color:var(--bone-b);
+  font-family:var(--f-sans);font-size:14.5px;line-height:1.6;padding:11px 13px;resize:vertical}
+textarea:focus{outline:2px solid var(--blue);outline-offset:-1px;border-color:var(--blue)}
+textarea::placeholder{color:#6B665E}
+
+.opts{display:flex;flex-direction:column;gap:1px}
+.opt{display:flex;gap:12px;padding:12px 14px;background:var(--bg-dim);border:1px solid var(--line-soft);
+  cursor:pointer;transition:all .12s;align-items:flex-start}
+.opt:hover{border-color:var(--dim2);background:var(--bg-hi)}
+.opt.on{border-color:var(--blue);background:#7fa9ce0f}
+.opt .box{width:14px;height:14px;border:1px solid var(--dim2);flex-shrink:0;margin-top:4px;position:relative;border-radius:50%}
+.opt.multi .box{border-radius:0}
+.opt.on .box{border-color:var(--blue)}
+.opt.on .box::after{content:"";position:absolute;inset:3px;background:var(--blue);border-radius:50%}
+.opt.multi.on .box::after{border-radius:0;inset:2px}
+.opt .txt{min-width:0;display:block}
+.opt .t{display:block;font-size:14.5px;color:var(--bone-b);line-height:1.45}
+.opt .d{display:block;font-size:12.5px;color:var(--dim2);line-height:1.55;margin-top:3px}
+.opt .d code{font-family:var(--f-mono);color:var(--orange);font-size:11.5px}
+.opt .d b{color:var(--bone);font-weight:500}
+.opt .pill{margin-left:auto;flex-shrink:0;font-family:var(--f-mono);font-size:9px;letter-spacing:.07em;
+  padding:2px 6px;border:1px solid var(--line);color:var(--dim2);align-self:flex-start;margin-top:3px}
+
+.spgrid{display:grid;gap:14px;grid-template-columns:1fr}
+.spwrap{border:1px solid var(--line);background:var(--bg-dim);transition:border-color .15s}
+.spwrap:hover{border-color:var(--dim2)}
+.spwrap.on{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue)}
+.sphead{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid var(--line);
+  cursor:pointer;user-select:none;flex-wrap:wrap}
+.sphead .box{width:13px;height:13px;border:1px solid var(--dim2);border-radius:50%;position:relative;flex-shrink:0}
+.spwrap.on .sphead .box{border-color:var(--blue)}
+.spwrap.on .sphead .box::after{content:"";position:absolute;inset:3px;background:var(--blue);border-radius:50%}
+.sphead .k{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.07em;color:var(--bone)}
+.spwrap.on .sphead .k{color:var(--bone-b)}
+.sphead .cost{font-family:var(--f-mono);font-size:10px;letter-spacing:.05em;padding:2px 7px;border:1px solid}
+.cost.free{color:var(--lime);border-color:#aaff0040}
+.cost.paid{color:var(--orange);border-color:#c4834a55}
+.cost.over{color:var(--red);border-color:#cc555555}
+.sphead .tag{margin-left:auto;font-family:var(--f-mono);font-size:9.5px;color:var(--dim2);letter-spacing:.05em}
+.spnote{font-size:12.5px;color:var(--dim2);padding:10px 12px 12px;line-height:1.55;border-top:1px solid var(--line-soft)}
+.spnote b{color:var(--bone);font-weight:500}
+.spnote .m{font-family:var(--f-mono);color:var(--bone)}
+.spstage{padding:0;overflow:hidden}
+
+.secnav{display:flex;gap:10px;margin-top:42px;padding-top:24px;border-top:1px solid var(--line)}
+.btn{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;background:none;
+  border:1px solid var(--line);color:var(--bone);padding:11px 20px;cursor:pointer;transition:all .14s}
+.btn:hover{border-color:var(--dim2);background:var(--bg-hi)}
+.btn.pri{border-color:var(--blue);color:var(--blue)}
+.btn.pri:hover{background:var(--blue);color:#0d1620}
+.btn:disabled{opacity:.3;cursor:default}
+.spacer{flex:1}
+
+.warn{border-left:2px solid var(--orange);padding:2px 0 2px 16px;margin:24px 0;font-size:14px;
+  color:var(--bone);line-height:1.65}
+.warn b{color:var(--orange);font-weight:500}
+.warn.ok{border-color:var(--lime)}.warn.ok b{color:var(--lime)}
+.warn.bad{border-color:var(--red)}.warn.bad b{color:var(--red)}
+.warn.forced{border-color:var(--teal)}.warn.forced b{color:var(--teal)}
+.kv{display:grid;grid-template-columns:170px 1fr;gap:9px 18px;font-size:14px;margin:22px 0}
+.kv dt{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--dim2);padding-top:3px}
+.kv dd{margin:0;color:var(--bone)}
+.kv dd b{color:var(--lime);font-weight:500;font-family:var(--f-mono)}
+.kv dd.set{color:var(--dim2)}
+.kv dd.set b{color:var(--bone-b)}
+
+table.px{width:100%;border-collapse:collapse;font-size:13px;margin:18px 0}
+table.px th{font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim2);
+  text-align:left;padding:0 12px 8px 0;font-weight:400;border-bottom:1px solid var(--line)}
+table.px td{padding:8px 12px 8px 0;border-bottom:1px solid var(--line-soft);color:var(--bone);vertical-align:top}
+table.px td.n{font-family:var(--f-mono);white-space:nowrap}
+table.px td.n.over{color:var(--red)}
+table.px td.n.ok{color:var(--lime)}
+table.px td.n.mid{color:var(--orange)}
+table.px td.sw span{display:inline-block;width:11px;height:11px;margin-right:6px;vertical-align:-1px;border:1px solid #ffffff20}
+table.px tr.hi td{background:#aaff000a}
+
+.outbox{background:var(--bg-dim);border:1px solid var(--line);padding:16px;font-family:var(--f-mono);
+  font-size:11.5px;line-height:1.65;color:var(--bone);white-space:pre-wrap;max-height:440px;overflow:auto}
+.outbox::-webkit-scrollbar{width:8px}.outbox::-webkit-scrollbar-thumb{background:var(--bg-sel)}
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,90px);background:var(--lime);color:#141a06;
+  font-family:var(--f-mono);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;padding:11px 22px;
+  transition:transform .3s var(--ease);z-index:99}
+.toast.on{transform:translate(-50%,0)}
+@media(max-width:900px){#shell{grid-template-columns:1fr}
+  #rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+  .wrap{padding:0 20px}.sec-title{font-size:30px}}
+
+/* ── vision + ground simulation ────────────────────────────── */
+.vbar{position:sticky;top:0;z-index:40;display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+  background:#0e0e0d;border:1px solid var(--line);padding:9px 12px;margin:0 0 22px}
+.vbar button{font-family:var(--f-mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+  background:none;border:1px solid var(--line);color:var(--dim2);padding:5px 9px;cursor:pointer;transition:all .12s}
+.vbar button:hover{color:var(--bone);border-color:var(--dim2)}
+.vbar button.on{color:#141a06;background:var(--lime);border-color:var(--lime)}
+.vbar .sep{width:1px;align-self:stretch;background:var(--line);margin:0 3px}
+.vbar .hint{font-size:11.5px;color:var(--dim2);margin-left:auto}
+/* .spstage is deliberately NOT in this list. Every specimen stage
+   contains a .demo, so filtering both would nest two colour matrices
+   and apply the simulation TWICE — overstating every collapse this
+   page argues about. One filter, on the innermost stage only. */
+body.sim-deuter .swrow,body.sim-deuter .demo{filter:url(#f-deuter)}
+body.sim-protan .swrow,body.sim-protan .demo{filter:url(#f-protan)}
+body.sim-gray   .swrow,body.sim-gray   .demo{filter:grayscale(1)}
+#svgf{position:absolute;width:0;height:0;overflow:hidden}
+
+/* ── swatch strip ─────────────────────────────────────────── */
+.swrow{display:grid;gap:1px;background:var(--line-soft);border:1px solid var(--line);margin:16px 0}
+.swrow>div{background:#131211;padding:11px 13px;display:flex;gap:11px;align-items:center}
+.swrow .chip{width:30px;height:30px;flex-shrink:0;border:1px solid #ffffff18}
+.swrow .nm{font-family:var(--f-mono);font-size:11.5px;color:var(--bone-b)}
+.swrow .mt{font-family:var(--f-mono);font-size:10px;color:var(--dim2);display:block;margin-top:2px;letter-spacing:.04em}
+.swrow .rt{margin-left:auto;font-family:var(--f-mono);font-size:11px;color:var(--lime);white-space:nowrap}
+.swrow .rt.bad{color:var(--red)}
+.swrow .rt.mid{color:var(--orange)}
+
+/* ── the collapse diagram ─────────────────────────────────── */
+.collapse{border:1px solid var(--line);background:var(--bg-dim);padding:20px 22px;margin:20px 0}
+.cpair{display:grid;grid-template-columns:1fr 26px 1fr;gap:0;align-items:center;margin:18px 0 0}
+.cpair .side{display:flex;align-items:center;gap:10px;padding:11px 13px;background:#131211;border:1px solid var(--line)}
+.cpair .arrow{text-align:center;font-family:var(--f-mono);font-size:15px;color:var(--dim2)}
+.cpair .chip{width:26px;height:26px;flex-shrink:0;border:1px solid #ffffff18}
+.cpair .nm{font-family:var(--f-mono);font-size:11px;color:var(--bone-b);line-height:1.35}
+.cpair .nm span{display:block;color:var(--dim2);font-size:10px;margin-top:2px}
+.cverdict{font-family:var(--f-mono);font-size:11px;letter-spacing:.05em;margin-top:10px;color:var(--red)}
+.cverdict.ok{color:var(--lime)}
+
+/* ══════════════════════════════════════════════════════════
+   SPECIMENS — every stage renders against a switchable
+   ground, because the paper collapse is worse than the ink
+   one and judging only on ink would flatter the options.
+   ══════════════════════════════════════════════════════════ */
+.demo{padding:22px 24px;background:var(--d-bg);color:var(--d-text);font-family:var(--f-sans);font-size:14px}
+.demo .dlbl{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--d-muted);margin-bottom:15px;display:block}
+
+/* a field, built the way the real one would be */
+.fld{margin-bottom:19px;max-width:44ch}
+.fld:last-child{margin-bottom:0}
+.fld label{display:block;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--d-muted);margin-bottom:7px}
+.fld label .rq{color:var(--d-err);margin-left:3px}
+.fld label .op{color:var(--d-muted);text-transform:none;letter-spacing:.02em;font-size:10px;margin-left:5px}
+.fld .ctl{display:block;width:100%;min-height:44px;background:var(--d-sunk);color:var(--d-text);
+  border:1px solid var(--d-rule);border-radius:2px;padding:11px 13px;font-family:var(--f-sans);font-size:14.5px;
+  line-height:1.4}
+.fld .ctl.empty{color:var(--d-muted)}
+.fld.is-invalid .ctl{border-color:var(--d-err);box-shadow:inset 2px 0 0 var(--d-err)}
+.fld.is-valid   .ctl{border-color:var(--d-ok)}
+.fld.is-warn    .ctl{border-color:var(--d-warn)}
+.fld.is-focus   .ctl{outline:3px solid var(--d-focus);outline-offset:1px;border-color:var(--d-focus)}
+.fld .msg{display:flex;gap:7px;align-items:flex-start;margin-top:7px;font-size:13px;line-height:1.45}
+.fld .msg .g{font-family:var(--f-mono);font-weight:700;flex-shrink:0;line-height:1.45}
+.fld .msg.err{color:var(--d-err)}
+.fld .msg.ok{color:var(--d-ok)}
+.fld .msg.warn{color:var(--d-warn)}
+.fld .msg.quiet{color:var(--d-muted)}
+.fld .hint{font-size:12.5px;color:var(--d-muted);margin-top:6px;line-height:1.45}
+
+/* error summary block */
+.esum{border:1px solid var(--d-err);border-left-width:3px;padding:13px 15px;margin-bottom:22px;max-width:52ch}
+.esum .h{font-family:var(--f-tech);font-size:16px;color:var(--d-err);margin:0 0 8px;font-weight:500}
+.esum ul{margin:0;padding-left:18px;font-size:13.5px;line-height:1.7}
+.esum a{color:var(--d-err);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+
+/* the pull-quote specimen */
+.qt{padding-left:18px;border-left:2px solid var(--q-rule);max-width:56ch}
+.qt blockquote{margin:0;font-size:18px;line-height:28px;color:var(--q-text);font-family:var(--f-sans)}
+.qt figcaption{margin-top:9px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.06em;color:var(--d-muted)}
+.qt.tinted blockquote{color:var(--q-tint)}
+.qt.markonly{border-left-color:var(--q-tint)}
+.qt .qmark{font-family:var(--f-tech);font-size:34px;line-height:1;color:var(--q-tint);display:block;margin-bottom:2px}
+
+/* control inventory grid */
+.inv{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.inv .cell{border:1px solid var(--d-rule);padding:13px;border-radius:2px}
+.inv .cell .cn{font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--d-muted);margin-bottom:9px;display:block}
+.chk{display:flex;gap:10px;align-items:center;font-size:14px;margin-bottom:9px;color:var(--d-text)}
+.chk:last-child{margin-bottom:0}
+.chk i{width:17px;height:17px;border:1px solid var(--d-rule);flex-shrink:0;position:relative;
+  background:var(--d-sunk);border-radius:2px}
+.chk.rd i{border-radius:50%}
+.chk.on i{border-color:var(--d-struct)}
+.chk.on i::after{content:"";position:absolute;inset:3px;background:var(--d-struct);border-radius:1px}
+.chk.rd.on i::after{border-radius:50%}
+.sel{position:relative}
+.sel::after{content:"▾";position:absolute;right:13px;top:12px;color:var(--d-muted);font-size:13px;pointer-events:none}
+
+/* skeleton + empty */
+.skel{display:block;height:11px;background:var(--d-sunk);border-radius:2px;margin-bottom:9px}
+.skel.w1{width:70%}.skel.w2{width:92%}.skel.w3{width:48%}
+.zero{font-family:var(--f-mono);font-size:26px;color:var(--d-muted);font-variant-numeric:tabular-nums}
+.zerolbl{font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--d-muted);margin-top:4px}
+
+/* ══════════════════════════════════════════════════════════
+   SPECIMENS — document primitives
+   ══════════════════════════════════════════════════════════ */
+.doc{max-width:56ch}
+.doc p{margin:0 0 15px;font-family:Georgia,serif;font-size:14.5px;line-height:24px;color:var(--d-text)}
+.doc p:last-child{margin-bottom:0}
+
+/* lists — every marker variant is a real list, not a mock */
+.doc ul,.doc ol{margin:0 0 15px;font-family:Georgia,serif;font-size:14.5px;line-height:24px;color:var(--d-text)}
+.doc li{margin-bottom:6px}
+.doc li:last-child{margin-bottom:0}
+/* A — disc, browser default position */
+.l-disc ul{padding-left:20px;list-style:disc}
+.l-disc ol{padding-left:22px;list-style:decimal}
+/* B — hanging dash, marker outside the measure */
+.l-dash ul{padding-left:0;list-style:none}
+.l-dash ul li{position:relative;padding-left:22px}
+.l-dash ul li::before{content:"—";position:absolute;left:0;color:var(--l-mark);font-family:var(--f-mono)}
+.l-dash ol{padding-left:0;list-style:none;counter-reset:n}
+.l-dash ol li{position:relative;padding-left:28px;counter-increment:n}
+.l-dash ol li::before{content:counter(n,decimal-leading-zero);position:absolute;left:0;
+  color:var(--l-mark);font-family:var(--f-mono);font-size:12px;font-variant-numeric:tabular-nums}
+/* C — square tick, echoing the section mark */
+.l-tick ul{padding-left:0;list-style:none}
+.l-tick ul li{position:relative;padding-left:22px}
+.l-tick ul li::before{content:"";position:absolute;left:0;top:11px;width:9px;height:1px;background:var(--l-mark)}
+.l-tick ol{padding-left:0;list-style:none;counter-reset:n}
+.l-tick ol li{position:relative;padding-left:28px;counter-increment:n}
+.l-tick ol li::before{content:counter(n);position:absolute;left:0;color:var(--l-mark);
+  font-family:var(--f-mono);font-size:12px;font-variant-numeric:tabular-nums}
+/* D — no marker, indent only */
+.l-none ul,.l-none ol{padding-left:20px;list-style:none}
+.l-none li{position:relative}
+
+/* rules */
+.r-hair{border:0;border-top:1px solid var(--d-rule);margin:22px 0}
+.r-seg{border:0;border-top:1px solid var(--d-rule);margin:22px 0;position:relative}
+.r-seg::before{content:"";position:absolute;top:-1px;left:50%;transform:translateX(-50%);
+  width:60px;height:1px;background:var(--d-struct)}
+.r-space{border:0;margin:34px 0;height:0}
+.r-glyph{border:0;margin:26px 0;text-align:center;color:var(--d-muted);
+  font-family:var(--f-mono);font-size:12px;letter-spacing:.5em}
+
+/* figures */
+.figbox{margin:18px 0}
+.figbox .ph{background:var(--d-sunk);border:1px solid var(--d-rule);border-radius:2px;
+  height:110px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--f-mono);font-size:10px;color:var(--d-muted);letter-spacing:.1em}
+.figbox.bare .ph{border:0;border-radius:0}
+.figbox.bleed{margin-left:-24px;margin-right:-24px}
+.figbox.bleed .ph{border-left:0;border-right:0;border-radius:0}
+.figcap{margin-top:9px;font-family:var(--f-mono);font-size:10.5px;line-height:15px;color:var(--d-muted)}
+.figcap.edi{padding-left:12px;border-left:2px solid var(--d-edi)}
+.figcap.center{text-align:center;padding-left:0;border-left:0}
+
+/* definition list variants */
+.dl-rows{display:grid;grid-template-columns:minmax(120px,22%) 1fr;gap:9px 18px;font-size:14px}
+.dl-rows dt{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--d-muted);padding-top:4px}
+.dl-rows dd{margin:0;color:var(--d-text);font-family:Georgia,serif;line-height:22px}
+.dl-stack dt{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--d-muted);margin-bottom:4px}
+.dl-stack dd{margin:0 0 14px;color:var(--d-text);font-family:Georgia,serif;font-size:14px;line-height:22px}
+.dl-inline dt{display:inline;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--d-muted)}
+.dl-inline dd{display:inline;margin:0;color:var(--d-text);font-family:Georgia,serif;font-size:14px}
+.dl-inline dd::after{content:"";display:block;margin-bottom:10px}
+
+/* article header variants */
+.ah h1{font-family:var(--f-tech);font-weight:500;color:var(--d-strong);margin:0;
+  font-size:34px;line-height:38px;letter-spacing:-.02em}
+.ah .dek{font-family:Georgia,serif;font-size:16px;line-height:27px;color:var(--d-text);
+  margin:14px 0 0;max-width:52ch}
+.ah .strip{display:flex;flex-wrap:wrap;gap:0;font-family:var(--f-mono);font-size:10.5px;
+  letter-spacing:.09em;text-transform:uppercase;color:var(--d-muted);margin-top:18px}
+.ah .strip>span{padding-right:14px;margin-right:14px;border-right:1px solid var(--d-rule)}
+.ah .strip>span:last-child{border-right:0;margin-right:0;padding-right:0}
+.ah .kicker{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--d-muted);display:block;margin-bottom:12px}
+.ah.centered{text-align:center}
+.ah.centered .dek,.ah.centered .strip{margin-left:auto;margin-right:auto;justify-content:center}
+
+/* footnotes */
+.fn-wrap{display:grid;grid-template-columns:1fr;gap:0}
+.fn-side{display:grid;grid-template-columns:1fr 168px;gap:26px}
+.fn-side .aside{font-family:var(--f-mono);font-size:10.5px;line-height:16px;color:var(--d-muted);
+  padding-left:11px;border-left:2px solid var(--d-edi)}
+.fnref{font-family:var(--f-mono);font-size:10px;vertical-align:super;color:var(--d-edi);
+  text-decoration:none;padding:0 1px}
+.fnlist{margin:22px 0 0;padding-top:14px;border-top:1px solid var(--d-rule);
+  font-family:var(--f-mono);font-size:11px;line-height:18px;color:var(--d-muted)}
+.fnlist div{margin-bottom:8px;display:flex;gap:9px}
+.fnlist b{color:var(--d-edi);font-weight:400;flex-shrink:0}
+
+/* resume role patterns */
+.role-rule{border-top:1px solid var(--d-rule);padding:15px 0}
+.role-rule:last-child{border-bottom:1px solid var(--d-rule)}
+.role-rule .top{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap}
+.role-rule .ttl{font-family:var(--f-tech);font-size:16px;font-weight:500;color:var(--d-strong)}
+.role-rule .org{font-family:Georgia,serif;font-size:14px;color:var(--d-text)}
+.role-rule .when{margin-left:auto;font-family:var(--f-mono);font-size:11px;color:var(--d-muted);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.role-rule ul{margin:9px 0 0;padding-left:0;list-style:none}
+.role-rule li{position:relative;padding-left:20px;font-family:Georgia,serif;font-size:14px;
+  line-height:22px;color:var(--d-text);margin-bottom:5px}
+.role-rule li::before{content:"—";position:absolute;left:0;color:var(--l-mark);font-family:var(--f-mono)}
+.role-grid{display:grid;grid-template-columns:110px 1fr;gap:5px 20px;padding:13px 0;
+  border-top:1px solid var(--d-rule)}
+.role-grid .when{font-family:var(--f-mono);font-size:11px;color:var(--d-muted);
+  font-variant-numeric:tabular-nums;padding-top:3px}
+.role-card{border:1px solid var(--d-rule);border-radius:2px;padding:15px;margin-bottom:12px}
+
+/* simulated print page */
+.page{background:#fff;color:#1a1a17;padding:26px 30px;font-family:Georgia,serif;font-size:11px;
+  line-height:17px;box-shadow:0 0 0 1px #00000022}
+.page .nm{font-family:var(--f-tech);font-size:20px;font-weight:500;color:#000;margin:0}
+.page .ct{font-family:var(--f-mono);font-size:9px;color:#4a463f;margin-top:5px;letter-spacing:.05em}
+.page h3{font-family:var(--f-mono);font-size:8.5px;letter-spacing:.15em;text-transform:uppercase;
+  color:#4a463f;margin:16px 0 7px;padding-bottom:4px;border-bottom:.5pt solid #c9c4b8}
+.page .rrow{margin-bottom:10px}
+.page .rtop{display:flex;gap:10px;align-items:baseline}
+.page .rtop b{font-size:11.5px;color:#000}
+.page .rtop i{margin-left:auto;font-family:var(--f-mono);font-size:8.5px;color:#4a463f;font-style:normal}
+.page ul{margin:4px 0 0;padding-left:13px}
+.page li{margin-bottom:2px}
+.page .url{color:#4a463f;font-family:var(--f-mono);font-size:8px}
+.pagelbl{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--dim2);margin-bottom:9px;display:block}
+
+/* the live overflow demonstration */
+.ovbox{border:1px solid var(--line);background:var(--bg-dim);padding:0;margin:18px 0;overflow:hidden}
+.ovport{width:320px;overflow-x:auto;background:#161614}
+.ovdoc{padding:14px;font-family:Georgia,serif;font-size:14px;line-height:24px;color:#D0CAB8}
+.ovdoc p{margin:0 0 12px}
+.ovlbl{font-family:var(--f-mono);font-size:10px;color:#8B8478;letter-spacing:.08em;
+  text-transform:uppercase;margin-bottom:10px}
+.ovimg{width:520px;height:64px;background:#2c2b28;color:#A8A192;font-family:var(--f-mono);
+  font-size:12px;display:flex;align-items:center;padding-left:14px;margin-bottom:12px}
+.ovcap{font-family:var(--f-mono);font-size:10.5px;color:var(--dim2);padding:9px 12px;
+  border-top:1px solid var(--line-soft);line-height:1.5}
+</style>
+</head>
+<body>
+
+<svg id="svgf" aria-hidden="true"><defs>
+  <filter id="f-deuter" color-interpolation-filters="linearRGB">
+    <feColorMatrix type="matrix" values="0.2920 0.7054 -0.0003 0 0
+                                         0.2934 0.7089  0.0000 0 0
+                                        -0.0209 0.0225  1.0000 0 0
+                                         0      0       0      1 0"/>
+  </filter>
+  <filter id="f-protan" color-interpolation-filters="linearRGB">
+    <feColorMatrix type="matrix" values="0.1121 0.8853 -0.0005 0 0
+                                         0.1127 0.8897 -0.0001 0 0
+                                         0.0045 0.0000  1.0019 0 0
+                                         0      0       0      1 0"/>
+  </filter>
+</defs></svg>
+
+<div id="shell">
+  <nav id="rail">
+    <div class="rail-head">
+      <div class="rail-title">calibration <b>06</b></div>
+      <div class="rail-sub">Documents · lists, articles, and print</div>
+    </div>
+    <div id="nav"></div>
+    <div class="rail-foot">
+      <div class="bar"><i id="barfill"></i></div>
+      <div class="lbl"><span id="pcount">0 / 0</span><span id="ppct">0%</span></div>
+      <div class="mini">
+        <button id="b-out">Output</button>
+        <button id="b-reset">Reset</button>
+      </div>
+    </div>
+  </nav>
+  <main id="main"><div class="wrap" id="stage"></div></main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* ═══════════════════════════════════════════════════════════
+   COLOUR MATH — identical to Calibration 04. Every figure
+   quoted on this page is produced by these functions at
+   render time, so nothing here is transcribed.
+   ═══════════════════════════════════════════════════════════ */
+function lin(c){c/=255;return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);}
+function enc(c){c=Math.max(0,Math.min(1,c));
+  return Math.round((c<=0.0031308?12.92*c:1.055*Math.pow(c,1/2.4)-0.055)*255);}
+function rgb(h){h=h.replace('#','');
+  return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+function hex(a){return '#'+a.map(v=>('0'+Math.round(v).toString(16)).slice(-2)).join('').toUpperCase();}
+function lum(h){const c=rgb(h);return 0.2126*lin(c[0])+0.7152*lin(c[1])+0.0722*lin(c[2]);}
+function ratio(a,b){const x=lum(a),y=lum(b);return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05);}
+const DEUTER=[[0.2920,0.7054,-0.0003],[0.2934,0.7089,0.0000],[-0.0209,0.0225,1.0000]];
+const PROTAN=[[0.1121,0.8853,-0.0005],[0.1127,0.8897,-0.0001],[0.0045,0.0000,1.0019]];
+function sim(h,M){const c=rgb(h).map(lin);
+  return hex([0,1,2].map(i=>enc(M[i][0]*c[0]+M[i][1]*c[1]+M[i][2]*c[2])));}
+function hue(h){const c=rgb(h).map(v=>v/255);
+  const mx=Math.max.apply(null,c),mn=Math.min.apply(null,c),d=mx-mn;
+  if(!d)return 0;
+  let x; if(mx===c[0])x=60*(((c[1]-c[2])/d)%6);
+  else if(mx===c[1])x=60*(((c[2]-c[0])/d)+2); else x=60*(((c[0]-c[1])/d)+4);
+  return (x+360)%360;}
+function hgap(a,b){const d=Math.abs(hue(a)-hue(b));return Math.min(d,360-d);}
+
+
+/* ═══════════════════════════════════════════════════════════
+   TOKENS
+   ═══════════════════════════════════════════════════════════ */
+const INK='#161614', PAPER='#F0EDE4';
+const TOK={
+  bone7:'#F0EDE4', bone6:'#E8E2D0', bone5:'#D0CAB8', bone4:'#A8A192',
+  green:'#44BB44', blue:'#7FA9CE', lime:'#AAFF00', red4:'#E68C8C',
+  teal5:'#4FB8AF', orange:'#C4834A', inkSunk:'#111110', inkRule:'#2c2b28', inkCtl:'#6E6963',
+  graph7:'#161614', graph6:'#1E1D1B', graph5:'#2C2A26', graph4:'#47423B',
+  fir:'#12551E', slate:'#22506F', citron:'#454F00', oxide:'#8A1F1F',
+  patina:'#0F4F4A', paperSunk:'#FAF8F2', paperRule:'#C2BBA8', paperCtl:'#868074'
+};
+
+function groundVars(g,o){
+  o=o||{};
+  const ink=g!=='paper';
+  const V = ink ? {
+    '--d-bg':INK,'--d-sunk':TOK.inkSunk,'--d-rule':TOK.inkRule,'--d-ctl':TOK.inkCtl,
+    '--d-text':TOK.bone5,'--d-strong':TOK.bone6,'--d-muted':TOK.bone4,
+    '--d-struct':TOK.green,'--d-link':TOK.blue,'--d-data':TOK.lime,'--d-edi':TOK.teal5
+  } : {
+    '--d-bg':PAPER,'--d-sunk':TOK.paperSunk,'--d-rule':TOK.paperRule,'--d-ctl':TOK.paperCtl,
+    '--d-text':TOK.graph5,'--d-strong':TOK.graph6,'--d-muted':TOK.graph4,
+    '--d-struct':TOK.fir,'--d-link':TOK.slate,'--d-data':TOK.citron,'--d-edi':TOK.patina
+  };
+  V['--l-mark'] = o.mark || V['--d-muted'];
+  return Object.keys(V).map(k=>k+':'+V[k]).join(';');
+}
+const gStruct = g => g==='paper'?TOK.fir:TOK.green;
+const gData   = g => g==='paper'?TOK.citron:TOK.lime;
+const gMuted  = g => g==='paper'?TOK.graph4:TOK.bone4;
+const gEdi    = g => g==='paper'?TOK.patina:TOK.teal5;
+const gBg     = g => g==='paper'?PAPER:INK;
+
+/* ═══════════════════════════════════════════════════════════
+   SPECIMEN BUILDERS
+   ═══════════════════════════════════════════════════════════ */
+
+const LI_U = ['Sources stay in version control, so a claim can be traced.',
+              'Agent instructions live beside the material they govern.',
+              'Review happens before the deploy lane, not after.'];
+const LI_O = ['Name the constraint before the solution.',
+              'Show the measurement, including the ones that fail.',
+              'End with the move, not the possibility.'];
+
+/* §01 — lists. Every variant is a real <ul>/<ol>, not a mock, so the
+   marker alignment and baseline behaviour are the actual ones. */
+function listSpec(g, variant, markKey){
+  const mark = markKey==='struct' ? gStruct(g) : markKey==='data' ? gData(g)
+             : markKey==='edi' ? gEdi(g) : gMuted(g);
+  const vars = groundVars(g,{mark:mark});
+  return `<div class="demo" style="${vars}">
+    <span class="dlbl">${g==='paper'?'Paper':'Ink'} · unordered above, ordered below</span>
+    <div class="doc ${variant}">
+      <p>A list interrupts prose, and the marker is the thing that decides how hard.</p>
+      <ul>${LI_U.map(x=>'<li>'+x+'</li>').join('')}</ul>
+      <p>Ordered lists carry a different weight, because the numeral is an ordinal.</p>
+      <ol>${LI_O.map(x=>'<li>'+x+'</li>').join('')}</ol>
+      <p>Prose resumes here, and the eye has to find the measure again.</p>
+    </div>
+  </div>`;
+}
+
+/* §01 — horizontal rules inside prose */
+function ruleSpec(g, cls, note){
+  const vars=groundVars(g);
+  return `<div class="demo" style="${vars}">
+    <span class="dlbl">${g==='paper'?'Paper':'Ink'} · a break between two passages</span>
+    <div class="doc">
+      <p>The stack works because each layer can stand alone. Files are durable, indexing is
+      replaceable, and the agent instructions are readable by a person.</p>
+      <hr class="${cls}">
+      <p>What changed after six months of operating it was not the architecture. It was how much
+      of the context survived a handoff.</p>
+    </div>
+  </div>`;
+}
+
+/* §02 — figures. vd-figure has never been rendered on a real page, so this
+   is the first look at the treatment it already carries. */
+function figureSpec(g, mode){
+  const vars=groundVars(g);
+  const cls = mode==='bare'?'figbox bare':mode==='bleed'?'figbox bleed':'figbox';
+  const cap = mode==='center'?'figcap center':mode==='bare'?'figcap':'figcap edi';
+  return `<div class="demo" style="${vars}">
+    <span class="dlbl">${g==='paper'?'Paper':'Ink'} · a figure mid-article</span>
+    <div class="doc">
+      <p>The diagram below is doing the work the paragraph cannot.</p>
+      <div class="${cls}">
+        <div class="ph">IMAGE OR DIAGRAM</div>
+        <div class="${cap}">The four-layer stack, with the review gate sitting between
+          generation and deploy.</div>
+      </div>
+      <p>Prose resumes, and the figure has either interrupted it or sat inside it.</p>
+    </div>
+  </div>`;
+}
+
+/* §02 — definition lists, the natural markup for resume skills and article metadata */
+function dlSpec(g, cls){
+  const vars=groundVars(g);
+  return `<div class="demo" style="${vars}">
+    <span class="dlbl">${g==='paper'?'Paper':'Ink'} · skills, tools, or article metadata</span>
+    <dl class="${cls}">
+      <dt>Design</dt><dd>Design systems, accessibility to AAA, interaction and prototyping</dd>
+      <dt>AI systems</dt><dd>Agent experience, retrieval design, evaluation harnesses, governance</dd>
+      <dt>Build</dt><dd>Front-end, custom elements, zero-dependency CSS and JS</dd>
+    </dl>
+  </div>`;
+}
+
+/* §03 — the article header */
+function headerSpec(g, mode){
+  const vars=groundVars(g);
+  const strip = `<div class="strip"><span>2026-08</span><span>2,400 words</span>
+      <span>Agent systems</span></div>`;
+  if(mode==='hero') return `<div class="demo" style="${vars}">
+    <span class="dlbl">${g==='paper'?'Paper':'Ink'} · vd-hero reused, field off</span>
+    <div class="ah">
+      <h1>Agent-Mediated Interaction and Shared Legibility</h1>
+      <p class="dek">Accessibility has always been machine legibility. The screen reader was the
+        first agent, and everything we learned making interfaces legible to it applies to the
+        agents arriving now.</p>
+      ${strip}
+    </div></div>`;
+  if(mode==='kicker') return `<div class="demo" style="${vars}">
+    <span class="dlbl">${g==='paper'?'Paper':'Ink'} · kicker above, strip below</span>
+    <div class="ah">
+      <span class="kicker">Field Note</span>
+      <h1>Agent-Mediated Interaction and Shared Legibility</h1>
+      <p class="dek">Accessibility has always been machine legibility. The screen reader was the
+        first agent, and everything we learned making interfaces legible to it applies to the
+        agents arriving now.</p>
+      ${strip}
+    </div></div>`;
+  if(mode==='rail') return `<div class="demo" style="${vars}">
+    <span class="dlbl">${g==='paper'?'Paper':'Ink'} · metadata in the rail, header clean</span>
+    <div style="display:grid;grid-template-columns:132px 1fr;gap:40px">
+      <div style="font-family:var(--f-mono);font-size:10.5px;letter-spacing:.09em;
+        text-transform:uppercase;color:var(--d-muted);line-height:1.9">
+        Field Note<br><span style="color:var(--d-data)">2,400</span><br>words<br><br>2026-08</div>
+      <div class="ah">
+        <h1>Agent-Mediated Interaction and Shared Legibility</h1>
+        <p class="dek">Accessibility has always been machine legibility. The screen reader was the
+          first agent, and everything we learned making interfaces legible to it applies to the
+          agents arriving now.</p>
+      </div>
+    </div></div>`;
+  return '';
+}
+
+/* §03 — footnotes. The rail and .vd-marginalia already exist, which makes
+   sidenotes cheap; endnotes are the safe default. */
+function footnoteSpec(g, mode){
+  const vars=groundVars(g);
+  const body=`<p>The knowledge base is infrastructure, not documentation<a class="fnref" href="#">1</a>.
+    Treating it as cleanup is what keeps AI work unverifiable, because the sources never
+    stabilise<a class="fnref" href="#">2</a>.</p>
+    <p>Once the files are durable, the agent instructions can be reviewed like any other
+    artifact.</p>`;
+  if(mode==='end') return `<div class="demo" style="${vars}">
+    <span class="dlbl">${g==='paper'?'Paper':'Ink'} · endnotes at the foot of the article</span>
+    <div class="doc">${body}
+      <div class="fnlist">
+        <div><b>1</b><span>The distinction is operational: documentation describes a system,
+          infrastructure is part of it.</span></div>
+        <div><b>2</b><span>Measured across three months of agent runs on a moving corpus.</span></div>
+      </div>
+    </div></div>`;
+  if(mode==='side') return `<div class="demo" style="${vars}">
+    <span class="dlbl">${g==='paper'?'Paper':'Ink'} · sidenotes in the rail, no jump</span>
+    <div class="fn-side">
+      <div class="doc">${body}</div>
+      <div>
+        <div class="aside" style="margin-bottom:16px">1 · The distinction is operational:
+          documentation describes a system, infrastructure is part of it.</div>
+        <div class="aside">2 · Measured across three months of agent runs on a moving corpus.</div>
+      </div>
+    </div></div>`;
+  if(mode==='none') return `<div class="demo" style="${vars}">
+    <span class="dlbl">${g==='paper'?'Paper':'Ink'} · no footnotes — the aside goes inline</span>
+    <div class="doc">
+      <p>The knowledge base is infrastructure, not documentation — and the distinction is
+      operational, since documentation describes a system while infrastructure is part of it.
+      Treating it as cleanup is what keeps AI work unverifiable, because the sources never
+      stabilise.</p>
+      <p>Once the files are durable, the agent instructions can be reviewed like any other
+      artifact.</p>
+    </div></div>`;
+  return '';
+}
+
+/* §04 — resume role entries */
+function roleSpec(g, mode){
+  const vars=groundVars(g,{mark:gMuted(g)});
+  const bullets=['Built and operate a four-agent governed system on owned infrastructure.',
+    'Reviewed by an outside CTO, who adopted its principles into his own system.'];
+  if(mode==='rule') return `<div class="demo" style="${vars}">
+    <span class="dlbl">${g==='paper'?'Paper':'Ink'} · ruled rows, like the Field Notes list</span>
+    <div class="role-rule"><div class="top"><span class="ttl">Product Designer</span>
+      <span class="org">Nationwide</span><span class="when">2020 — present</span></div>
+      <ul>${bullets.map(b=>'<li>'+b+'</li>').join('')}</ul></div>
+    <div class="role-rule"><div class="top"><span class="ttl">Principal</span>
+      <span class="org">madebychives</span><span class="when">2019 — present</span></div>
+      <ul><li>Independent practice in design systems and human-AI workflows.</li></ul></div>
+  </div>`;
+  if(mode==='grid') return `<div class="demo" style="${vars}">
+    <span class="dlbl">${g==='paper'?'Paper':'Ink'} · date column, content column</span>
+    <div class="role-grid"><div class="when">2020 —<br>present</div>
+      <div><div class="top" style="display:flex;gap:12px;align-items:baseline">
+        <span class="ttl">Product Designer</span><span class="org">Nationwide</span></div>
+        <ul style="margin:8px 0 0;padding-left:0;list-style:none">
+        ${bullets.map(b=>'<li style="position:relative;padding-left:20px;font-family:Georgia,serif;font-size:14px;line-height:22px;margin-bottom:5px"><span style="position:absolute;left:0;color:var(--l-mark);font-family:var(--f-mono)">—</span>'+b+'</li>').join('')}
+        </ul></div></div>
+    <div class="role-grid"><div class="when">2019 —<br>present</div>
+      <div><div style="display:flex;gap:12px;align-items:baseline">
+        <span class="ttl">Principal</span><span class="org">madebychives</span></div></div></div>
+  </div>`;
+  if(mode==='card') return `<div class="demo" style="${vars}">
+    <span class="dlbl">${g==='paper'?'Paper':'Ink'} · boxed, like vd-system-card</span>
+    <div class="role-card"><div class="top" style="display:flex;gap:12px;align-items:baseline">
+      <span class="ttl">Product Designer</span><span class="org">Nationwide</span>
+      <span class="when" style="margin-left:auto">2020 — present</span></div>
+      <ul style="margin:9px 0 0;padding-left:0;list-style:none">
+      ${bullets.map(b=>'<li style="position:relative;padding-left:20px;font-family:Georgia,serif;font-size:14px;line-height:22px;margin-bottom:5px"><span style="position:absolute;left:0;color:var(--l-mark);font-family:var(--f-mono)">—</span>'+b+'</li>').join('')}
+      </ul></div>
+    <div class="role-card" style="margin-bottom:0"><div style="display:flex;gap:12px;align-items:baseline">
+      <span class="ttl">Principal</span><span class="org">madebychives</span>
+      <span class="when" style="margin-left:auto">2019 — present</span></div></div>
+  </div>`;
+  return '';
+}
+
+/* §05 — the printed page. The resume is the one document where print IS
+   the deliverable, so it is judged as paper, not as a screen in light mode. */
+function printSpec(mode){
+  const url = mode==='urls' ? '<span class="url"> &lt;dreyburn.com/work/agent-os&gt;</span>' : '';
+  const contact = mode==='nocontact'
+    ? 'dreyburn.com · linkedin.com/in/davidreyburn'
+    : 'reyburn.david@gmail.com · dreyburn.com · Columbus, OH';
+  return `<div class="sp" style="padding:20px;background:#0e0e0d">
+    <span class="pagelbl">A4 · ink on white · nav, buttons and field removed</span>
+    <div class="page">
+      <p class="nm">David Reyburn</p>
+      <div class="ct">${contact}</div>
+      <h3>Experience</h3>
+      <div class="rrow"><div class="rtop"><b>Product Designer</b><span>Nationwide</span>
+        <i>2020 — present</i></div>
+        <ul><li>Built and operate a four-agent governed system${url}.</li>
+        <li>Design systems and accessibility to AAA across enterprise surfaces.</li></ul></div>
+      <div class="rrow"><div class="rtop"><b>Principal</b><span>madebychives</span>
+        <i>2019 — present</i></div>
+        <ul><li>Independent practice in design systems and human-AI workflows.</li></ul></div>
+      <h3>Selected work</h3>
+      <div class="rrow"><div class="rtop"><b>The Agent Operating System</b>
+        <i>2026</i></div>
+        <ul><li>Externally adopted; four agents with explicit context boundaries${url}.</li></ul></div>
+      <h3>Skills</h3>
+      <p style="margin:0">Design systems · accessibility · agent experience · retrieval design ·
+        evaluation harnesses · front-end</p>
+    </div>
+  </div>`;
+}
+
+/* Intro — the bare-image hazard, demonstrated rather than asserted.
+
+   No iframe and no srcdoc: an earlier version used both and the HTML was
+   mangled on the way in, producing a broken demo that still looked plausible.
+   This is a 320px column with a 520px child, which is the actual failure and
+   cannot silently stop reproducing it. */
+function overflowDemo(){
+  return `<div class="ovbox">
+    <div class="ovport">
+      <div class="ovdoc">
+        <div class="ovlbl">a bare &lt;img&gt; in prose &middot; 320px column</div>
+        <p>Prose before the image.</p>
+        <div class="ovimg">520px image, unwrapped</div>
+        <p>Prose after.</p>
+      </div>
+    </div>
+    <div class="ovcap"><b>Drag that panel sideways.</b> A bare image has no
+      <code>max-width</code> — only <code>vd-figure img</code> does — so it pushes the
+      document past the viewport and breaks 1.4.10. The reflow guarantee currently depends on
+      every author remembering to wrap every image.</div>
+  </div>`;
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   SECTIONS
+   ═══════════════════════════════════════════════════════════ */
+const SECTIONS=[
+
+{id:'intro',num:'00',nav:'What is missing',title:'The document half',noCount:true,intro:true,
+ lede:'The kit is strong on <em>components</em> and thin on <em>document primitives</em>, which is backwards for the two pages left to build. A reader page is mostly prose, and a resume is mostly prose that prints. Thirteen base elements are unstyled, the only list rules in the system are for navigation, and one of the gaps is an active conformance hazard rather than a cosmetic one.'},
+
+/* ── 01 · LISTS AND RULES ─────────────────────────────────── */
+{id:'lists',num:'01',nav:'Lists',title:'The marker question',
+ lede:'Lists are the most common thing in a case study after paragraphs, and the system has no opinion about them yet. There is a real doctrine fork here: this system says <b>ordinals are structure</b> and quantities are data — so an ordered list marker should be green. That is defensible and it also puts the structure accent at higher frequency inside prose than anywhere else on the site.',
+ vbar:true, ground:true,
+ qs:[
+  {id:'l-style',type:'specimen',
+   label:'How does a list marker sit against the measure?',
+   help:'All four are real <code>&lt;ul&gt;</code> and <code>&lt;ol&gt;</code> elements, so the alignment and the 30px baseline behaviour are the actual ones. <b>Watch the left edge</b>: whether the marker hangs outside the text column or indents it.',
+   opts:[
+    {v:'dash',k:'A — Hanging em dash, numerals mono and zero-padded',tag:'recommended',cost:'free',
+     dyn:g=>listSpec(g,'l-dash','muted'),
+     note:'The marker hangs outside the measure, so the text column stays flush with the paragraphs above and below it — the list does not visually indent the article. The ordered variant uses <span class="m">01 02 03</span> in the mono face, which matches the card indices and the readouts. <b>Cost:</b> two pseudo-elements and a counter; nothing structural.'},
+    {v:'tick',k:'B — Short rule, echoing the section mark',cost:'free',
+     dyn:g=>listSpec(g,'l-tick','struct'),
+     note:'The 9px rule is the section signature at list scale, which makes the whole page one device at three sizes. <b>Cost:</b> at three items it reads as structure; at fifteen it reads as a lot of green. This is the option most affected by the ordinal doctrine.'},
+    {v:'disc',k:'C — Browser default disc and decimal',cost:'free',
+     dyn:g=>listSpec(g,'l-disc','muted'),
+     note:'Costs nothing to build and every reader recognises it instantly. <b>Cost:</b> the bullet is the one glyph on the page that came from the browser rather than from you, and default list indent does not sit on the 30px baseline without correction.'},
+    {v:'none',k:'D — Indent only, no marker',cost:'free',
+     dyn:g=>listSpec(g,'l-none','muted'),
+     note:'Quietest possible. <b>Cost:</b> a list without markers is hard to distinguish from a run of short paragraphs, which is exactly the ambiguity a list exists to remove.'},
+   ]},
+
+  {id:'l-mark',type:'choice',
+   label:'What colour is the marker?',
+   help:'The doctrine says <b>an ordinal counts position and is structure, so it is green</b> — <code>vd-system-card</code> enforces the same rule in code for proof values. Applying it literally makes every ordered list green.',
+   opts:[
+    {v:'muted',t:'Muted text — the marker is punctuation, not signal',d:'Treats the marker as typography rather than as a semantic colour. Keeps green rare, which is what makes it work as a signature. <b>The doctrine exception would need stating</b>: list markers are ordinals but are not coloured as such, because frequency changes the meaning.'},
+    {v:'struct',t:'Structure green — follow the ordinal rule literally',d:'Internally consistent with the card indices and the section marks, and the rule stays stateable in one sentence with no exceptions. <b>Cost:</b> a fifteen-item list in a case study becomes fifteen green marks in a column, which is the highest-frequency use of the accent anywhere.'},
+    {v:'split',t:'Split — unordered muted, ordered structure',d:'A bullet is punctuation; a number is genuinely an ordinal. Follows the doctrine exactly where it applies and not where it does not. <b>Cost:</b> two rules to remember instead of one.'},
+   ]},
+
+  {id:'l-rule',type:'specimen',
+   label:'What is a horizontal rule inside an article?',
+   help:'A long case study needs a break between passages that is weaker than a heading. The section divider was just removed from the home page, so re-introducing a full-width rule here is worth a deliberate decision rather than a default.',
+   opts:[
+    {v:'space',k:'A — Space only, no mark',tag:'recommended',cost:'free',
+     dyn:g=>ruleSpec(g,'r-space'),
+     note:'Consistent with the decision you just made on the home page: 90px of clear ground already says "new passage", and a hairline across it announces a boundary the whitespace made. <b>Cost:</b> invisible in a scan; a reader skimming for structure gets nothing.'},
+    {v:'seg',k:'B — The green segment, centred, no rule',cost:'free',
+     dyn:g=>ruleSpec(g,'r-seg'),
+     note:'The freestanding section mark, reused one level down. Makes the article and the page use the same device. <b>Cost:</b> the mark currently means "section"; using it for a passage break dilutes that.'},
+    {v:'hair',k:'C — Full-width hairline',cost:'free',
+     dyn:g=>ruleSpec(g,'r-hair'),
+     note:'Unambiguous and conventional. <b>Cost:</b> it is exactly the device removed from the home page a moment ago, which would need explaining.'},
+    {v:'glyph',k:'D — A centred glyph run',cost:'paid',
+     dyn:g=>ruleSpec(g,'r-glyph'),
+     note:'Editorial and warm, and it survives print where a hairline can drop out. <b>Cost:</b> the most decorative thing in the system by some distance.'},
+   ]},
+
+  {id:'l-note',type:'prose',rows:2,label:'List and rule notes.',optional:true},
+]},
+
+/* ── 02 · BARE ELEMENTS ───────────────────────────────────── */
+{id:'bare',num:'02',nav:'Bare elements',title:'What an author types',
+ lede:'An author writing a case study will type <code>&lt;img&gt;</code>, <code>&lt;blockquote&gt;</code> and <code>&lt;dl&gt;</code> without reaching for a component. Right now those get browser defaults, and one of them breaks a published conformance claim. The question is how much the bare element should do on its own.',
+ vbar:true, ground:true,
+ qs:[
+  {id:'b-img',type:'choice',
+   label:'What does a bare <code>&lt;img&gt;</code> in prose get?',
+   help:'Only <code>vd-figure img</code> currently sets <code>max-width:100%</code>. A bare image overflows at 320px and breaks 1.4.10 — demonstrated live in §00. <b>This one has a right answer; the question is how far past it to go.</b>',
+   opts:[
+    {v:'safe',t:'Safety only — max-width, height auto, display block',d:'Fixes the reflow hazard and nothing else. An image that wants a border or a caption uses <code>vd-figure</code>, and the two stay clearly different. Add an audit check so an unwrapped image is caught rather than trusted.'},
+    {v:'full',t:'Full treatment — bare images look like vd-figure images',d:'Border, radius, and the same margins. An author gets the right result without knowing the component exists. <b>Cost:</b> <code>vd-figure</code> becomes almost redundant, and an inline icon or a logo would arrive wearing a card border it did not ask for.'},
+    {v:'safe-audit',t:'Safety only, and the audit refuses to pass an unwrapped image',d:'Strictest. Bare images are legal but flagged, so figures are always deliberate. <b>Cost:</b> noisy if you genuinely want an unadorned image.'},
+   ]},
+
+  {id:'b-quote',type:'choice',
+   label:'What does a bare <code>&lt;blockquote&gt;</code> get?',
+   help:'<code>vd-quote</code> is a pull-quote: teal rule, 18px, a figcaption for attribution. A block quotation inside an argument is a different thing — it is someone else\'s words, not your emphasis.',
+   opts:[
+    {v:'distinct',t:'A distinct, quieter treatment — indent and a hairline, no teal',d:'Separates <em>quoting a source</em> from <em>pulling out your own line</em>. The editorial teal stays rare and keeps meaning "this is the page speaking differently".'},
+    {v:'same',t:'Same as vd-quote — one quotation treatment',d:'One device, no decision for the author. <b>Cost:</b> a long block quotation set at 18px with a teal rule shouts, and teal stops being rare.'},
+    {v:'none',t:'Do not style it — require vd-quote',d:'Forces the decision. <b>Cost:</b> an author who types a blockquote gets browser default indent, which looks broken rather than deliberate.'},
+   ]},
+
+  {id:'b-dl',type:'specimen',
+   label:'How does a definition list render?',
+   help:'The natural markup for resume skills, article metadata, and any term-plus-explanation pair. Currently unstyled.',
+   opts:[
+    {v:'rows',k:'A — Two columns, term in the mono label style',tag:'recommended',
+     dyn:g=>dlSpec(g,'dl-rows'),
+     note:'Echoes the readout rail and the docs tables. Scans well and prints well. <b>Cost:</b> needs a fallback below 480px, where a 120px term column is too much.'},
+    {v:'stack',k:'B — Term above, definition below',
+     dyn:g=>dlSpec(g,'dl-stack'),
+     note:'Works at every width with no breakpoint. <b>Cost:</b> taller, and the relationship between term and definition is carried only by proximity.'},
+    {v:'inline',k:'C — Term inline, run-in',
+     dyn:g=>dlSpec(g,'dl-inline'),
+     note:'Densest, and closest to how a printed resume sets skills. <b>Cost:</b> the term is harder to find when scanning a long list.'},
+   ]},
+
+  {id:'b-inline',type:'multi',
+   label:'Which inline elements get styled?',
+   help:'All currently unstyled. Pick what a case study or resume actually needs — anything unpicked keeps browser defaults, which is an honest answer for elements you will not use.',
+   opts:[
+    {v:'sup',t:'sup / sub',d:'Required if footnotes are inline-referenced. Needs line-height correction or it disturbs the 30px baseline.'},
+    {v:'small',t:'small',d:'Fine print, dates, disclaimers.'},
+    {v:'time',t:'time',d:'Semantic dates. Likely tabular figures in the mono face.'},
+    {v:'kbd',t:'kbd',d:'Keyboard keys. Only if you write about interfaces at that level.'},
+    {v:'mark',t:'mark',d:'Highlight. Needs a surface that keeps text AAA — the selected surface would work.'},
+    {v:'dfn',t:'dfn / abbr',d:'<code>abbr</code> already has a dotted underline; <code>dfn</code> does not.'},
+    {v:'details',t:'details / summary',d:'Progressive disclosure. §09 argues against hiding decision boundaries, so this one is arguably against doctrine.'},
+   ]},
+
+  {id:'b-note',type:'prose',rows:2,label:'Bare element notes.',optional:true},
+]},
+
+/* ── 03 · THE READER PAGE ─────────────────────────────────── */
+{id:'reader',num:'03',nav:'Reader',title:'The page that holds an argument',
+ lede:'One template serves both case studies and Field Notes — they differ in content, not in shape. The open questions are what the header carries, whether the field appears at all, and how a citation works. <code>vd-figure</code> has <b>never been rendered on a real page</b>, so §02 above is also its first outing.',
+ vbar:true, ground:true,
+ qs:[
+  {id:'r-head',type:'specimen',
+   label:'What does the article header look like?',
+   help:'The hero component exists and can run with <code>field="off"</code>, but it was built to open a landing page. An article opens differently: the title has to carry a specific argument, not a stance.',
+   opts:[
+    {v:'kicker',k:'A — Kicker, title, dek, then a metadata strip',tag:'recommended',
+     dyn:g=>headerSpec(g,'kicker'),
+     note:'The kicker says which kind of document this is — <b>Field Note</b> or <b>Case Study</b> — which the reader needs before the title lands. The strip below reuses <span class="m">vd-meta</span>, which already exists and is used once on the home page.'},
+    {v:'hero',k:'B — Title and dek only, no kicker',
+     dyn:g=>headerSpec(g,'hero'),
+     note:'Cleanest, and closest to reusing <span class="m">vd-hero</span> unchanged. <b>Cost:</b> nothing distinguishes a case study from an essay until the reader is into the body.'},
+    {v:'rail',k:'C — Metadata moves into the rail, header stays clean',
+     dyn:g=>headerSpec(g,'rail'),
+     note:'Consistent with the change just made to the home page, where the rail carries category and counts. The header becomes only the argument. <b>Cost:</b> the rail is 132px and already holds the table of contents on the docs page — these would compete.'},
+   ]},
+
+  {id:'r-field',type:'choice',
+   label:'Does the topolang field appear on an article page?',
+   help:'It is the signature element and it costs a canvas and an animation loop on a page meant for sustained reading.',
+   opts:[
+    {v:'off',t:'No field on article pages',d:'Reading pages stay still. The field remains the landing-page signature, which keeps it special and avoids animating behind a 2,400-word argument. <code>prefers-reduced-motion</code> already stops it, but "off by default while reading" is a stronger position.'},
+    {v:'band',t:'A thin band above the title only',d:'Keeps the family resemblance at a fraction of the cost, and it stops where the reading starts.'},
+    {v:'full',t:'Full masked field, same as the home page',d:'Maximum consistency. <b>Cost:</b> a moving background above a long article, and the mask alpha work has only been proven against hero-length text.'},
+   ]},
+
+  {id:'r-notes',type:'specimen',
+   label:'How does a citation work?',
+   help:'A sanitized enterprise case study is the format most likely to need sources. <code>.vd-cite</code> already styles an inline superscript marker in the editorial colour, but there is no list, no numbering and no back-link.',
+   opts:[
+    {v:'end',k:'A — Endnotes at the foot of the article',tag:'recommended',
+     dyn:g=>footnoteSpec(g,'end'),
+     note:'Works at every width, prints correctly, and needs no layout. <b>Cost:</b> the reader jumps away and back, which on mobile means losing their place.'},
+    {v:'side',k:'B — Sidenotes in the rail, no jump',
+     dyn:g=>footnoteSpec(g,'side'),
+     note:'The rail and <span class="m">.vd-marginalia</span> already exist, so this is cheaper than it looks, and the note is read in place. <b>Cost:</b> below 860px the rail collapses and they have to become endnotes anyway — so this is <em>both</em> patterns, not one.'},
+    {v:'none',k:'C — No footnotes; asides go inline',
+     dyn:g=>footnoteSpec(g,'none'),
+     note:'Forces every aside to earn its place in the sentence, which usually improves the writing. <b>Cost:</b> genuine citations have nowhere to go, and a case study making claims about a client needs somewhere to put the caveat.'},
+   ]},
+
+  {id:'r-fig',type:'specimen',
+   label:'How does a figure sit in the column?',
+   help:'This is <code>vd-figure</code>\'s first appearance anywhere. The caption currently carries the editorial teal rule, which was decided for the pull-quote family.',
+   opts:[
+    {v:'bordered',k:'A — Hairline box, caption with the editorial rule',tag:'current',
+     dyn:g=>figureSpec(g,'bordered'),
+     note:'What <span class="m">vd-figure</span> already does today, seen for the first time. Consistent with the card treatment and with the editorial family.'},
+    {v:'bare',k:'B — No border, caption plain beneath',
+     dyn:g=>figureSpec(g,'bare'),
+     note:'Lets a screenshot with its own edges avoid a double frame. <b>Cost:</b> an image on a similar-toned ground floats without an anchor.'},
+    {v:'bleed',k:'C — Full-bleed past the measure',
+     dyn:g=>figureSpec(g,'bleed'),
+     note:'Gives a wide diagram room, which a system architecture usually needs. <b>Cost:</b> a second figure variant to maintain, and it breaks the column rhythm deliberately.'},
+   ]},
+
+  {id:'r-end',type:'multi',
+   label:'What sits at the end of an article?',
+   help:'§09 already rules out breadcrumbs. These are adjacent but separate decisions.',
+   opts:[
+    {v:'prevnext',t:'Previous / next article',d:'Keeps a reader moving through the writing.'},
+    {v:'related',t:'Related work links',d:'Connects a Field Note to the case study it came from.'},
+    {v:'contact',t:'A line inviting contact',d:'The portfolio has no form; this would link to email or the resume page.'},
+    {v:'updated',t:'A last-updated date',d:'Honest about drift on a page making measured claims.'},
+    {v:'nothing',t:'Nothing — the article ends',d:'Consistent with ending on a move rather than on navigation.'},
+   ]},
+
+  {id:'r-note',type:'prose',rows:2,label:'Reader page notes.',optional:true},
+]},
+
+/* ── 04 · THE RESUME ──────────────────────────────────────── */
+{id:'resume',num:'04',nav:'Resume',title:'The one page that is paper',
+ lede:'Settled already: the <b>Download résumé</b> button becomes a link to <code>resume.html</code>, and that page has to print well. That makes this the only document in the system where print is the deliverable rather than a courtesy — so it is judged as paper first and as a screen second.',
+ vbar:true, ground:true,
+ qs:[
+  {id:'m-role',type:'specimen',
+   label:'What does a role entry look like?',
+   help:'Nothing in the kit fits this yet. <code>vd-system-card</code> is a box for projects; <code>vd-note-card</code> is closer — a dated ruled row — but is built around a link and a word count.',
+   opts:[
+    {v:'rule',k:'A — Ruled rows, the Field Notes pattern',tag:'recommended',
+     dyn:g=>roleSpec(g,'rule'),
+     note:'Reuses a pattern the site already has, and ruled rows break across printed pages cleanly. <b>Cost:</b> the dates sit right-aligned, which scans well on screen and slightly less well in a narrow print column.'},
+    {v:'grid',k:'B — Date column, content column',
+     dyn:g=>roleSpec(g,'grid'),
+     note:'The most scannable for a recruiter: every date lands on the same left edge, so the career shape is visible in one pass. Closest to a conventional printed resume. <b>Cost:</b> a fixed date column below 480px has to collapse.'},
+    {v:'card',k:'C — Boxed, like vd-system-card',
+     dyn:g=>roleSpec(g,'card'),
+     note:'Maximum consistency with the Work section. <b>Cost:</b> boxes waste vertical space on paper, and a resume is fighting for the page.'},
+   ]},
+
+  {id:'m-sections',type:'multi',
+   label:'Which sections does the resume carry?',
+   help:'Pick what earns its space. Anything unpicked does not get built.',
+   opts:[
+    {v:'exp',t:'Experience',d:'Roles, dates, what changed because you were there.'},
+    {v:'work',t:'Selected work',d:'The four systems, condensed. Overlaps the portfolio deliberately.'},
+    {v:'skills',t:'Skills and tools',d:'Uses the definition list from §02.'},
+    {v:'edu',t:'Education',d:''},
+    {v:'speaking',t:'Speaking and writing',d:'Talks given, essays published. Evidence of external validation.'},
+    {v:'summary',t:'A short positioning statement at the top',d:'Three lines saying what you do and for whom.'},
+   ]},
+
+  {id:'m-contact',type:'choice',
+   label:'What contact detail appears?',
+   help:'This page is public and will be scraped. The licence already carries your email, so this is about how much more is exposed and where.',
+   opts:[
+    {v:'full',t:'Email, site, and city',d:'Conventional and frictionless for a recruiter. Accepts scraping as the cost of being reachable.'},
+    {v:'nocontact',t:'Site and LinkedIn only — no email on the page',d:'Keeps the address off a scrapable public page while staying reachable. <b>The printed copy could still carry it</b>, since print is a deliberate act.'},
+    {v:'print',t:'Different on screen and in print',d:'Screen shows links; print shows the full block. Costs a print-only rule, which the system already does elsewhere.'},
+   ]},
+
+  {id:'m-note',type:'prose',rows:2,label:'Resume notes.',optional:true},
+]},
+
+/* ── 05 · PRINT ───────────────────────────────────────────── */
+{id:'print',num:'05',nav:'Print',title:'Judged as paper',
+ lede:'<code>print.css</code> exists and handles headings, tables, cards and redactions — but it has never been exercised on a resume-shaped document. The specimens below are simulated pages, not screenshots of light mode: ink on white, with the nav, buttons and field already removed.',
+ qs:[
+  {id:'p-urls',type:'specimen',
+   label:'Should link destinations print inline?',
+   help:'Current behaviour prints <code>&lt;url&gt;</code> after every external link, on the reasoning that a printed underline pointing nowhere is useless. On a resume that reasoning holds and the noise is worse.',
+   opts:[
+    {v:'nourls',k:'A — Suppress on the resume, keep everywhere else',tag:'recommended',
+     dyn:g=>printSpec('nourls'),
+     note:'Articles keep their citations printable; the resume stays clean. <b>Cost:</b> one page-scoped exception, which has to be stated or it looks like an oversight.'},
+    {v:'urls',k:'B — Keep them everywhere, including the resume',
+     dyn:g=>printSpec('urls'),
+     note:'One rule, no exceptions, and a printed resume that can be typed back in. <b>Cost:</b> see for yourself — the bullets carry a URL each and the page gets busy fast.'},
+   ]},
+
+  {id:'p-len',type:'choice',
+   label:'What is the print length target?',
+   help:'This decides how much editing the content needs, not just how the CSS behaves.',
+   opts:[
+    {v:'one',t:'One page, enforced by what is written',d:'The classic constraint, and it forces the content to be good. <b>Cost:</b> selected work and speaking probably do not both fit.'},
+    {v:'two',t:'Two pages, with a deliberate break',d:'Experience and selected work on page one, skills and speaking on page two. Needs explicit <code>break-before</code> rules.'},
+    {v:'flow',t:'Flow naturally, just break cleanly',d:'No length target; the rules only guarantee that a role never splits across a page. Most honest for a long career.'},
+   ]},
+
+  {id:'p-scope',type:'multi',
+   label:'What else needs print rules it does not have?',
+   help:'Already handled: <code>@page</code> margins, nav and buttons hidden, cards and quotes unbreakable, headings never orphaned from their content, redactions stay redacted.',
+   opts:[
+    {v:'widows',t:'orphans / widows on paragraphs',d:'Currently unset, so a single line can strand at a page break.'},
+    {v:'roles',t:'break-inside on role entries',d:'A role splitting across pages is the most likely print failure.'},
+    {v:'lists',t:'break-inside on list items',d:'A bullet splitting mid-sentence.'},
+    {v:'figures',t:'Figures and captions kept together',d:'A caption on the next page from its image.'},
+    {v:'footnotes',t:'Endnotes on the article print',d:'Depends on §03.'},
+   ]},
+
+  {id:'p-note',type:'prose',rows:3,label:'Print notes, and anything else.',optional:true,
+   ph:'Anything about the resume content itself — what it should say, what to leave out — is useful here too.'},
+]},
+
+{id:'out',num:'—',nav:'Output',title:'Brief',output:true,
+ lede:'Copy this back and I will build against it. Order of work is §01 and §02 first, because both pages depend on them, then the reader template, then the resume.'},
+];
+
+/* ═══════════════════════════════════════════════════════════
+   ENGINE — same as Calibration 04, minus the topolang field
+   mounting, which this page has no use for.
+   ═══════════════════════════════════════════════════════════ */
+const KEY='verdigris-calibration-06';
+let A={}, cur=0, storageOK=true, vsim='none', ground='ink';
+
+function load(){ try{const r=localStorage.getItem(KEY); if(r)A=JSON.parse(r)||{};}catch(e){A={};} }
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(A)); if(!storageOK){storageOK=true;flag();}}
+  catch(e){ if(storageOK){storageOK=false;flag();} } }
+function flag(){
+  let el=document.getElementById('nosave');
+  if(storageOK){ if(el)el.remove(); return; }
+  if(el) return;
+  el=document.createElement('div'); el.id='nosave';
+  el.style.cssText='position:fixed;top:0;left:0;right:0;z-index:200;background:var(--red);color:#1a0c0c;'+
+    'font-family:var(--f-mono);font-size:11.5px;padding:9px 16px;text-align:center';
+  el.textContent='AUTOSAVE UNAVAILABLE — serve over http://localhost, or export from Output before closing.';
+  document.body.appendChild(el);
+}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');
+  clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('on'),1700);}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const strip=s=>String(s).replace(/<[^>]+>/g,'');
+
+function allQs(){return SECTIONS.filter(s=>s.qs).flatMap(s=>s.qs.map(q=>({s,q})));}
+function answered(q){const v=A[q.id];
+  if(v===undefined||v===null)return false;
+  if(typeof v==='string')return v.trim()!=='';
+  if(Array.isArray(v))return v.length>0;
+  if(typeof v==='object')return Object.keys(v).length>0;
+  return true;}
+const req=q=>!q.optional;
+function secStats(s){ if(!s.qs)return null; const r=s.qs.filter(req);
+  return {done:r.filter(answered).length,total:r.length}; }
+
+/* ── question renderers ──────────────────────────────────── */
+function qHTML(q,i){
+  const id=q.id; let body='';
+  if(q.type==='prose')
+    body=`<textarea data-q="${id}" rows="${q.rows||3}" placeholder="${esc(q.ph||'')}">${esc(A[id]||'')}</textarea>`;
+  else if(q.type==='choice'){
+    const v=A[id];
+    body=`<div class="opts">`+q.opts.map(o=>
+      `<label class="opt ${v===o.v?'on':''}" data-opt="${id}" data-v="${o.v}"><span class="box"></span>
+       <span class="txt"><span class="t">${o.t}</span>${o.d?`<span class="d">${o.d}</span>`:''}</span></label>`).join('')+`</div>`;
+  }
+  else if(q.type==='multi'){
+    const v=Array.isArray(A[id])?A[id]:[];
+    body=`<div class="opts">`+q.opts.map(o=>
+      `<label class="opt multi ${v.indexOf(o.v)>-1?'on':''}" data-multi="${id}" data-v="${o.v}"><span class="box"></span>
+       <span class="txt"><span class="t">${o.t}</span>${o.d?`<span class="d">${o.d}</span>`:''}</span>
+       ${v.indexOf(o.v)>-1?`<span class="pill">${v.indexOf(o.v)+1}</span>`:''}</label>`).join('')+`</div>`;
+    if(id==='s-controls') body+=`<div style="margin-top:14px">${inventorySpec(ground)}</div>`;
+  }
+  else if(q.type==='specimen'){
+    const v=A[id];
+    body=`<div class="spgrid">`+q.opts.map(o=>{
+      /* dyn options render against the currently selected ground,
+         so switching ground re-renders rather than re-tints. */
+      const stage=o.dyn?o.dyn(ground):o.html;
+      return `<div class="spwrap ${v===o.v?'on':''}">
+        <div class="sphead" data-opt="${id}" data-v="${o.v}"><span class="box"></span>
+          <span class="k">${o.k}</span>
+          ${o.cost?`<span class="cost ${o.cost}">${o.cost==='free'?'FREE':o.cost==='paid'?'PAID':'HIGH COST'}</span>`:''}
+          ${o.tag?`<span class="tag">${o.tag}</span>`:''}</div>
+        <div class="spstage">${stage}</div>
+        ${o.note?`<div class="spnote">${o.note}</div>`:''}
+      </div>`;}).join('')+`</div>`;
+  }
+
+  return `<div class="q" id="q-${id}">
+    <div class="q-top"><span class="q-id">${q.optional?'○':String(i).padStart(2,'0')}</span>
+    <p class="q-label">${q.label}</p></div>
+    ${q.help?`<div class="q-help">${q.help}</div>`:''}
+    <div class="q-body">${body}</div></div>`;
+}
+
+
+/* ── intro ───────────────────────────────────────────────── */
+const UNSTYLED=['ul','ol','dl','dt','dd','hr','sup','sub','small','time','kbd','details','summary'];
+function introHTML(){
+  return `
+  <div class="warn bad"><b>Finding 1 — a bare image breaks a published claim.</b>
+    Only <code>vd-figure img</code> sets <code>max-width</code>. An author who types
+    <code>&lt;img&gt;</code> in a case study pushes the document past the viewport at 320px, which
+    is a <b>1.4.10 failure</b> on a page whose sibling advertises the opposite. The reflow
+    guarantee currently rests on every author remembering to wrap every image.</div>
+
+  ${overflowDemo()}
+
+  <div class="warn"><b>Finding 2 — thirteen base elements are unstyled.</b>
+    <span class="m">${UNSTYLED.join('</span> <span class="m">')}</span>.
+    The only list rules in the entire stylesheet are <code>.vd-nav__list</code> and
+    <code>.vd-toc</code>, both <code>list-style:none</code> for navigation. A list inside prose has
+    never been rendered by this system.</div>
+
+  <div class="warn forced"><b>Finding 3 — the components are ahead of the documents.</b>
+    Fourteen <code>vd-*</code> tags are styled; nine are registered and in the manifest.
+    <span class="m">vd-nav</span>, <span class="m">vd-footer</span>, <span class="m">vd-quote</span>,
+    <span class="m">vd-figure</span> and <span class="m">vd-meta</span> are CSS-only. Three of
+    those five are exactly what a reader page needs, and <b><span class="m">vd-figure</span> has
+    never been rendered on any page</b> — §02 and §03 below are its first outing.</div>
+
+  <div class="lbl" style="margin:26px 0 14px">Already settled — not re-asked</div>
+  <dl class="kv">
+    <dt>Resume link</dt><dd class="set">The <b>Download résumé</b> button becomes a link to <b>resume.html</b>, and that page must print well. Print is the deliverable there, not a courtesy.</dd>
+    <dt>Docs convention</dt><dd class="set">The docs page keeps its own shape — <b>eyebrow above the heading, table of contents in the rail</b>. It is a reference document with its own navigation; the portfolio pages are not.</dd>
+    <dt>Home page</dt><dd class="set">Rail carries the category, the heading carries the specific name. Section divider removed; the green mark survives, centred.</dd>
+    <dt>Colour</dt><dd class="set">Structure green, link blue, data lime — numerals only. Editorial teal for quoting, crediting, annotating. Success aliases link, and inline links are underlined because of it.</dd>
+    <dt>Verification</dt><dd class="set">Every page runs <b>verdigrisAudit()</b>. One theme per load, plus 320px. Anything built from this brief has to pass before it ships.</dd>
+  </dl>
+
+  <div class="lbl" style="margin:26px 0 12px">What this page closes</div>
+  <table class="px">
+    <tr><th>§</th><th>Question</th><th>Why it is being asked</th></tr>
+    <tr class="hi"><td class="n">01</td><td>Lists and rules</td><td>Never asked. There is a real doctrine fork: ordinals are structure, so an ordered list marker should be green — at the highest frequency the accent has ever run.</td></tr>
+    <tr class="hi"><td class="n">02</td><td>Bare elements</td><td>The image gap is an active conformance hazard. The rest decide how much an author gets without reaching for a component.</td></tr>
+    <tr><td class="n">03</td><td>The reader page</td><td>Header, field, citations, figures. One template serves case studies and Field Notes.</td></tr>
+    <tr><td class="n">04</td><td>The resume</td><td>No pattern in the kit fits a dated role entry.</td></tr>
+    <tr><td class="n">05</td><td>Print</td><td><code>print.css</code> has never been exercised on a document where print is the point.</td></tr>
+  </table>`;
+}
+function outputHTML(){
+  const r=allQs().filter(x=>req(x.q)), done=r.filter(x=>answered(x.q)).length;
+  const gaps=r.filter(x=>!answered(x.q));
+  return `<div style="display:flex;gap:26px;margin:18px 0 26px">
+    <div><div style="font-family:var(--f-mono);font-size:26px;color:var(--white)">${done}/${r.length}</div><div class="lbl">Answered</div></div>
+    <div><div style="font-family:var(--f-mono);font-size:26px;color:var(--white)">${Math.round(done/r.length*100)}%</div><div class="lbl">Complete</div></div>
+  </div>
+  ${gaps.length?`<div class="warn"><b>${gaps.length} unanswered.</b> ${gaps.map(g=>g.s.num+' · '+strip(g.q.label).slice(0,64)).join('<br>')}</div>`
+   :`<div class="warn ok"><b>Complete.</b> Copy or download, then hand it back.</div>`}
+  <div class="outbox" id="outbox"></div>
+  <div style="display:flex;gap:9px;margin-top:14px">
+    <button class="btn pri" id="b-copy">Copy</button>
+    <button class="btn" id="b-dl">Download</button></div>`;
+}
+
+
+function brief(){
+  const NL=String.fromCharCode(10);
+  const L=[];
+  L.push('# Verdigris — Calibration 06 brief');
+  L.push('');
+  L.push('Document primitives, the reader page, and the resume.');
+  L.push('');
+  SECTIONS.filter(s=>s.qs).forEach(s=>{
+    L.push('## '+s.num+' · '+s.title);
+    L.push('');
+    s.qs.forEach(q=>{
+      const v=A[q.id];
+      if(v===undefined||v===null||v===''||(Array.isArray(v)&&!v.length)){
+        L.push('- **'+strip(q.label)+'** — _unanswered_'); return;
+      }
+      L.push('- **'+strip(q.label)+'**');
+      if(q.type==='choice'||q.type==='specimen'){
+        const o=q.opts.find(x=>x.v===v);
+        L.push('  → '+(o?strip(o.t||o.k):v)+'  `['+v+']`');
+      } else if(q.type==='multi'){
+        v.forEach((x,i)=>{const o=q.opts.find(y=>y.v===x);
+          L.push('  '+(i+1)+'. '+(o?strip(o.t):x)+'  `['+x+']`');});
+      } else String(v).trim().split(/\r?\n/).forEach(l=>L.push('  > '+l));
+    });
+    L.push('');
+  });
+  L.push('---');
+  L.push('');
+  L.push('## Measured, before any of this was asked');
+  L.push('');
+  L.push('- Unstyled base elements: `'+UNSTYLED.join('`, `')+'`');
+  L.push('- The only list rules in the stylesheet are `.vd-nav__list` and `.vd-toc`,');
+  L.push('  both `list-style:none` for navigation. A prose list has never been rendered.');
+  L.push('- Only `vd-figure img` sets `max-width`. A bare `<img>` overflows at 320px —');
+  L.push('  a **1.4.10 failure**, and the guarantee depends on authors wrapping every image.');
+  L.push('- 14 `vd-*` tags are styled; 9 are registered and in `custom-elements.json`.');
+  L.push('  CSS-only: `vd-nav`, `vd-footer`, `vd-quote`, `vd-figure`, `vd-meta`.');
+  L.push('- `vd-figure` has 0 uses across every built page. It has never been rendered.');
+  L.push('');
+  L.push('## Settled going in');
+  L.push('');
+  L.push('- The **Download résumé** button links to `resume.html`; that page must print well.');
+  L.push('- The docs page keeps eyebrow-above-heading and its rail table of contents.');
+  L.push('- Portfolio pages put the category in the rail and the specific name in the heading.');
+  L.push('');
+  L.push('## Build order implied by this brief');
+  L.push('');
+  L.push('1. Prose primitives (§01, §02) — both pages depend on them');
+  L.push('2. Audit check for unwrapped images, so reflow stops depending on discipline');
+  L.push('3. Reader template (§03) — first real use of `vd-figure`');
+  L.push('4. Resume template (§04, §05) — print-first');
+  L.push('5. Document the five CSS-only elements in the manifest');
+  return L.join(NL);
+}
+function vbarHTML(s){
+  return `<div class="vbar">
+    <span class="lbl">Vision</span>
+    ${[['none','Normal'],['deuter','Deuteranopia'],['protan','Protanopia'],['gray','Greyscale']]
+      .map(v=>`<button data-vsim="${v[0]}" class="${vsim===v[0]?'on':''}">${v[1]}</button>`).join('')}
+    ${s.ground?`<span class="sep"></span><span class="lbl">Ground</span>
+      ${[['ink','Ink'],['paper','Paper']].map(v=>
+        `<button data-ground="${v[0]}" class="${ground===v[0]?'on':''}">${v[1]}</button>`).join('')}`:''}
+    <span class="hint">Viénot 1999 · applied to every specimen below</span>
+  </div>`;
+}
+
+function render(){
+  const s=SECTIONS[cur], st=document.getElementById('stage');
+  let h=`<div class="sec-head"><div class="sec-num">${s.num==='—'?'OUTPUT':'SECTION '+s.num}</div>
+    <h1 class="sec-title">${s.title}</h1>${s.lede?`<p class="sec-lede">${s.lede}</p>`:''}</div>`;
+  if(s.vbar)h+=vbarHTML(s);
+  if(s.intro)h+=introHTML();
+  else if(s.output)h+=outputHTML();
+  else{let n=0;h+=s.qs.map(q=>{if(!q.optional)n++;return qHTML(q,n);}).join('');}
+  h+=`<div class="secnav"><button class="btn" id="b-prev" ${cur===0?'disabled':''}>← Back</button>
+    <div class="spacer"></div>
+    ${cur<SECTIONS.length-1?`<button class="btn pri" id="b-next">${cur===0?'Begin':'Next'} →</button>`:''}</div>`;
+  st.innerHTML=h;
+  window.scrollTo({top:0,behavior:'instant'});
+  if(s.output){const b=document.getElementById('outbox'); if(b)b.textContent=brief();}
+  bind(); renderNav();
+}
+
+function renderNav(){
+  document.getElementById('nav').innerHTML=SECTIONS.map((s,i)=>{
+    const st=secStats(s), done=st&&st.total>0&&st.done===st.total;
+    return `<button class="nav-item ${i===cur?'on':''} ${done?'done':''}" data-go="${i}">
+      <span class="n">${s.num==='—'?'··':s.num}</span><span>${s.nav}</span>
+      ${st?`<span class="ct">${st.done}/${st.total}</span>`:''}</button>`;}).join('');
+  const r=allQs().filter(x=>req(x.q)), done=r.filter(x=>answered(x.q)).length;
+  const pct=Math.round(done/r.length*100);
+  document.getElementById('barfill').style.width=pct+'%';
+  document.getElementById('pcount').textContent=done+' / '+r.length;
+  document.getElementById('ppct').textContent=pct+'%';
+}
+
+function set(k,v){A[k]=v;save();renderNav();}
+
+function bind(){
+  const st=document.getElementById('stage');
+
+  st.querySelectorAll('textarea[data-q]').forEach(el=>
+    el.addEventListener('input',()=>set(el.dataset.q,el.value)));
+
+  st.querySelectorAll('[data-opt]').forEach(el=>el.addEventListener('click',()=>{
+    const k=el.dataset.opt,v=el.dataset.v;
+    set(k,A[k]===v?undefined:v);
+    const q=allQs().find(x=>x.q.id===k).q;
+    if(q.type==='specimen')
+      st.querySelectorAll('[data-opt="'+k+'"]').forEach(h=>h.parentElement.classList.toggle('on',h.dataset.v===A[k]));
+    else
+      st.querySelectorAll('[data-opt="'+k+'"]').forEach(h=>h.classList.toggle('on',h.dataset.v===A[k]));
+  }));
+
+  st.querySelectorAll('[data-multi]').forEach(el=>el.addEventListener('click',()=>{
+    const k=el.dataset.multi,v=el.dataset.v;
+    const c=Array.isArray(A[k])?A[k].slice():[];
+    const i=c.indexOf(v); if(i>-1)c.splice(i,1); else c.push(v);
+    set(k,c);
+    st.querySelectorAll('[data-multi="'+k+'"]').forEach(h=>{
+      const on=c.indexOf(h.dataset.v)>-1;
+      h.classList.toggle('on',on);
+      let pill=h.querySelector('.pill');
+      if(on){ if(!pill){pill=document.createElement('span');pill.className='pill';h.appendChild(pill);}
+        pill.textContent=c.indexOf(h.dataset.v)+1; }
+      else if(pill) pill.remove();
+    });
+  }));
+
+  st.querySelectorAll('[data-vsim]').forEach(b=>b.addEventListener('click',()=>{
+    vsim=b.dataset.vsim;
+    document.body.classList.remove('sim-deuter','sim-protan','sim-gray');
+    if(vsim!=='none')document.body.classList.add('sim-'+vsim);
+    st.querySelectorAll('[data-vsim]').forEach(x=>x.classList.toggle('on',x.dataset.vsim===vsim));
+  }));
+
+  /* Ground is a full re-render, not a filter. Re-tinting would
+     produce colours the paper theme never actually emits. */
+  st.querySelectorAll('[data-ground]').forEach(b=>b.addEventListener('click',()=>{
+    ground=b.dataset.ground; render();
+  }));
+
+  const p=document.getElementById('b-prev'),n=document.getElementById('b-next');
+  if(p)p.addEventListener('click',()=>{if(cur>0){cur--;render();}});
+  if(n)n.addEventListener('click',()=>{if(cur<SECTIONS.length-1){cur++;render();}});
+  const c=document.getElementById('b-copy');
+  if(c)c.addEventListener('click',()=>navigator.clipboard.writeText(brief())
+    .then(()=>toast('Copied'),()=>toast('Copy blocked, select manually')));
+  const d=document.getElementById('b-dl');
+  if(d)d.addEventListener('click',()=>{
+    const b=new Blob([brief()],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(b);
+    a.download='verdigris-brief-06.md';a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Saved');});
+}
+
+document.getElementById('nav').addEventListener('click',e=>{
+  const b=e.target.closest('[data-go]'); if(!b)return; cur=+b.dataset.go; render();});
+document.getElementById('b-out').addEventListener('click',()=>{cur=SECTIONS.length-1;render();});
+const rs=document.getElementById('b-reset'); let armed=false;
+rs.addEventListener('click',()=>{
+  if(!armed){armed=true;rs.textContent='Erase all?';rs.style.color='var(--red)';rs.style.borderColor='var(--red)';
+    clearTimeout(rs._t);rs._t=setTimeout(()=>{armed=false;rs.textContent='Reset';rs.style.color='';rs.style.borderColor='';},3500);return;}
+  armed=false;rs.textContent='Reset';rs.style.color='';rs.style.borderColor='';
+  A={};save();cur=0;render();toast('Erased');});
+document.addEventListener('keydown',e=>{
+  if(e.target.matches('textarea,input,select'))return;
+  if(e.key==='ArrowRight'&&cur<SECTIONS.length-1){cur++;render();}
+  if(e.key==='ArrowLeft'&&cur>0){cur--;render();}});
+
+load(); render();
+</script>
+</body>
+</html>

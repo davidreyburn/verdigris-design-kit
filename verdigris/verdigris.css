@@ -535,6 +535,148 @@ strong,b{font-weight:600;color:var(--vd-text-strong)}
 em,i{font-style:italic}
 abbr[title]{text-decoration:none;border-bottom:1px dotted var(--vd-rule-strong);cursor:help}
 
+
+/* ══ DOCUMENT PRIMITIVES ═════════════════════════════════════════════════
+   Calibration 06. Before this block, thirteen base elements were unstyled
+   and the only list rules in the system were .vd-nav__list and .vd-toc —
+   both list-style:none, for navigation. A list inside prose had never been
+   rendered by this system, which is a strange thing to be true of a design
+   system whose two remaining pages are mostly prose.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* LISTS. Hanging marker, so the text column stays flush with the paragraphs
+   above and below — a list does not indent the article. list-style is off
+   and the marker is a pseudo-element, which is the only way to control where
+   it sits relative to the measure.
+
+   The marker is MUTED, not the structure colour, and that is a deliberate
+   exception to the ordinal rule. Doctrine says an ordinal is structure and
+   takes green: card indices and section numbers do. A list marker is also an
+   ordinal, but frequency changes what a colour means — a fifteen-item list
+   would put more green on screen than the rest of the page combined, and the
+   accent works by being rare. So the marker is treated as punctuation. */
+.vd-prose ul,.vd-prose ol{
+  margin:0 0 var(--vd-space-1);padding-left:0;list-style:none;
+}
+.vd-prose ul:last-child,.vd-prose ol:last-child{margin-bottom:0}
+/* NO margin between items, and that is the baseline grid talking rather than
+   a taste call. --vd-space-h is 15px, which is half a line: with it, every
+   item after the first sat 15px off the 30px grid — measured, 10 of 23
+   elements in the render test. The docs page publishes "every line sits on
+   it", so a half-step here would falsify a live claim.
+
+   The separation comes from the marker instead. A hanging em dash at the head
+   of each item is a strong enough boundary that extra leading is not needed,
+   and a full 30px gap would put a blank line between every bullet. */
+.vd-prose li{position:relative;margin-bottom:0}
+.vd-prose ul>li{padding-left:var(--vd-space-1)}
+.vd-prose ul>li::before{
+  content:"—";position:absolute;left:0;
+  font-family:var(--vd-face-mono);color:var(--vd-text-muted);
+}
+/* Zero-padded and tabular, so 9 and 10 align and the column does not shift.
+   Matches the card indices and the rail readouts, which use the same face. */
+.vd-prose ol{counter-reset:vd-ol}
+.vd-prose ol>li{padding-left:var(--vd-space-2);counter-increment:vd-ol}
+.vd-prose ol>li::before{
+  content:counter(vd-ol,decimal-leading-zero);position:absolute;left:0;
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  font-variant-numeric:tabular-nums;color:var(--vd-text-muted);
+  line-height:var(--vd-lead-1);
+}
+/* Nested lists step in by one marker width and lose the zero-padding, which
+   would read as a version number at depth. */
+.vd-prose li ul,.vd-prose li ol{margin:0}
+.vd-prose li ol>li::before{content:counter(vd-ol) "."}
+
+/* A RULE IN PROSE IS SPACE. Consistent with removing the section divider:
+   --vd-space-2 of clear ground already says "new passage", and a hairline
+   across it announces a boundary the whitespace made. .vd-rule still exists
+   for the rare case where a visible rule is the point. */
+.vd-prose hr{border:0;height:0;margin:var(--vd-space-2) 0}
+
+/* BARE IMAGES. Safety only — this is the fix for a real 1.4.10 failure, not
+   a style. Without max-width a 520px screenshot in a 320px column pushes the
+   document sideways, and the reflow guarantee depended on every author
+   remembering to reach for vd-figure. No border and no radius: framing is
+   what vd-figure is for, and after Calibration 06 even that does not frame.
+   The difference between the two is now the CAPTION, not the box. */
+.vd-prose img,.vd-prose svg,.vd-prose video{
+  max-width:100%;height:auto;display:block;
+}
+
+/* A BARE BLOCKQUOTE is someone else's words. vd-quote is a pull-quote —
+   your own line, lifted out, in the editorial colour. Different jobs, so
+   this is deliberately quieter: no teal, no size change, just indent and a
+   hairline. If they looked the same, teal would stop being rare. */
+.vd-prose blockquote{
+  margin:var(--vd-space-1) 0;padding-left:var(--vd-space-1);
+  border-left:var(--vd-hairline) solid var(--vd-rule-strong);
+  color:var(--vd-text);
+}
+.vd-prose blockquote cite{
+  display:block;margin-top:var(--vd-space-h);
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  font-style:normal;color:var(--vd-text-muted);
+}
+
+/* DEFINITION LISTS. Two columns, term in the label treatment — the same
+   device as the rail readouts and the docs tables. Collapses to stacked
+   below 480px, where a 140px term column leaves nothing for the definition. */
+.vd-prose dl{
+  display:grid;grid-template-columns:minmax(0,140px) minmax(0,1fr);
+  gap:var(--vd-space-h) var(--vd-space-1);margin:0 0 var(--vd-space-1);
+}
+.vd-prose dt{
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  line-height:var(--vd-lead-half);text-transform:uppercase;
+  letter-spacing:var(--vd-track-label);color:var(--vd-text-muted);
+  font-weight:500;padding-top:var(--vd-space-q);
+}
+.vd-prose dd{margin:0;color:var(--vd-text)}
+
+/* INLINE. All of these were unstyled. sup/sub set line-height:0 because the
+   default raises the line box and knocks the paragraph off the 30px
+   baseline — the one rule here that is load-bearing rather than cosmetic. */
+sup,sub{
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  line-height:0;position:relative;vertical-align:baseline;
+}
+sup{top:-.5em}
+sub{bottom:-.25em}
+small{font-size:var(--vd-size-xs);color:var(--vd-text-muted)}
+time{font-variant-numeric:tabular-nums}
+kbd{
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  padding:0 var(--vd-space-q);border-radius:var(--vd-radius);
+  border:var(--vd-hairline) solid var(--vd-control-border);
+  background:var(--vd-surface-sunken);color:var(--vd-text);
+}
+/* The selected surface is the only fill in the system checked against text
+   explicitly, which is exactly what a highlight needs. */
+mark{background:var(--vd-surface-selected);color:var(--vd-text-max);
+  padding:0 var(--vd-space-q);border-radius:var(--vd-radius)}
+dfn{font-style:italic;color:var(--vd-text-strong)}
+
+/* DETAILS / SUMMARY. Included on request, and worth flagging: §09 argues an
+   interface that hides its decision boundaries has not removed them, which
+   is an argument against collapsing content. Use it for reference material a
+   reader may not need — never to hide something load-bearing. */
+details{
+  margin:0 0 var(--vd-space-1);padding-left:var(--vd-space-1);
+  border-left:var(--vd-hairline) solid var(--vd-rule);
+}
+summary{
+  cursor:pointer;list-style:none;
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-xs);
+  color:var(--vd-link);
+}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"+ ";font-family:var(--vd-face-mono)}
+details[open]>summary::before{content:"− "}
+summary:focus-visible{outline:var(--vd-focus-ring);outline-offset:2px}
+details>*:not(summary){margin-top:var(--vd-space-h)}
+
 /* ── primitives ──────────────────────────────────────────────────────── */
 .vd-prose{max-width:var(--vd-measure);font-size:var(--vd-size-s);line-height:var(--vd-lead-1)}
 .vd-prose--lead{font-size:var(--vd-size-m);line-height:var(--vd-lead-1);color:var(--vd-text-strong)}
@@ -600,6 +742,15 @@ abbr[title]{text-decoration:none;border-bottom:1px dotted var(--vd-rule-strong);
 .vd-section:first-of-type::before{display:none}
 
 /* rail entries: the readout that justifies the rail existing */
+/* A category label at the head of the rail. It needs separating from the
+   readouts below it, because .vd-label and .vd-readout__key are the same
+   treatment — uppercase mono micro, muted — so without a gap the label reads
+   as the key for the first readout rather than as the section's name. The
+   colour steps up for the same reason: same size, same case, different job. */
+.vd-spread__rail>.vd-label{
+  color:var(--vd-text);
+  margin-bottom:var(--vd-space-1);
+}
 .vd-readout{display:block;margin-bottom:var(--vd-space-1)}
 .vd-readout__value{
   display:block;font-family:var(--vd-face-mono);font-size:var(--vd-size-m);line-height:var(--vd-lead-half);
@@ -626,7 +777,7 @@ abbr[title]{text-decoration:none;border-bottom:1px dotted var(--vd-rule-strong);
     border-bottom:var(--vd-hairline) solid var(--vd-rule);
     display:flex;gap:var(--vd-space-1);flex-wrap:wrap;
   }
-  .vd-readout{margin-bottom:0}
+  .vd-readout,.vd-spread__rail>.vd-label{margin-bottom:0}
 }
 
 /* ═══ TIER 3 · COMPONENTS ══════════════════════════════════════════════ */
@@ -1183,7 +1334,11 @@ code{font-family:var(--vd-face-mono);font-size:.92em}
 
    Adjacency constraint: teal and link blue are 0.0° apart for a deuteranope.
    Marginalia sits beside prose, and prose contains links — the underline on
-   inline links is what keeps those apart. See the `a` rule.
+   inline links is what keeps those apart.
+
+   SCOPE, narrowed by Calibration 06: the pull-quote, .vd-marginalia and
+   .vd-cite. Figure captions were in this family and are not any more — see
+   vd-figure, where the reason is recorded. See the `a` rule.
    ═══════════════════════════════════════════════════════════════════════ */
 vd-quote{display:block;margin:var(--vd-space-2) 0;padding-left:var(--vd-space-1);
   border-left:2px solid var(--vd-editorial)}
@@ -1430,6 +1585,114 @@ legend{
   line-height:var(--vd-lead-half);color:var(--vd-text-muted);max-width:52ch;
 }
 
+
+/* ══ READER AND RESUME ═══════════════════════════════════════════════════
+   Calibration 06, §03 and §04. Two page shapes the kit had no patterns for.
+   Both put their metadata in the rail and their argument in the body, which
+   is the convention the home page settled on: category in the rail, the
+   specific thing in the heading.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── the reader page ─────────────────────────────────────────────────── */
+/* No topolang field on an article, by decision. The field is the landing-page
+   signature and this is a page for sustained reading; prefers-reduced-motion
+   would stop it anyway, but "still while reading" is the stronger position. */
+.vd-article__title{
+  font-family:var(--vd-face-display);font-weight:500;
+  font-size:var(--vd-size-xl);line-height:var(--vd-lead-2);
+  letter-spacing:var(--vd-track-display);color:var(--vd-text-max);
+  margin:0;max-width:var(--vd-measure);
+}
+/* The standfirst. One register above body, capped shorter than the measure so
+   it reads as a summary rather than as the first paragraph. */
+.vd-article__dek{
+  margin:var(--vd-space-1) 0 0;max-width:52ch;
+  font-size:var(--vd-size-m);line-height:var(--vd-lead-1);color:var(--vd-text-strong);
+}
+.vd-article__body{margin-top:var(--vd-space-2)}
+
+/* ENDNOTES, not sidenotes. Sidenotes would need the rail, which on this page
+   already carries the metadata, and below 860px they would have to become
+   endnotes anyway — so that option was two patterns wearing one name. */
+.vd-notes{
+  margin:var(--vd-space-3) 0 0;padding-top:var(--vd-space-1);
+  border-top:var(--vd-hairline) solid var(--vd-rule);
+  counter-reset:vd-note;
+}
+.vd-notes__list{list-style:none;margin:0;padding:0}
+.vd-notes__list li{
+  position:relative;padding-left:var(--vd-space-2);counter-increment:vd-note;
+  font-size:var(--vd-size-xs);line-height:var(--vd-lead-1);color:var(--vd-text-muted);
+}
+.vd-notes__list li::before{
+  content:counter(vd-note);position:absolute;left:0;
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  font-variant-numeric:tabular-nums;color:var(--vd-editorial);
+  line-height:var(--vd-lead-1);
+}
+/* The back-link is the whole point of an endnote over an aside: the reader
+   has to be able to return to where they were. */
+.vd-notes__back{margin-left:var(--vd-space-q);text-decoration:none}
+.vd-notes__back:hover{text-decoration:underline}
+/* :target makes the jump visible. Without it a reader lands on a list and has
+   to work out which line they were sent to. */
+.vd-notes__list li:target{color:var(--vd-text)}
+.vd-notes__list li:target::before{color:var(--vd-editorial);font-weight:700}
+
+/* END MATTER. Previous/next, a line inviting contact, and a last-updated
+   date — the three things chosen. Kept as one block so the article ends
+   once rather than trailing off through three separate sections. */
+.vd-endmatter{
+  margin-top:var(--vd-space-3);padding-top:var(--vd-space-1);
+  border-top:var(--vd-hairline) solid var(--vd-rule);
+}
+.vd-endmatter__nav{
+  display:flex;gap:var(--vd-space-1);flex-wrap:wrap;justify-content:space-between;
+}
+.vd-endmatter__nav a{
+  display:block;min-height:44px;max-width:34ch;
+  font-size:var(--vd-size-xs);line-height:var(--vd-lead-half);
+}
+.vd-endmatter__dir{
+  display:block;font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  letter-spacing:var(--vd-track-label);text-transform:uppercase;
+  color:var(--vd-text-muted);margin-bottom:var(--vd-space-q);
+}
+.vd-endmatter__note{
+  margin-top:var(--vd-space-1);font-size:var(--vd-size-xs);
+  line-height:var(--vd-lead-1);color:var(--vd-text-muted);
+}
+
+/* ── the resume ──────────────────────────────────────────────────────── */
+/* Date column, content column. Every date lands on the same left edge, so
+   the shape of a career is visible in one pass — which is the one thing a
+   recruiter does with this page before deciding to read it. */
+.vd-role{
+  display:grid;grid-template-columns:minmax(0,110px) minmax(0,1fr);
+  gap:var(--vd-space-h) var(--vd-space-1);
+  padding:var(--vd-space-1) 0;
+  border-top:var(--vd-hairline) solid var(--vd-rule);
+}
+.vd-role:last-of-type{border-bottom:var(--vd-hairline) solid var(--vd-rule)}
+.vd-role__when{
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  line-height:var(--vd-lead-1);font-variant-numeric:tabular-nums;
+  color:var(--vd-text-muted);
+}
+.vd-role__head{display:flex;gap:var(--vd-space-h);align-items:baseline;flex-wrap:wrap}
+.vd-role__title{
+  font-family:var(--vd-face-display);font-weight:500;
+  font-size:var(--vd-size-m);line-height:var(--vd-lead-1);color:var(--vd-text-max);
+}
+.vd-role__org{font-size:var(--vd-size-s);line-height:var(--vd-lead-1);color:var(--vd-text)}
+.vd-role__body{margin-top:var(--vd-space-h)}
+
+@media(max-width:600px){
+  /* A 110px date column leaves too little for a role title. Stack, and the
+     date leads — it is the thing being scanned. */
+  .vd-role{grid-template-columns:minmax(0,1fr);gap:var(--vd-space-q)}
+}
+
 /* ── tables ──────────────────────────────────────────────────────────── */
 .vd-table{width:100%;border-collapse:collapse;font-size:var(--vd-size-xs)}
 .vd-table th{
@@ -1445,11 +1708,22 @@ legend{
 
 /* ── vd-figure ───────────────────────────────────────────────────────── */
 vd-figure{display:block;margin:var(--vd-space-2) 0}
-vd-figure img,vd-figure svg{max-width:100%;height:auto;display:block;
-  border:var(--vd-hairline) solid var(--vd-rule);border-radius:var(--vd-radius)}
+/* NO frame and NO editorial rule on the caption. Calibration 06 chose the
+   bare treatment after seeing this component rendered for the first time —
+   it had zero uses on any page until then, so the border and the teal rule
+   had never actually been looked at.
+
+   That narrows the editorial family. Calibration 05 gave teal to pull-quotes,
+   figure captions and marginalia; 06 takes the captions back, so teal now
+   marks the pull-quote, .vd-marginalia and .vd-cite only. A screenshot with
+   its own edges was getting a double frame, and a caption is a label rather
+   than the page speaking in another voice.
+
+   What distinguishes vd-figure from a bare image is therefore the CAPTION,
+   not the box. Both are max-width constrained; only one is captioned. */
+vd-figure img,vd-figure svg{max-width:100%;height:auto;display:block}
 vd-figure figcaption{margin-top:var(--vd-space-h);font-family:var(--vd-face-mono);
-  font-size:var(--vd-size-micro);line-height:var(--vd-lead-half);color:var(--vd-text-muted);
-  padding-left:var(--vd-space-h);border-left:2px solid var(--vd-editorial)}
+  font-size:var(--vd-size-micro);line-height:var(--vd-lead-half);color:var(--vd-text-muted)}
 
 /* ── vd-redact · turns the IP constraint into a visible design decision ─ */
 vd-redact{
@@ -1654,6 +1928,13 @@ a.vd-tag{display:inline-flex;align-items:center;min-height:44px}
   /* The wrapper is the band, so the band height lives on it, not the canvas. */
   .vd-hero__fieldwrap{height:160px}
   .vd-spread__rail{gap:var(--vd-space-1)}
+  /* A 140px term column leaves nothing for the definition at this width, so
+     the grid collapses to a single stacked column. The term keeps its label
+     treatment, which is what carries the relationship once the columns go. */
+  .vd-prose dl{grid-template-columns:minmax(0,1fr);gap:0}
+  .vd-prose dt{padding-top:0;margin-bottom:var(--vd-space-q)}
+  .vd-prose dd{margin-bottom:var(--vd-space-1)}
+  .vd-prose dd:last-child{margin-bottom:0}
 }
 
 /* Note cards. The desktop row is date | title | length on one baseline.

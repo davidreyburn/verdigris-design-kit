@@ -27,8 +27,12 @@ Four documents overlap. When they disagree, this is the order of authority:
 The CSS wins. A comment beside a token is more current than any prose file, because it cannot
 be updated without touching the value it describes.
 
-`custom-elements.json` documents the nine custom elements for editors and tooling. It is
-hand-authored and carries a `checkedAgainst` field; if you add or change an element, update it.
+`custom-elements.json` documents all **fourteen** `vd-*` elements for editors and tooling — nine
+registered custom elements and five CSS-only styling hooks (`vd-nav`, `vd-footer`, `vd-quote`,
+`vd-figure`, `vd-meta`). It is hand-authored and carries a `checkedAgainst` field. If you add or
+change an element, update it — and verify against **both** the `defs` array in `verdigris.js` and
+the `vd-*` selectors in `verdigris.css`. Checking only the first is how the five CSS-only ones went
+missing while the manifest reported an exact match.
 
 ---
 
@@ -46,8 +50,12 @@ verdigrisAudit.classes()     // every .vd-* class the stylesheet defines
 
 It checks text contrast (1.4.6 AAA), control boundaries (1.4.11), target size (2.5.8 / 2.5.5),
 reflow (1.4.10), whether wide tables are wrapped, and the rule that the data colour is numerals
-only. Two of the three bugs fixed in v1.7.0 were found by this script on pages that had already
-been reviewed by eye.
+only. Several real bugs were found by this script on pages that had already been reviewed by eye.
+
+`fails` is a measured failure. `notes` is "worth looking at" — it does **not** implement 2.5.5's
+Spacing exception, under which an undersized target still conforms if a 44px circle centred on it
+does not overlap another's. A narrow but well-spaced nav link appears in `notes` without being a
+failure. Do not report notes as violations.
 
 **A full check is three page loads**, and there is no shortcut:
 
@@ -108,6 +116,20 @@ capped alpha across the text column, and muted measures below 7:1 against the wo
 **Never `opacity` a disabled control.** It composites the text toward the surface and destroys
 the measured ratio. Use the muted text colour, which is still legal at 7.06:1 / 8.50:1.
 
+**A bare `<img>` must keep its `max-width`.** That rule is a 1.4.10 fix, not a style: without it a
+wide screenshot scrolls the whole document sideways at 320px. Do not tidy it away.
+
+**`vd-figure` does not frame.** No border on the image, no editorial rule on the caption — what
+makes it a figure rather than an image is the caption. Teal covers the pull-quote,
+`.vd-marginalia` and `.vd-cite`, not captions.
+
+**List markers are muted, not structure green.** A stated exception to the ordinal rule, because at
+list frequency the accent stops being rare. List items also carry **no** margin: `--vd-space-h` is
+half a line and knocks every item after the first off the 30px grid.
+
+**Keep `.vd-resume` on the resume's `<main>`.** `print.css` targets it for page-scoped exceptions,
+including suppressing printed link destinations. Remove it and every bullet grows a URL.
+
 ---
 
 ## Conventions
@@ -138,6 +160,8 @@ and cannot be automated honestly, so it is listed as absent rather than claimed.
 ```
 index.html          the site
 template.html       starter page — copy this
+reader.html         case study / Field Note template
+resume.html         résumé. Print is the deliverable, the screen is the courtesy
 docs/               the design system, published as a portfolio piece
 verdigris/          the kit: verdigris.css, verdigris.js, topolang.js, print.css, audit.js
 calibration/        the questionnaires that settled each decision. Historical record

@@ -8,8 +8,8 @@ REM   Homepage          http://127.0.0.1:8787/index.html
 REM   Design system     http://127.0.0.1:8787/docs/
 REM   Mobile preview    http://127.0.0.1:8787/preview-mobile.html?w=320,390
 REM   Starter template  http://127.0.0.1:8787/template.html
-REM   Calibration 01-05 http://127.0.0.1:8787/calibration/calibration.html
-REM                     ...-02 ...-03 ...-04 ...-05 in the same folder
+REM   Calibration 01-06 http://127.0.0.1:8787/calibration/calibration.html
+REM                     ...-02 through ...-06 in the same folder
 REM
 REM Ctrl+C to stop.
 

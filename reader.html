@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent-Mediated Interaction and Shared Legibility — David Reyburn</title>
+<meta name="description" content="Accessibility has always been machine legibility. The screen reader was the first agent, and what we learned making interfaces legible to it applies to the agents arriving now.">
+
+<!-- READER TEMPLATE. One shape serves case studies and Field Notes — they
+     differ in content, not in structure. Copy this and replace the content.
+
+     Settled in Calibration 06 §03:
+       · metadata in the rail, header carries only the argument
+       · no topolang field — this is a page for sustained reading
+       · endnotes, not sidenotes: the rail is taken, and below 860px
+         sidenotes would have to become endnotes anyway
+       · figures are bare — a caption, not a frame
+       · end matter is previous/next, a contact line, and last-updated -->
+
+<meta name="color-scheme" content="dark light">
+<script>
+try{var t=localStorage.getItem('verdigris-theme');
+    if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}
+catch(e){}
+</script>
+<link rel="stylesheet" href="verdigris/verdigris.css?v=1.8.0">
+<link rel="stylesheet" href="verdigris/print.css?v=1.8.0">
+<script src="verdigris/verdigris.js?v=1.8.0" defer></script>
+<script src="verdigris/audit.js?v=1.8.0" defer></script>
+</head>
+<body>
+<a class="vd-skip" href="#main">Skip to content</a>
+
+<vd-nav>
+  <div class="vd-nav__inner">
+    <a class="vd-nav__mark" href="index.html">David Reyburn</a>
+    <ul class="vd-nav__list">
+      <li><a href="index.html#work">Work</a></li>
+      <li><a href="index.html#notes" aria-current="true">Field Notes</a></li>
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="docs/">System</a></li>
+    </ul>
+    <vd-theme-toggle></vd-theme-toggle>
+  </div>
+</vd-nav>
+
+<main id="main" class="vd-page">
+  <article class="vd-section">
+    <div class="vd-spread">
+
+      <!-- The rail carries what the document IS. The header carries what it
+           argues. Same convention as the home page: category in the rail,
+           the specific thing in the heading. -->
+      <div class="vd-spread__rail">
+        <span class="vd-label">Field Note</span>
+        <div class="vd-readout">
+          <span class="vd-readout__value">2,400</span>
+          <span class="vd-readout__key">Words</span>
+        </div>
+        <div class="vd-readout">
+          <!-- A date is not a quantity, so it does not take the data colour.
+               --vd-readout__value--grade is the achromatic variant. -->
+          <span class="vd-readout__value vd-readout__value--grade">
+            <time datetime="2026-08">2026-08</time>
+          </span>
+          <span class="vd-readout__key">Published</span>
+        </div>
+      </div>
+
+      <div class="vd-spread__body">
+        <h1 class="vd-article__title">Agent-Mediated Interaction and Shared Legibility</h1>
+        <p class="vd-article__dek">Accessibility has always been machine legibility. The screen
+          reader was the first agent, and everything we learned making interfaces legible to it
+          applies directly to the agents arriving now.</p>
+
+        <div class="vd-article__body vd-prose">
+          <p>Teams are not struggling because they lack AI tools. They are struggling because the
+            tools cannot see enough of the work to respond with context, and the reason is almost
+            never the model.</p>
+
+          <h2>Shared context is what makes an agent useful twice</h2>
+          <p>A demo works once, in a clean room, without the messy memory of the organisation
+            attached. What breaks on the second run is not capability. It is that the context was
+            never durable<a class="vd-cite" href="#note-1" id="ref-1">1</a>.</p>
+
+          <p>Three things have to be true before an agent can be trusted with a workflow:</p>
+          <ul>
+            <li>The sources are in version control, so a claim can be traced to a file.</li>
+            <li>The agent's instructions live beside the material they govern.</li>
+            <li>Review happens before the deploy lane, not after it.</li>
+          </ul>
+
+          <!-- Figures are BARE — no frame. What makes this a figure rather than
+               an image is the caption. -->
+          <vd-figure>
+            <img alt="Four layers: source files, indexing, agent instructions, and a review gate before deploy."
+                 width="900" height="120"
+                 src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'900'%20height%3D'120'%3E%3Crect%20width%3D'900'%20height%3D'120'%20fill%3D'%232c2b28'%2F%3E%3Ctext%20x%3D'18'%20y%3D'68'%20fill%3D'%23A8A192'%20font-family%3D'monospace'%20font-size%3D'15'%3Efigure%20placeholder%3C%2Ftext%3E%3C%2Fsvg%3E">
+            <figcaption>The four layers, with the review gate sitting between generation and
+              deploy. Replace this with a real diagram.</figcaption>
+          </vd-figure>
+
+          <h2>Governance has to live inside the workflow</h2>
+          <p>Governance is not the policy around the tool. It is the shape of the files,
+            permissions, sources, prompts and fallback paths that decide whether the tool can be
+            trusted at all<a class="vd-cite" href="#note-2" id="ref-2">2</a>.</p>
+
+          <blockquote>
+            The useful unit is not the prompt. It is the governed knowledge environment around
+            the prompt.
+            <cite>From the Anatomy of a Knowledge Base talk</cite>
+          </blockquote>
+
+          <p>You do not have to adopt a whole stack to get the benefit. Start with the layer that
+            creates the most trust for your own work — usually the one that makes a source
+            checkable.</p>
+
+          <h2>The move</h2>
+          <p>Stop treating knowledge management as cleanup and start treating it as the operating
+            layer for AI work. The smallest useful step is to pick one high-value workflow with
+            clear source material and test it end to end.</p>
+        </div>
+
+        <!-- ENDNOTES. The back-link is the point of an endnote over an aside:
+             a reader sent down here has to be able to return. :target makes
+             the arrival visible. -->
+        <section class="vd-notes" aria-labelledby="notes-h">
+          <h2 id="notes-h" class="vd-label">Notes</h2>
+          <ol class="vd-notes__list" style="margin-top:var(--vd-space-1)">
+            <li id="note-1">The distinction is operational: documentation describes a system,
+              infrastructure is part of it.
+              <a class="vd-notes__back" href="#ref-1" aria-label="Back to reference 1">↩</a></li>
+            <li id="note-2">Measured across three months of agent runs on a moving corpus.
+              <a class="vd-notes__back" href="#ref-2" aria-label="Back to reference 2">↩</a></li>
+          </ol>
+        </section>
+
+        <footer class="vd-endmatter">
+          <nav class="vd-endmatter__nav" aria-label="Other writing">
+            <a href="#">
+              <span class="vd-endmatter__dir">Previous</span>
+              The Human-AI Team Ontology
+            </a>
+            <a href="#" style="text-align:right">
+              <span class="vd-endmatter__dir">Next</span>
+              AI Hygiene
+            </a>
+          </nav>
+          <p class="vd-endmatter__note">
+            Last updated <time datetime="2026-08-07">2026-08-07</time>. If you are working on
+            something adjacent, <a href="resume.html">see what I do</a> — I am glad to compare
+            notes.
+          </p>
+        </footer>
+      </div>
+    </div>
+  </article>
+</main>
+
+<vd-footer>
+  <div class="vd-footer__inner">
+    <div>
+      <span class="vd-label">Elsewhere</span>
+      <ul style="list-style:none;margin:var(--vd-space-h) 0 0;padding:0;
+                 display:flex;gap:var(--vd-space-1);flex-wrap:wrap">
+        <li><a class="vd-tag" href="#">GitHub</a></li>
+        <li><a class="vd-tag" href="#">LinkedIn</a></li>
+        <li><a class="vd-tag" href="docs/">Design system</a></li>
+        <li><a class="vd-tag" href="resume.html">Résumé</a></li>
+      </ul>
+    </div>
+    <div class="vd-footer__sig">
+      <b>David Reyburn</b><br>
+      a studio practice by Chives<br>
+      built on Verdigris · AAA · ink and paper
+    </div>
+  </div>
+</vd-footer>
+</body>
+</html>

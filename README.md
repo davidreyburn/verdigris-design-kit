@@ -14,7 +14,7 @@ Both calibration passes are **complete**. The system is **built and verified**.
 |---|---|---|
 | 01 | `calibration/calibration.html` | Done, 67/68 |
 | 02 | `calibration/calibration-02.html` | Done, 7/7 |
-| Build | `verdigris/`, `index.html`, `docs/` | Shipped |
+| Build | `verdigris/`, `index.html`, `docs/`, `template.html`, `reader.html`, `resume.html` | Shipped |
 
 **Run `serve.cmd` in your own terminal and leave the window open.** A server started by an
 agent lives only as long as its session and gets reaped; this one lasts as long as the window
@@ -26,7 +26,7 @@ failing.
 | Homepage | <http://127.0.0.1:8787/index.html> |
 | Design system | <http://127.0.0.1:8787/docs/> |
 | Mobile preview | <http://127.0.0.1:8787/preview-mobile.html?w=320,390> |
-| Calibration 01 / 02 | `/calibration/` — five passes, 01 through 05 |
+| Calibration 01–06 | `/calibration/` — six passes, 01 through 06 |
 
 The mobile harness renders only the widths in `?w=`, and cache-busts each frame so a CSS fix
 can never be hidden by a stale iframe.
@@ -73,6 +73,7 @@ typed into a table.
 | Target size, 2.5.8 AA | Every target passes |
 | Target size, 2.5.5 AAA | All standalone controls and cards pass. Heading links were a stated deviation; **resolved** — the card is the target, click forwarded under drag/selection guards |
 | topolang conformance | 9/9 against the spec's own published vector, run live on the docs page |
+| Reflow at 320px | All five pages: scrollWidth 301 against a 316px viewport |
 | Colour vision | Viénot 1999 simulation published for every same-context pair, including the two that **fail** and what carries them instead |
 | Form controls, 1.4.11 | Every control boundary ≥3:1 against its adjacent surface, both themes |
 

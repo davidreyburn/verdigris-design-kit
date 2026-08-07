@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>David Reyburn — Résumé</title>
+<meta name="description" content="Product designer and creative technologist working on human-AI systems: agent experience, knowledge-backed workflows, design systems, and accessibility.">
+
+<!-- RESUME. The one page in this system where PRINT is the deliverable and the
+     screen is the courtesy. Ctrl/Cmd+P is the download.
+
+     Settled in Calibration 06 §04 and §05:
+       · date column, content column — every date on the same left edge, so
+         the shape of a career is visible in one pass
+       · three sections: a positioning statement, experience, skills
+       · site and LinkedIn only. NO email on the page, screen or print —
+         this is public and scrapable
+       · link destinations are NOT printed here, unlike everywhere else on
+         the site: every bullet would carry a URL. See print.css
+       · one page, enforced by what is written rather than by CSS
+
+     The .vd-resume class on <main> is what print.css targets for the
+     page-scoped exceptions. Do not remove it. -->
+
+<meta name="color-scheme" content="dark light">
+<script>
+try{var t=localStorage.getItem('verdigris-theme');
+    if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}
+catch(e){}
+</script>
+<link rel="stylesheet" href="verdigris/verdigris.css?v=1.8.0">
+<link rel="stylesheet" href="verdigris/print.css?v=1.8.0">
+<script src="verdigris/verdigris.js?v=1.8.0" defer></script>
+<script src="verdigris/audit.js?v=1.8.0" defer></script>
+</head>
+<body>
+<a class="vd-skip" href="#main">Skip to content</a>
+
+<vd-nav>
+  <div class="vd-nav__inner">
+    <a class="vd-nav__mark" href="index.html">David Reyburn</a>
+    <ul class="vd-nav__list">
+      <li><a href="index.html#work">Work</a></li>
+      <li><a href="index.html#notes">Field Notes</a></li>
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="docs/">System</a></li>
+    </ul>
+    <vd-theme-toggle></vd-theme-toggle>
+  </div>
+</vd-nav>
+
+<main id="main" class="vd-page vd-resume">
+  <section class="vd-section">
+    <div class="vd-spread">
+
+      <div class="vd-spread__rail">
+        <span class="vd-label">Résumé</span>
+        <!-- Site and LinkedIn only. No email, on screen or on paper. -->
+        <!-- .vd-tag, not bare anchors. A standalone link is not covered by
+             2.5.8's inline exception, and as inline anchors these measured
+             86x15 — a real AA failure the audit caught. .vd-tag carries the
+             padding that makes each one a genuine target. -->
+        <ul style="list-style:none;margin:var(--vd-space-1) 0 0;padding:0;
+                   display:flex;flex-direction:column;align-items:flex-start;
+                   gap:var(--vd-space-q)">
+          <li><a class="vd-tag" href="https://dreyburn.com">dreyburn.com</a></li>
+          <li><a class="vd-tag" href="https://www.linkedin.com/in/davidreyburn">LinkedIn</a></li>
+          <li><a class="vd-tag" href="docs/">Design system</a></li>
+        </ul>
+        <p class="vd-endmatter__note" style="margin-top:var(--vd-space-1)">
+          Print or save as PDF with Ctrl&thinsp;+&thinsp;P.
+        </p>
+      </div>
+
+      <div class="vd-spread__body">
+        <h1 class="vd-article__title">David Reyburn</h1>
+
+        <!-- The positioning statement. Three lines saying what and for whom. -->
+        <p class="vd-article__dek">Product designer and creative technologist working on human-AI
+          systems: agent experience, knowledge-backed workflows, design systems and accessibility.
+          I build and operate the systems I design, which is where most of what I know came from.</p>
+
+        <h2 style="margin-top:var(--vd-space-2)">Experience</h2>
+
+        <div class="vd-role">
+          <div class="vd-role__when">2020 —<br>present</div>
+          <div>
+            <div class="vd-role__head">
+              <span class="vd-role__title">Product Designer</span>
+              <span class="vd-role__org">Nationwide</span>
+            </div>
+            <div class="vd-role__body vd-prose">
+              <ul>
+                <li>Design systems and accessibility to AAA across enterprise surfaces, with
+                  contrast and reflow measured on the rendered page rather than asserted.</li>
+                <li>Knowledge-backed AI workflows at Fortune-100 scale, sanitized here because
+                  the employer owns the work.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="vd-role">
+          <div class="vd-role__when">2019 —<br>present</div>
+          <div>
+            <div class="vd-role__head">
+              <span class="vd-role__title">Principal</span>
+              <span class="vd-role__org">madebychives</span>
+            </div>
+            <div class="vd-role__body vd-prose">
+              <ul>
+                <li>Independent practice in design systems and human-AI workflows.</li>
+                <li>Built and operate a governed four-agent system on owned infrastructure. An
+                  outside CTO reviewed the architecture and adopted its principles.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <h2 style="margin-top:var(--vd-space-2)">Skills and tools</h2>
+        <div class="vd-prose" style="margin-top:var(--vd-space-1)">
+          <dl>
+            <dt>Design</dt>
+            <dd>Design systems, accessibility to WCAG AAA, interaction design, prototyping</dd>
+            <dt>AI systems</dt>
+            <dd>Agent experience, retrieval design, evaluation harnesses, governance and review
+              loops</dd>
+            <dt>Build</dt>
+            <dd>Front-end, custom elements, zero-dependency CSS and JS, generative graphics</dd>
+            <dt>Practice</dt>
+            <dd>Facilitation, communities of practice, writing and speaking</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<vd-footer>
+  <div class="vd-footer__inner">
+    <div>
+      <span class="vd-label">Elsewhere</span>
+      <ul style="list-style:none;margin:var(--vd-space-h) 0 0;padding:0;
+                 display:flex;gap:var(--vd-space-1);flex-wrap:wrap">
+        <li><a class="vd-tag" href="#">GitHub</a></li>
+        <li><a class="vd-tag" href="#">LinkedIn</a></li>
+        <li><a class="vd-tag" href="docs/">Design system</a></li>
+      </ul>
+    </div>
+    <div class="vd-footer__sig">
+      <b>David Reyburn</b><br>
+      a studio practice by Chives<br>
+      built on Verdigris · AAA · ink and paper
+    </div>
+  </div>
+</vd-footer>
+</body>
+</html>

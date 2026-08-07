@@ -118,6 +118,60 @@ Two of the three failures fixed in this release were found by `audit.js` on its 
 pages that had already been reviewed by eye and by hand-written checks. That is the argument for
 shipping it.
 
+## 1.8.0 — 2026-08-07
+
+Document primitives, a reader page, and a resume. Settled in Calibration 06.
+
+### Added
+
+- **Thirteen base elements, previously unstyled.** `ul`, `ol`, `dl`, `dt`, `dd`, `hr`, `sup`,
+  `sub`, `small`, `time`, `kbd`, `details`, `summary`. Before this, the only list rules in the
+  system were `.vd-nav__list` and `.vd-toc` — both `list-style:none`, for navigation. A list
+  inside prose had never been rendered.
+- **`reader.html`** — one template for case studies and Field Notes. Metadata in the rail, no
+  generative field, endnotes with back-links, bare figures, and end matter carrying
+  previous/next, a contact line and a last-updated date.
+- **`resume.html`** — date column and content column, so a career's shape reads in one pass.
+  Positioning statement, experience, skills. Print is the deliverable here, not a courtesy.
+- **Print page-break rules**, all previously unset: `orphans`/`widows` on paragraphs,
+  `break-inside` on roles and list items, figures kept with their captions, endnotes kept with
+  their article.
+- **`.vd-article__title`, `.vd-article__dek`, `.vd-notes`, `.vd-endmatter`, `.vd-role`.**
+
+### Changed
+
+- **`vd-figure` lost its frame**, and its caption lost the editorial rule. It had zero uses on
+  any page until Calibration 06, so neither had ever been looked at. **This narrows the editorial
+  family** set in 1.7.0: teal now marks the pull-quote, `.vd-marginalia` and `.vd-cite` only.
+  What distinguishes `vd-figure` from a bare image is now the caption, not the box.
+- **A bare `<img>` is max-width constrained.** A 1.4.10 fix, not a style: only `vd-figure img`
+  had it, so a 900px screenshot in a 320px column pushed the document sideways and the reflow
+  guarantee depended on authors remembering to wrap every image.
+- **List markers are muted, not the structure colour** — a stated exception to the ordinal rule.
+  A list marker is an ordinal, but at list frequency green would stop being rare.
+- **The résumé button and footer links point at `resume.html`**, which now exists.
+- **`custom-elements.json` documents 14 elements, not 9.** `vd-nav`, `vd-footer`, `vd-quote`,
+  `vd-figure` and `vd-meta` are CSS-only and were missing. The 1.7.0 check that the manifest
+  "matched exactly" compared it against registered elements only and so could not have found them.
+
+### Fixed
+
+- **`audit.js` reported compliant targets as near-misses.** `getBoundingClientRect` is
+  fractional, so a real 44px control measures 43.996 and `< 44` flagged it. Twelve of thirteen
+  AAA notes on `reader.html` were this artifact. Rounded, with a 0.5px tolerance.
+- **`audit.js` does not implement 2.5.5's Spacing exception**, so its AAA notes over-report
+  narrow-but-well-spaced nav links. Now stated in the file, because an audit that cries wolf
+  gets ignored.
+- Two real AA target-size failures the audit caught: a standalone footer link in `template.html`
+  and the resume's rail links, both bare inline anchors at 15–18px. A standalone link is not
+  covered by 2.5.8's inline exception; both now use `.vd-tag`.
+
+### Verified
+
+All five pages pass every `verdigrisAudit()` check, and all five pass 1.4.10 at 320px with
+scrollWidth 301 against a 316px viewport: `index.html`, `docs/index.html`, `template.html`,
+`reader.html`, `resume.html`.
+
 ## Earlier
 
 Not retroactively written up. Calibration 01–04 and the sessions that implemented them are the

@@ -36,11 +36,11 @@ catch(e){}
 
 <!-- print.css must load AFTER verdigris.css: it matches theme-attribute
      specificity deliberately and relies on source order to win. -->
-<link rel="stylesheet" href="verdigris/verdigris.css?v=1.7.0">
-<link rel="stylesheet" href="verdigris/print.css?v=1.7.0">
-<script src="verdigris/topolang.js?v=1.7.0" defer></script>
-<script src="verdigris/verdigris.js?v=1.7.0" defer></script>
-<script src="verdigris/audit.js?v=1.7.0" defer></script>
+<link rel="stylesheet" href="verdigris/verdigris.css?v=1.8.0">
+<link rel="stylesheet" href="verdigris/print.css?v=1.8.0">
+<script src="verdigris/topolang.js?v=1.8.0" defer></script>
+<script src="verdigris/verdigris.js?v=1.8.0" defer></script>
+<script src="verdigris/audit.js?v=1.8.0" defer></script>
 </head>
 <body>
 
@@ -195,6 +195,59 @@ catch(e){}
           <figcaption>Attribution</figcaption>
         </vd-quote>
 
+        <h3>Document primitives</h3>
+        <div class="vd-prose">
+          <!-- Lists use a HANGING marker, so list text stays flush with the
+               paragraph left edge — a list does not indent the article. The
+               marker is muted, not the structure colour: a list marker is an
+               ordinal, but at list frequency green would stop being rare.
+               No margin between items, so every line stays on the 30px grid. -->
+          <ul>
+            <li>Sources stay in version control, so a claim can be traced.</li>
+            <li>Agent instructions live beside the material they govern.</li>
+          </ul>
+          <p>Ordered lists get zero-padded tabular numerals, so 9 and 10 align.</p>
+          <ol>
+            <li>Name the constraint before the solution.</li>
+            <li>Show the measurement, including the ones that fail.</li>
+          </ol>
+
+          <!-- An <hr> in prose is SPACE, not a line — consistent with the
+               section divider being removed. Use .vd-rule if you genuinely
+               want a visible hairline. -->
+          <hr>
+
+          <!-- A bare blockquote is someone else's words: quiet, no teal.
+               vd-quote above is a pull-quote — your own line, lifted out. -->
+          <blockquote>
+            A bare blockquote is quieter than a pull-quote and carries no
+            editorial colour.
+            <cite>Calibration 06</cite>
+          </blockquote>
+
+          <dl>
+            <dt>Design</dt><dd>Design systems, accessibility to AAA</dd>
+            <dt>AI systems</dt><dd>Agent experience, retrieval, governance</dd>
+          </dl>
+
+          <p>Inline: a reference<sup>1</sup>, <small>small print</small>, a
+            <time datetime="2026-08">2026-08</time> date, <kbd>Ctrl</kbd>
+            <kbd>K</kbd>, a <mark>highlight</mark>, and a <dfn>definition</dfn>.</p>
+
+          <!-- A bare <img> is max-width constrained, which is a 1.4.10 fix and
+               not a style. What distinguishes vd-figure is the CAPTION, not a
+               frame — neither is framed. -->
+          <p>A bare image is safe at any width:</p>
+          <img alt="" width="900" height="60"
+            src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'900'%20height%3D'60'%3E%3Crect%20width%3D'900'%20height%3D'60'%20fill%3D'%232c2b28'%2F%3E%3C%2Fsvg%3E">
+        </div>
+
+        <vd-figure>
+          <img alt="" width="900" height="60"
+            src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'900'%20height%3D'60'%3E%3Crect%20width%3D'900'%20height%3D'60'%20fill%3D'%232c2b28'%2F%3E%3C%2Fsvg%3E">
+          <figcaption>vd-figure adds a caption, not a frame.</figcaption>
+        </vd-figure>
+
         <!-- ALWAYS wrap a table in .vd-table-scroll. Without it a wide table
              scrolls the whole document sideways at 320px, which is a 1.4.10
              failure. The audit checks this specifically. -->
@@ -319,9 +372,16 @@ catch(e){}
   <div class="vd-footer__inner">
     <div>
       <span class="vd-label">Elsewhere</span>
-      <p class="vd-mono" style="margin-top:var(--vd-space-h)">
-        <a href="#">A link</a>
-      </p>
+      <!-- .vd-tag, not a bare link. A standalone link is NOT exempt from
+           2.5.8 — the "inline" exception covers links set in a sentence, and
+           a footer link on its own line is not one. A bare <a> here measures
+           52x18 and the audit correctly fails it; .vd-tag carries the padding
+           that makes it a real target. -->
+      <ul style="list-style:none;margin:var(--vd-space-h) 0 0;padding:0;
+                 display:flex;gap:var(--vd-space-1);flex-wrap:wrap">
+        <li><a class="vd-tag" href="#">GitHub</a></li>
+        <li><a class="vd-tag" href="#">LinkedIn</a></li>
+      </ul>
     </div>
     <div>
       <span class="vd-label">Built with</span>
