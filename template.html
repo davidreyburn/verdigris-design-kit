@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verdigris — starter template</title>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     STARTER TEMPLATE
+
+     Every major element of the kit, once, with the reasoning that is easy to
+     get wrong. Copy this file and delete what you do not need. It is meant
+     to be read top to bottom: the order below is the order things must
+     appear in.
+
+     Verify your page rather than trusting it:
+
+         verdigrisAudit()            summary in the console
+         verdigrisAudit({json:true}) structured, for an agent
+
+     AAA needs BOTH themes and a 320px width, and the audit measures only
+     what is on screen. Reload per theme — see the header of audit.js for
+     why switching theme and auditing in the same tick reports nonsense.
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<!-- ORDER MATTERS. color-scheme first so the browser paints form controls
+     and scrollbars correctly, then the blocking script so the stored theme
+     is applied BEFORE first paint. Defer this script and the page flashes
+     the wrong theme on every load. -->
+<meta name="color-scheme" content="dark light">
+<script>
+try{var t=localStorage.getItem('verdigris-theme');
+    if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}
+catch(e){}
+</script>
+
+<!-- print.css must load AFTER verdigris.css: it matches theme-attribute
+     specificity deliberately and relies on source order to win. -->
+<link rel="stylesheet" href="verdigris/verdigris.css?v=1.7.0">
+<link rel="stylesheet" href="verdigris/print.css?v=1.7.0">
+<script src="verdigris/topolang.js?v=1.7.0" defer></script>
+<script src="verdigris/verdigris.js?v=1.7.0" defer></script>
+<script src="verdigris/audit.js?v=1.7.0" defer></script>
+</head>
+<body>
+
+<!-- Always first in the body. -->
+<a class="vd-skip" href="#main">Skip to content</a>
+
+<vd-nav>
+  <div class="vd-nav__inner">
+    <a class="vd-nav__mark" href="index.html">Your Name</a>
+    <ul class="vd-nav__list">
+      <li><a href="#work">Work</a></li>
+      <li><a href="#writing">Writing</a></li>
+      <!-- aria-current marks the page you are on. The active underline is
+           driven by this attribute, not by a class. -->
+      <li><a href="#about" aria-current="true">About</a></li>
+    </ul>
+    <!-- Outside the <ul>: it is a control, not a navigation destination. -->
+    <vd-theme-toggle></vd-theme-toggle>
+  </div>
+</vd-nav>
+
+<main id="main">
+
+  <!-- ── HERO ────────────────────────────────────────────────────────────
+       Sits OUTSIDE .vd-page: the generative field is full-bleed and needs
+       the whole viewport. It manages its own inner max-width.
+
+       field="off" suppresses the canvas. seed is fixed per page, so every
+       visitor sees the same frame at the same moment.
+
+       Nothing inside the hero may use the muted text value — the field is
+       masked to a capped alpha across the text column, and muted measures
+       below 7:1 against the worst composite. Use the sub attribute, which
+       is already promoted one step. -->
+  <vd-hero
+    thesis="A short declarative line that says what you do."
+    sub="One or two sentences of support. This is the only place a hero should carry prose."
+    seed="20260801"
+    caption="Drift, rendered in topolang v1.3.2.">
+  </vd-hero>
+
+  <!-- ── SECTION + RAIL ──────────────────────────────────────────────────
+       .vd-page constrains and centres. .vd-section adds vertical rhythm and
+       the centred green signature mark (suppressed on the first section).
+       .vd-spread is the rail-plus-body grid; below 860px the rail becomes a
+       horizontal strip automatically. -->
+  <section id="work" class="vd-page vd-section" aria-labelledby="work-h">
+    <div class="vd-spread">
+
+      <div class="vd-spread__rail">
+        <!-- Readouts justify the rail existing. Numerals only in the value:
+             --vd-data is the numeral colour and the audit checks it. -->
+        <div class="vd-readout">
+          <span class="vd-readout__value">04</span>
+          <span class="vd-readout__label">Systems</span>
+        </div>
+        <div class="vd-readout">
+          <span class="vd-readout__value">2020</span>
+          <span class="vd-readout__label">Since</span>
+        </div>
+      </div>
+
+      <div class="vd-spread__body">
+        <span class="vd-label">Work</span>
+        <h2 id="work-h">Section heading</h2>
+
+        <!-- The whole card is clickable. Do not add a stretched overlay
+             link — it breaks text selection. vd-system-card forwards the
+             click under drag and selection guards instead. -->
+        <div class="vd-grid" style="margin-top:var(--vd-space-2)">
+          <vd-system-card index="01" kicker="Category"
+            title="A project title" href="#"
+            proof="agents:4|adopted:2026|status:shipped">
+            One or two sentences. A value in <code>proof</code> only gets the
+            data colour if it starts with a digit, so <em>status:shipped</em>
+            renders as emphasis rather than as data.
+          </vd-system-card>
+
+          <vd-system-card index="02" kicker="Another category"
+            title="A second project" href="#"
+            proof="coverage:41/41|surfaces:3">
+            Sanitized detail, with <vd-redact data-reason="client NDA">the
+            confidential part</vd-redact> marked as a visible decision rather
+            than silently omitted. Redactions stay redacted when printed.
+          </vd-system-card>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── WRITING ─────────────────────────────────────────────────────── -->
+  <section id="writing" class="vd-page vd-section" aria-labelledby="writing-h">
+    <div class="vd-spread">
+      <div class="vd-spread__rail">
+        <div class="vd-readout">
+          <span class="vd-readout__value">02</span>
+          <span class="vd-readout__label">Published</span>
+        </div>
+      </div>
+      <div class="vd-spread__body">
+        <span class="vd-label">Writing</span>
+        <h2 id="writing-h">A ruled list</h2>
+
+        <div style="margin-top:var(--vd-space-2)">
+          <!-- Ruled list. The hover accent is a LEFT BAR, not the horizontal
+               rules: in a ruled list the rules are shared boundaries, so
+               accenting your own would outline the last row on two sides and
+               every other row on one. -->
+          <vd-note-card date="2026-08" length="2,400 words"
+            title="An essay title" href="#"
+            dek="A standfirst. One or two sentences of what the piece argues."></vd-note-card>
+          <vd-note-card date="2026-09" length="1,800 words"
+            title="A second essay" href="#"
+            dek="Another standfirst."></vd-note-card>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PROSE, QUOTES, TABLES ───────────────────────────────────────── -->
+  <section id="about" class="vd-page vd-section" aria-labelledby="about-h">
+    <div class="vd-spread">
+      <div class="vd-spread__rail">
+        <span class="vd-label">Contents</span>
+      </div>
+      <div class="vd-spread__body">
+        <span class="vd-label">About</span>
+        <h2 id="about-h">Prose and primitives</h2>
+
+        <div class="vd-prose" style="margin-top:var(--vd-space-1)">
+          <p>
+            Body copy sits in <code>.vd-prose</code>, which caps the measure.
+            An <a href="#">inline link</a> is underlined — that is not
+            decoration. It is the channel that separates a link from a
+            success message, since both use the same hue, and colour alone
+            measured 1.51:1 against body text where 3:1 is required.
+          </p>
+          <p>
+            <strong>Emphasis</strong> and <em>italics</em> behave normally.
+            A marginal note<span class="vd-cite">1</span> uses the editorial
+            colour — patina teal, the one this system is named for.
+          </p>
+        </div>
+
+        <!-- The editorial voice: quoting, crediting, annotating. The RULE
+             takes teal; the quote text stays bone. An 18px run of teal body
+             copy would be the loudest thing on the page. -->
+        <vd-quote>
+          <blockquote>
+            A pull-quote. The left rule is the editorial colour; the text is not.
+          </blockquote>
+          <figcaption>Attribution</figcaption>
+        </vd-quote>
+
+        <!-- ALWAYS wrap a table in .vd-table-scroll. Without it a wide table
+             scrolls the whole document sideways at 320px, which is a 1.4.10
+             failure. The audit checks this specifically. -->
+        <div class="vd-table-scroll">
+          <table class="vd-table vd-table--zebra">
+            <thead>
+              <tr><th>Column</th><th>Another</th><th>Measured</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>A row</td><td>Some value</td><td class="vd-is-num">7.31</td></tr>
+              <tr><td>Another row</td><td>Another value</td><td class="vd-is-num">14.68</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <vd-code file="example.css">
+<pre>.thing{color:var(--vd-text)}</pre>
+        </vd-code>
+
+        <!-- Live contrast readout, computed from the token. against defaults
+             to --vd-ink-000; pass --vd-paper-000 for the light set. -->
+        <vd-swatch token="--vd-link" note="link text" min="7"></vd-swatch>
+        <vd-swatch token="--vd-editorial" note="editorial voice" min="7"></vd-swatch>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FORM ────────────────────────────────────────────────────────────
+       vd-form wraps a NATIVE form and replaces the browser's validation
+       bubble. It sets novalidate from script, so with JS off the browser
+       still enforces required and type — do not put novalidate in markup.
+
+       Validates on blur, then on every keystroke once a field has been
+       blurred. On submit, focus moves to the first invalid control; there
+       is no summary block, by decision. -->
+  <section class="vd-page vd-section" aria-labelledby="contact-h">
+    <div class="vd-spread">
+      <div class="vd-spread__rail"><span class="vd-label">Contact</span></div>
+      <div class="vd-spread__body">
+        <span class="vd-label">Contact</span>
+        <h2 id="contact-h">Form and feedback</h2>
+
+        <vd-form>
+          <form class="vd-form" style="margin-top:var(--vd-space-1)">
+            <!-- The asterisk is a symbol with no intrinsic meaning, so this
+                 legend is not decoration — it is what makes it parseable.
+                 The control also carries `required`, so assistive tech hears
+                 it without seeing the mark. -->
+            <p class="vd-form__legend">Fields marked <span class="vd-form__req">*</span> are required.</p>
+
+            <div class="vd-field">
+              <label class="vd-field__label" for="t-name">Name<span class="vd-form__req" aria-hidden="true">*</span></label>
+              <input class="vd-input" id="t-name" name="name" type="text" required
+                     data-msg-required="Enter your name.">
+            </div>
+
+            <div class="vd-field">
+              <label class="vd-field__label" for="t-email">Email<span class="vd-form__req" aria-hidden="true">*</span></label>
+              <!-- data-msg-* replaces the browser's generic wording. -->
+              <input class="vd-input" id="t-email" name="email" type="email" required
+                     data-msg-required="An email address is required."
+                     data-msg-type="This address is missing an @."
+                     data-msg-valid="That address will work.">
+              <p class="vd-field__hint">A persistent hint. Not a state.</p>
+            </div>
+
+            <div class="vd-field">
+              <label class="vd-field__label" for="t-kind">Type</label>
+              <!-- Native select. The closed control is styled; the open
+                   panel belongs to the OS and is left alone. -->
+              <select class="vd-select" id="t-kind" name="kind">
+                <option>One</option><option>Two</option>
+              </select>
+            </div>
+
+            <div class="vd-field">
+              <label class="vd-field__label" for="t-msg">Message<span class="vd-form__req" aria-hidden="true">*</span></label>
+              <textarea class="vd-textarea" id="t-msg" name="message" required minlength="20"
+                        data-msg-short="Twenty characters minimum."></textarea>
+            </div>
+
+            <fieldset>
+              <legend>Options</legend>
+              <label class="vd-check"><input type="checkbox" checked><span>A checkbox</span></label>
+              <label class="vd-check"><input type="radio" name="t-r" checked><span>A radio</span></label>
+              <label class="vd-check"><input type="radio" name="t-r"><span>Another radio</span></label>
+              <label class="vd-check"><input type="checkbox" disabled><span>Disabled — muted, never faded</span></label>
+            </fieldset>
+
+            <div style="display:flex;gap:var(--vd-space-h);margin-top:var(--vd-space-1)">
+              <button class="vd-btn vd-btn--primary" type="submit">Send</button>
+              <button class="vd-btn" type="reset">Reset</button>
+            </div>
+          </form>
+        </vd-form>
+
+        <!-- Loading and empty. The skeleton does not shimmer: a looping
+             sweep on a block that may persist for seconds is what 2.2.2
+             exists to prevent, and a loading state has nowhere to put a
+             pause control. -->
+        <h3 style="margin-top:var(--vd-space-2)">Loading and empty</h3>
+        <div class="vd-grid" style="margin-top:var(--vd-space-1)">
+          <div>
+            <span class="vd-skeleton vd-skeleton--title"></span>
+            <span class="vd-skeleton"></span>
+            <span class="vd-skeleton vd-skeleton--short"></span>
+          </div>
+          <div class="vd-empty" style="padding-block:0">
+            <div class="vd-empty__value">0</div>
+            <div class="vd-empty__label">results</div>
+            <p class="vd-empty__note">The instrument reads zero. It has not broken
+              and it is not apologising.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<vd-footer>
+  <div class="vd-footer__inner">
+    <div>
+      <span class="vd-label">Elsewhere</span>
+      <p class="vd-mono" style="margin-top:var(--vd-space-h)">
+        <a href="#">A link</a>
+      </p>
+    </div>
+    <div>
+      <span class="vd-label">Built with</span>
+      <p class="vd-mono" style="margin-top:var(--vd-space-h);color:var(--vd-text-muted)">
+        Verdigris · AAA · ink and paper
+      </p>
+    </div>
+  </div>
+</vd-footer>
+
+</body>
+</html>

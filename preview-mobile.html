@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Verdigris — mobile preview harness</title>
+<style>
+  body{margin:0;background:#0a0a09;font:12px/1.4 Consolas,monospace;color:#8B8478;
+       display:flex;gap:16px;padding:16px;align-items:flex-start}
+  figure{margin:0;display:flex;flex-direction:column;gap:6px}
+  figcaption{color:#AAFF00;letter-spacing:.1em;text-transform:uppercase}
+  iframe{border:1px solid #2c2b28;background:#161614;display:block}
+  nav{position:fixed;right:16px;top:16px;display:flex;gap:6px;z-index:9}
+  nav a{color:#8B8478;border:1px solid #2c2b28;padding:5px 9px;text-decoration:none}
+  nav a:hover{color:#AAFF00;border-color:#AAFF00}
+</style>
+</head>
+<body>
+<nav>
+  <a href="?w=320">320</a><a href="?w=390">390</a><a href="?w=430">430</a>
+  <a href="?w=768">768</a><a href="?w=320,390">320+390</a>
+</nav>
+<script>
+// Widths come from ?w= so only what you are looking at is rendered. Three
+// tall iframes each running a topolang field was enough to hang the renderer.
+const widths = (new URLSearchParams(location.search).get('w') || '390')
+  .split(',').map(n => parseInt(n, 10)).filter(Boolean);
+const scrollTo = parseInt(new URLSearchParams(location.search).get('y') || '0', 10);
+document.write(widths.map(w =>
+  `<figure><figcaption>${w} px</figcaption>` +
+  `<iframe width="${w}" height="1500" data-y="${scrollTo}" ` +
+  `src="index.html?cb=${Date.now()}${Math.random().toString(36).slice(2)}"></iframe></figure>`
+).join(''));
+addEventListener('load', () => {
+  document.querySelectorAll('iframe').forEach(f => {
+    const y = +f.dataset.y; if (y) f.contentWindow.scrollTo(0, y);
+  });
+});
+</script>
+</body>
+</html>

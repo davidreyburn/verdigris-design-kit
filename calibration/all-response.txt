@@ -1,0 +1,624 @@
+# Verdigris — Visual Language Calibration
+
+Completed: 2026-08-01  ·  Answered 67/68 required
+
+
+## 01 · Stance
+
+**North star weighting — how much should “sleek” dominate?**
+
+6/7  (present → dominant)
+
+**— how much should “rigorous” dominate?**
+
+4/7  (present → dominant)
+
+**— how much should “slightly dangerous” dominate?**
+
+3/7  (present → dominant)
+
+**— how much should “deeply useful” dominate?**
+
+5/7  (present → dominant)
+
+**First three seconds. A staff-level designer at a frontier lab lands on the homepage. What do they feel before they read a word?**
+
+> Where has this guy been hiding?
+
+**Who is the system optimized for? Pick at most two.**
+
+- Frontier-lab design hiring manager
+- Enterprise AI design leader
+
+**The counter-evidence test. What would make that person close the tab in under ten seconds?**
+
+> em dashes. anything that evokes boredom. anything with a whiff of lazy generation. the same design elements that every naive prompter slops out, which are overwhelmingly evident in the portfolio site
+
+**Authored vs. generated — what is the tell?**
+
+> generated design is the same elements you see everywhere, repeated without understanding of the meaning because it seems like it should be there. its the death of cognition. authorship says something unique that may cost something
+
+**Risk posture: how strange is the site allowed to be?**
+
+4/7  (recruiter-safe → uncompromising)
+
+**Anything else about stance?**
+
+> The presence needs to deliver on a promise of core stability in practice before weirdness, but weird is in my DNA and I need my tastes expressed legibly where it fits
+
+## 02 · Territory bake-off
+
+**Cybernetic Minimalism** — fit 1/5
+> steal: hard to read, I feel nothing
+
+**Academic Cyberpunk** — fit 3/5
+> steal: very readable option, great for an article, case study or long reading. looks a little too Anthropic-coded
+
+**Prismatic Instrument** — fit 3/5
+> steal: useful in concepts that are "spectrumatic" or the 4-pillar model set by the report. strong colors anchor to multiple concepts being kept alive in the piece. in overuse it looks a little bit like slop, needs to have tight semantic connections
+
+**Black Box** — fit 2/5
+> steal: OK I personally love this but this is where it starts freaking out the non-tech literate among us and reads a bit "basement dweller". elements here would be most appropriate for small print, technical details, etc
+
+**Signal Lab** — fit 5/5
+> steal: Love this. combines readability with a tech edge that still feels like me. Especially good for "lab report" style content
+
+**Verdigris Native** — fit —/5
+> steal: better than "Academic Cyberpunk" but feels a little bit underwhemling on first blush. maybe best as long form, non-technical text approaches
+
+**Synthesis — which is the spine?**
+
+→ Signal Lab
+
+**Which territories are guests, and what exactly do they contribute?**
+
+- Verdigris Native
+- Black Box
+- Prismatic Instrument
+
+**The one move you want from each guest.**
+
+> signal lab- good for "lab report" style tones, want the graph readouts and tech style
+> black box - useful for minimal, out of the way content or technical details that the general public doesn't care to see
+> verdigris native= best for stuff I really want people to read and feel comfortable while they do so
+> prismatic- may be useful for "spectrum" topics or multi-pillar topics
+
+**Which territories are dead? Say so now so I stop rendering them.**
+
+- Cybernetic Minimalism
+- Academic Cyberpunk
+
+**Where did I misread a territory name?**
+
+> you got it right
+
+## 03 · Typography
+
+**Display voice — the hero thesis line.**
+
+→ Technical grotesque  [DIN / Bahnschrift lineage]
+
+**Reading voice — essays and case studies.**
+
+→ Serif  [Academic Cyberpunk]
+
+**How far does monospace reach?**
+
+→ Code + metadata + labels
+
+**Type scale ratio.**
+
+→ Two-register · 1.15 + jump  [flat body, huge display]
+
+**Measure and leading for body copy.**
+
+→ 58ch · 1.85  [open, essayistic]
+
+**Label treatment — eyebrows, section marks, tags.**
+
+→ Numbered, leading zeros
+
+**Any actual typefaces you already want — or already own?**
+
+> Based on these I'm open to exploring up to $200 or so for a license if we think it will really move the needle
+
+## 04 · Colour
+
+**Background strategy.**
+
+→ Flat + fine grain  [film / paper texture]
+
+**How many accent colours may appear in one viewport?**
+
+→ Two
+
+**Semantic assignment. Give each Verdigris colour exactly one web job.**
+
+- Blue `#5B8DB8` → Links  `--vd-link`
+- Lime `#AAFF00` → Live / numeric data  `--vd-data`
+- *unused:* Green, Orange, Teal, Purple, Red
+
+**The lime question.**
+
+→ Anything live or measured
+
+**Link treatment in body copy.**
+
+→ Coloured text, no underline
+
+**Light mode.**
+
+→ Dark only on screen, plus a real print stylesheet
+
+**Contrast posture.**
+
+→ AAA wherever technically possible
+
+**Colour notes, exceptions, things I have not asked about.**
+
+> I give you license to make recommendations on additional color semantic assignment
+
+## 05 · Space & structure
+
+**Density of a list of systems.**
+
+→ Measured  [editorial]
+
+**Page container behaviour.**
+
+→ Asymmetric — content column plus a persistent margin rail
+
+**Base spacing unit.**
+
+→ Baseline-derived
+
+**Is the grid visible?**
+
+→ Hairline rules at structural boundaries
+
+**Structure notes.**
+
+> I could have used some visualization on page container behavior and base spacing and grid. I think I made the right calls but not exactly sure
+
+## 06 · Surface & depth
+
+**How is a work item bounded?**
+
+→ Hairline box, no radius
+
+**Corner radius, system-wide.**
+
+→ 1–2px — barely there
+
+**Elevation and shadow.**
+
+→ No shadows. Depth via value only
+
+**The topolang field — where does it live?**
+
+→ Hero only, behind the thesis
+
+**How loud is the field?**
+
+5/7  (barely perceptible → unmistakable)
+
+## 07 · Motion
+
+**Interactive feedback. Hover each.**
+
+→ Rule draw
+
+**Entrance behaviour on scroll.**
+
+→ None. Content is simply there.
+
+**Motion tempo.**
+
+3/7  (120ms · instrument → 600ms · cinematic)
+
+**Easing character.**
+
+→ Sharp out
+
+**Under prefers-reduced-motion, what survives?**
+
+> make recommendations here
+
+## 08 · Component inventory
+
+**Confirm the v1 component set.**
+
+- Hero / thesis block
+- System card (the four proof pillars)
+- Field-note card
+- Nav + masthead
+- Footer (carries the Chives signature)
+- Metadata strip
+- Tag / chip
+- Button — primary, ghost, destructive
+- Link + external-link affordance
+- Code block with filename and copy
+- Pull-quote / testimonial
+- Citation + marginalia
+- Data table
+- Figure + caption
+- Redaction / sanitization marker
+- Table of contents / reading progress
+- Token + swatch display
+- Diagram primitives
+
+**Missing components?**
+
+> make recommendations, hard to consider it all right now
+
+**Which three ship first?**
+
+> hero, system card, field-note card
+
+**Component and token naming convention.**
+
+→ --vd-* / &lt;vd-card&gt;
+
+**How does the system document itself?**
+
+→ Multi-page reference with live playground
+
+## 09 · Voice & nomenclature
+
+**What is the work section called?**
+
+→ Work
+
+**What is the writing section called?**
+
+→ Field Notes
+
+**Grammatical person in UI and case-study copy.**
+
+→ First person — "I built…"
+
+**Do things get numbered?**
+
+→ Sections only
+
+**Empty, loading, and error states — what register?**
+
+> a stately, minimal and on theme error page
+
+**Where does the Chives signature appear?**
+
+→ Footer only
+
+**The hero, in the exact words you want on the page.**
+
+> Designing instruments for cognition, creativity, and complex systems.
+
+## 10 · Accessibility as differentiator
+
+**Focus indicator. Tab into the page and this is the most-seen component you will ever design.**
+
+→ High-contrast dual ring
+
+**What goes into the published accessibility notes?**
+
+- Measured contrast ratios for every token pair
+- The pairs that fail, and why they are never used for text
+- Reduced-motion strategy, with the static fallback shown
+- Full keyboard map and focus order rationale
+- Screen-reader annotations on the generative field
+- 400% reflow evidence
+- Target-size compliance
+- Agent legibility notes
+
+**Shared legibility. Should the site itself demonstrate the thesis?**
+
+> I love it, to the extent that it can be useful and not cosplay
+
+**Accessibility notes.**
+
+> I wasn't exactly sure what the focus indicator referred to here
+
+## 11 · Anti-goals
+
+**Forbidden. Check everything that is out.**
+
+- Glassmorphism — blur, translucent panels
+- Glow and neon bloom on text or borders
+- Saturated neon greens — #00FF88 and relatives
+- Blinking terminal cursor in the logo
+- Space Grotesk + Inter
+- Gradient-filled text
+- Emoji in UI or headings
+- Animated gradient borders
+- Stock imagery and generic 3D renders
+- Parallax and scroll-jacking
+- Matrix rain, falling glyphs, fake terminals typing themselves
+- Dark-violet SaaS gradient backgrounds
+- Skeuomorphic hardware chrome — knobs, bezels, LEDs
+- Marketing testimonial carousels
+
+**The single thing that would most embarrass you if it shipped.**
+
+> anything that looks like a quick LLM output I didn't author
+
+**Inverse — what must survive no matter what the system says?**
+
+> this needs to speak to someone with an abiding love of computers, Japan, cyberpunk, technicality and love of knowledge itself. somewhere in the middle of that is the frequency of my soul
+
+**Sites, tools, or objects whose visual language you admire — and the one thing you would take from each.**
+
+> the e.g. suggestions were really good
+
+## 12 · Execution constraints
+
+**What do you want in hand at the end of this?**
+
+→ Full library and the thesis-first homepage assembled on it
+
+**Where does it land?**
+
+→ A fresh verdigris/ package here in this directory
+
+**Tailwind: keep or cut?**
+
+→ Cut it. Plain CSS with custom properties.
+
+**Realistic build window before you need something shippable.**
+
+→ A month
+
+**Anything I did not ask about that will change the design.**
+
+> My number one challenge right now is that my head is a whilwind of ideas and I speak in high-density technobabble understandable only to machines and the highly technical. I need the work to be legible in order to get to the next step; it can't scare off those who feel less expert in this stuff.
+
+---
+
+## Derived token seed
+
+```css
+/* Verdigris — derived token seed */
+/* Generated from calibration answers. Values marked TBD await design work. */
+:root{
+  /* ── tier 1 · primitives ─────────────────── */
+  --vd-bg: #161614;
+  --vd-bg-dim: #111110;
+  --vd-bg-hi: #1e1d1b;
+  --vd-bg-sel: #2c2b28;
+  --vd-dim: #524e48;   /* 2.6:1 on bg — non-text only */
+  --vd-bone: #D0CAB8;
+  --vd-bone-bright: #E8E2D0;
+  --vd-white: #F0EDE4;
+  --vd-green: #44BB44;
+  --vd-orange: #C4834A;
+  --vd-teal: #4AACA4;
+  --vd-blue: #5B8DB8;
+  --vd-purple: #8855BB;
+  --vd-lime: #AAFF00;
+  --vd-red: #CC5555;
+
+  /* ── tier 2 · semantic ───────────────────── */
+  --vd-data: var(--vd-lime);
+  --vd-link: var(--vd-blue);
+  /* unused on the web: green, orange, teal, purple, red */
+
+  /* ── space ───────────────────────────────── */
+  /* baseline-derived — computed from --vd-lh-body */
+
+  /* ── type scale ──────────────────────────── */
+  --vd-fs-0: 14px;
+  --vd-fs-1: 16px;
+  --vd-fs-2: 18px;
+  --vd-fs-3: 56px;
+  --vd-fs-4: 72px;
+  --vd-measure: 58ch;
+  --vd-lh-body: 1.85;
+
+  /* ── surface ─────────────────────────────── */
+  --vd-radius: 2px;
+  --vd-card-border: 1px solid var(--vd-bg-sel);
+
+  /* ── motion ──────────────────────────────── */
+  --vd-dur-fast: 108ms;
+  --vd-dur: 180ms;
+  --vd-dur-slow: 306ms;
+  --vd-ease: cubic-bezier(.2,.6,.2,1);
+
+  /* ── focus ───────────────────────────────── */
+  --vd-focus-ring: 3px solid var(--vd-lime);
+  --vd-focus-offset: 2px;
+}
+```
+
+
+/* Verdigris — derived token seed */
+/* Generated from calibration answers. Values marked TBD await design work. */
+:root{
+  /* ── tier 1 · primitives ─────────────────── */
+  --vd-bg: #161614;
+  --vd-bg-dim: #111110;
+  --vd-bg-hi: #1e1d1b;
+  --vd-bg-sel: #2c2b28;
+  --vd-dim: #524e48;   /* 2.6:1 on bg — non-text only */
+  --vd-bone: #D0CAB8;
+  --vd-bone-bright: #E8E2D0;
+  --vd-white: #F0EDE4;
+  --vd-green: #44BB44;
+  --vd-orange: #C4834A;
+  --vd-teal: #4AACA4;
+  --vd-blue: #5B8DB8;
+  --vd-purple: #8855BB;
+  --vd-lime: #AAFF00;
+  --vd-red: #CC5555;
+
+  /* ── tier 2 · semantic ───────────────────── */
+  --vd-data: var(--vd-lime);
+  --vd-link: var(--vd-blue);
+  /* unused on the web: green, orange, teal, purple, red */
+
+  /* ── space ───────────────────────────────── */
+  /* baseline-derived — computed from --vd-lh-body */
+
+  /* ── type scale ──────────────────────────── */
+  --vd-fs-0: 14px;
+  --vd-fs-1: 16px;
+  --vd-fs-2: 18px;
+  --vd-fs-3: 56px;
+  --vd-fs-4: 72px;
+  --vd-measure: 58ch;
+  --vd-lh-body: 1.85;
+
+  /* ── surface ─────────────────────────────── */
+  --vd-radius: 2px;
+  --vd-card-border: 1px solid var(--vd-bg-sel);
+
+  /* ── motion ──────────────────────────────── */
+  --vd-dur-fast: 108ms;
+  --vd-dur: 180ms;
+  --vd-dur-slow: 306ms;
+  --vd-ease: cubic-bezier(.2,.6,.2,1);
+
+  /* ── focus ───────────────────────────────── */
+  --vd-focus-ring: 3px solid var(--vd-lime);
+  --vd-focus-offset: 2px;
+}
+
+
+{
+  "ns-sleek": 6,
+  "ns-rigor": 4,
+  "ns-danger": 3,
+  "ns-useful": 5,
+  "three-sec": "Where has this guy been hiding?",
+  "reader": [
+    "lab",
+    "ent"
+  ],
+  "counter": "em dashes. anything that evokes boredom. anything with a whiff of lazy generation. the same design elements that every naive prompter slops out, which are overwhelmingly evident in the portfolio site",
+  "tell": "generated design is the same elements you see everywhere, repeated without understanding of the meaning because it seems like it should be there. its the death of cognition. authorship says something unique that may cost something",
+  "risk": 4,
+  "stance-note": "The presence needs to deliver on a promise of core stability in practice before weirdness, but weird is in my DNA and I need my tastes expressed legibly where it fits",
+  "bo-cyb.score": 1,
+  "bo-aca.score": 3,
+  "bo-aca.steal": "very readable option, great for an article, case study or long reading. looks a little too Anthropic-coded",
+  "bo-pri.steal": "useful in concepts that are \"spectrumatic\" or the 4-pillar model set by the report. strong colors anchor to multiple concepts being kept alive in the piece. in overuse it looks a little bit like slop, needs to have tight semantic connections",
+  "bo-pri.score": 3,
+  "bo-blk.score": 2,
+  "bo-blk.steal": "OK I personally love this but this is where it starts freaking out the non-tech literate among us and reads a bit \"basement dweller\". elements here would be most appropriate for small print, technical details, etc",
+  "bo-sig.score": 5,
+  "bo-sig.steal": "Love this. combines readability with a tech edge that still feels like me. Especially good for \"lab report\" style content",
+  "bo-vrd.steal": "better than \"Academic Cyberpunk\" but feels a little bit underwhemling on first blush. maybe best as long form, non-technical text approaches",
+  "terr-spine": "sig",
+  "terr-guests": [
+    "vrd",
+    "blk",
+    "pri"
+  ],
+  "bo-cyb.steal": "hard to read, I feel nothing",
+  "terr-guest-note": "signal lab- good for \"lab report\" style tones, want the graph readouts and tech style\nblack box - useful for minimal, out of the way content or technical details that the general public doesn't care to see\nverdigris native= best for stuff I really want people to read and feel comfortable while they do so\nprismatic- may be useful for \"spectrum\" topics or multi-pillar topics",
+  "terr-kill": [
+    "cyb",
+    "aca"
+  ],
+  "terr-correct": "you got it right",
+  "ty-display": "grot",
+  "ty-body": "ser",
+  "ty-mono-reach": "meta",
+  "ty-scale": "dramatic",
+  "ty-measure": "open",
+  "ty-label": "num",
+  "ty-faces": "Based on these I'm open to exploring up to $200 or so for a license if we think it will really move the needle",
+  "cl-bg": "noise",
+  "cl-count": "2",
+  "cl-map": {
+    "lime": "data",
+    "blue": "link"
+  },
+  "cl-lime": "live",
+  "cl-link": "col",
+  "cl-light": "print",
+  "cl-contrast": "aaa",
+  "cl-note": "I give you license to make recommendations on additional color semantic assignment",
+  "sp-density": "mid",
+  "sp-container": "asym",
+  "sp-note": "I could have used some visualization on page container behavior and base spacing and grid. I think I made the right calls but not exactly sure",
+  "sp-unit": "lh",
+  "sp-grid": "hair",
+  "sf-card": "hair",
+  "sf-radius": "1",
+  "sf-elev": "none",
+  "sf-topo": "hero",
+  "sf-topo-loud": 5,
+  "mo-hover": "rule",
+  "mo-entrance": "none",
+  "mo-speed": 3,
+  "mo-easing": "sharp",
+  "mo-reduced": "make recommendations here",
+  "cp-core": [
+    "hero",
+    "pillar",
+    "note",
+    "nav",
+    "foot",
+    "meta",
+    "tag",
+    "btn",
+    "link",
+    "code",
+    "quote",
+    "cite",
+    "table",
+    "figure",
+    "redact",
+    "toc",
+    "swatch",
+    "diagram"
+  ],
+  "cp-extra": "make recommendations, hard to consider it all right now",
+  "cp-first3": "hero, system card, field-note card",
+  "cp-naming": "vd",
+  "cp-docs": "multi",
+  "vc-work": "work",
+  "vc-notes": "field",
+  "vc-person": "first",
+  "vc-empty": "a stately, minimal and on theme error page",
+  "vc-numbering": "sections",
+  "vc-chives": "foot",
+  "vc-hero": "Designing instruments for cognition, creativity, and complex systems.",
+  "ax-focus": "double",
+  "ax-publish": [
+    "ratios",
+    "fails",
+    "motion",
+    "kbd",
+    "sr",
+    "zoom",
+    "targets",
+    "agent"
+  ],
+  "ax-agent": "I love it, to the extent that it can be useful and not cosplay",
+  "ax-note": "I wasn't exactly sure what the focus indicator referred to here",
+  "ag-list": [
+    "glass",
+    "glow",
+    "neon",
+    "cursor",
+    "grotesk",
+    "gradtext",
+    "emoji",
+    "gradborder",
+    "stock",
+    "parallax",
+    "matrix",
+    "darkviolet",
+    "skeuo",
+    "testimonial"
+  ],
+  "ag-worst": "anything that looks like a quick LLM output I didn't author",
+  "ag-keep": "this needs to speak to someone with an abiding love of computers, Japan, cyberpunk, technicality and love of knowledge itself. somewhere in the middle of that is the frequency of my soul",
+  "ag-precedent": "the e.g. suggestions were really good",
+  "ex-scope": "both",
+  "ex-repo": "new",
+  "ex-tail": "cut",
+  "ex-time": "month",
+  "ex-final": "My number one challenge right now is that my head is a whilwind of ideas and I speak in high-density technobabble understandable only to machines and the highly technical. I need the work to be legible in order to get to the next step; it can't scare off those who feel less expert in this stuff."
+}

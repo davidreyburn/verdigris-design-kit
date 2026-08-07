@@ -1,0 +1,7 @@
+# Working notes and anything not meant to be published.
+.private/
+
+# OS and editor noise
+Thumbs.db
+.DS_Store
+*.swp

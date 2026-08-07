@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>David Reyburn — Designing instruments for cognition, creativity, and complex systems</title>
+<meta name="description" content="Product designer and creative technologist specializing in human-AI systems: agent experience, knowledge-backed AI workflows, design systems, and accessibility.">
+<!-- Tells the browser to theme its own furniture — scrollbars, form controls,
+     the canvas behind an overscroll — to match. Without this the page can be
+     light while the scrollbar stays dark. -->
+<meta name="color-scheme" content="dark light">
+<!-- Blocking, and deliberately so: this must run before first paint or a
+     reader who chose light gets a frame of dark first. It is the only inline
+     script on the site. Everything it does is also done by verdigris.js, so
+     the page is still correct without it — just briefly wrong-coloured. -->
+<script>
+try{var t=localStorage.getItem('verdigris-theme');
+    if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}
+catch(e){}
+</script>
+<link rel="stylesheet" href="verdigris/verdigris.css?v=1.7.0">
+<link rel="stylesheet" href="verdigris/print.css?v=1.7.0">
+<script src="verdigris/topolang.js?v=1.7.0" defer></script>
+<script src="verdigris/verdigris.js?v=1.7.0" defer></script>
+<!-- Machine-readable structure, per the shared-legibility thesis. The same
+     structure a screen reader walks is the structure an agent parses. -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Person","name":"David Reyburn",
+ "alternateName":"DJ","url":"https://dreyburn.com",
+ "jobTitle":"Product Designer, Human-AI Systems",
+ "description":"I design and operate governed human-AI systems.",
+ "knowsAbout":["Agent experience design","Multi-agent systems","Design systems",
+   "WCAG 2.2 accessibility","Knowledge architecture","Creative technology"]}
+</script>
+</head>
+<body>
+<a class="vd-skip" href="#main">Skip to content</a>
+
+<vd-nav>
+  <div class="vd-nav__inner">
+    <a class="vd-nav__mark" href="/">David Reyburn</a>
+    <ul class="vd-nav__list">
+      <li><a href="#work" aria-current="true">Work</a></li>
+      <li><a href="#notes">Field Notes</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="docs/">System</a></li>
+    </ul>
+    <!-- Deliberately outside the list: it is a control, not a destination.
+         Renders nothing without JS, where prefers-color-scheme still works. -->
+    <vd-theme-toggle></vd-theme-toggle>
+  </div>
+</vd-nav>
+
+<main id="main">
+
+  <!-- ── hero ─────────────────────────────────────────────────────────
+       Deliberately NOT wrapped in .vd-page. The hero is the one full-bleed
+       block on the site so the field can run off the right edge of the
+       screen; the page measure is re-applied inside, on .vd-hero__inner. -->
+  <vd-hero
+    thesis="Designing instruments for cognition, creativity, and complex systems."
+    sub="I design and operate governed human-AI systems. Close enough to the machinery to build and debug, close enough to the organization to see how work actually flows."
+    seed="20260801">
+    <!-- One line. The mode name and the reduced-motion behaviour used to be
+         stated here too; both are still true and both are now documented in
+         docs/#topolang, which this caption links to. A credit line that also
+         tries to be a spec sheet is neither. -->
+    <div class="vd-hero__caption" slot="caption">
+      <!-- <cite>, not <em>: "Drift" is the title of the piece, not stressed
+           emphasis. Both render italic, but only one is true. The name also
+           comes from the runtime's own vocabulary — topolang calls the
+           dynamics "drift" and the field is literally makeDrift(seed). -->
+      <cite>Drift</cite>, rendered in <a href="docs/#topolang">topolang v1.3.2</a>, my own DSL.
+    </div>
+  </vd-hero>
+
+  <!-- ── work ─────────────────────────────────────────────────────── -->
+  <section id="work" class="vd-page vd-section" aria-labelledby="work-h">
+    <div class="vd-spread">
+      <!-- The rail carries measurements only. The section-position readout
+           that used to head this list is gone: an ordinal in structure
+           colour beside a quantity in data colour is the one adjacency the
+           colour separation rule forbids. -->
+      <div class="vd-spread__rail">
+        <span class="vd-readout">
+          <span class="vd-readout__value">04</span>
+          <span class="vd-readout__key">Systems</span>
+        </span>
+        <span class="vd-readout">
+          <span class="vd-readout__value">2020</span>
+          <span class="vd-readout__key">Since</span>
+        </span>
+      </div>
+
+      <div class="vd-spread__body">
+        <span class="vd-label">Work</span>
+        <h2 id="work-h">Four systems</h2>
+        <p class="vd-prose vd-prose--lead" style="margin-top:var(--vd-space-1)">
+          Each of these is running, not proposed. Where an employer owns the work,
+          the case study is sanitized and says so.
+        </p>
+
+        <div class="vd-grid" style="margin-top:var(--vd-space-2)">
+
+          <vd-system-card index="01" kicker="Agent systems"
+            title="The Agent Operating System"
+            href="#"
+            proof="agents:4|externally adopted:2026|status:running">
+            A governed multi-agent organization on infrastructure I own. Four agents with
+            explicit context boundaries, a claims layer carrying provenance, and continuity
+            architecture built on the rule that files are truth. An outside CTO reviewed the
+            architecture and adopted its principles into his own system.
+          </vd-system-card>
+
+          <vd-system-card index="02" kicker="Shipped product"
+            title="Curriculum by Chives"
+            href="#"
+            proof="pipeline:agent-operated|status:deployed">
+            Source-grounded microlearning where an agent gathers sources, generates validated
+            content, commits, and deploys. The corpus is the professor; the model is the tutor.
+            Validation gates sit between generation and the deploy lane.
+          </vd-system-card>
+
+          <vd-system-card index="03" kicker="Enterprise, sanitized"
+            title="Knowledge-backed AI at Fortune-100 scale"
+            href="#"
+            proof="domain:regulated|community of practice:founded">
+            A knowledge-backed assistant performing in a regulated domain, plus the prototyping
+            method and community of practice built around it. Implementation detail is
+            <vd-redact data-reason="employer IP">withheld under employer IP boundaries</vd-redact>
+            and the boundary itself is part of the design.
+          </vd-system-card>
+
+          <vd-system-card index="04" kicker="Creative systems"
+            title="Barrowlands TCG"
+            href="#"
+            proof="effect coverage:41/41|parity:3 surfaces">
+            A trading card game with a zero-dependency functional rules engine, AIs that consume
+            only redacted views so they cannot cheat, and an evaluation harness most product teams
+            would envy: property-based fuzzing, exhaustive effect coverage, deterministic replay,
+            and golden transcripts. Identical behaviour in paper, terminal, and browser.
+          </vd-system-card>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── field notes ──────────────────────────────────────────────── -->
+  <section id="notes" class="vd-page vd-section" aria-labelledby="notes-h">
+    <div class="vd-spread">
+      <!-- "03 Published" is a COUNT, so it is data and takes lime. It was
+           previously marked as an ordinal, which was simply wrong. -->
+      <div class="vd-spread__rail">
+        <span class="vd-readout">
+          <span class="vd-readout__value">03</span>
+          <span class="vd-readout__key">Published</span>
+        </span>
+        <span class="vd-readout">
+          <span class="vd-readout__value">7,300</span>
+          <span class="vd-readout__key">Words</span>
+        </span>
+      </div>
+
+      <div class="vd-spread__body">
+        <span class="vd-label">Field Notes</span>
+        <h2 id="notes-h">Writing</h2>
+
+        <div style="margin-top:var(--vd-space-2)">
+          <vd-note-card date="2026-08" length="2,400 words"
+            title="Agent-Mediated Interaction and Shared Legibility"
+            href="#"
+            dek="Accessibility has always been machine legibility. The screen reader was the first agent, and everything we learned making interfaces legible to it applies directly to the agents arriving now. A four-level maturity model for enterprises."></vd-note-card>
+
+          <vd-note-card date="2026-08" length="3,100 words"
+            title="The Human-AI Team Ontology"
+            href="#"
+            dek="Five stages from tool to institutionalized hybrid team, and why most organizations stall at stage two. What changes at each transition, and what has to be true before the next one is possible."></vd-note-card>
+
+          <vd-note-card date="2026-09" length="1,800 words"
+            title="AI Hygiene"
+            href="#"
+            dek="Practical discipline for working with models daily without losing the thread: context boundaries, provenance, and knowing which of your outputs you are actually willing to sign."></vd-note-card>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── about ────────────────────────────────────────────────────── -->
+  <section id="about" class="vd-page vd-section" aria-labelledby="about-h">
+    <div class="vd-spread">
+      <!-- AAA is a grade, not a measurement, so it cannot take lime. -->
+      <div class="vd-spread__rail">
+        <span class="vd-readout">
+          <span class="vd-readout__value vd-readout__value--grade">AAA</span>
+          <span class="vd-readout__key">Contrast</span>
+        </span>
+        <span class="vd-readout">
+          <span class="vd-readout__value">2019</span>
+          <span class="vd-readout__key">Since</span>
+        </span>
+      </div>
+
+      <div class="vd-spread__body">
+        <span class="vd-label">About</span>
+        <h2 id="about-h">The operator-designer</h2>
+
+        <div class="vd-prose" style="margin-top:var(--vd-space-1)">
+          <p>
+            I am a product designer and creative technologist working on human-AI systems:
+            agent experience, knowledge-backed workflows, design systems, and accessibility.
+            I do not only design AI interfaces. I build and operate multi-agent systems, and
+            I bring what I learn into enterprise practice.
+          </p>
+          <p>
+            The classical half of the work is Fortune-100 design systems, WCAG 2.2 rigour, and
+            enough implementation fluency to argue with an engineer in good faith. The other half
+            runs on my own infrastructure, where the consequences of a bad architecture decision
+            land on me.
+          </p>
+        </div>
+
+        <vd-quote>
+          <blockquote>
+            An interface that hides its own decision boundaries has not removed them.
+            It has moved them somewhere you cannot argue with.
+          </blockquote>
+          <figcaption>Information Freedom &amp; Systems Governance · working doctrine</figcaption>
+        </vd-quote>
+
+        <vd-meta style="margin-top:var(--vd-space-2)">
+          <div>Based<b>Columbus, Ohio</b></div>
+          <div>Also<b>Sentient A/V, since 2019</b></div>
+          <div>Studio<b>madebychives</b></div>
+          <div>Contrast<b class="vd-is-grade">AAA</b></div>
+        </vd-meta>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<vd-footer>
+  <div class="vd-footer__inner">
+    <div>
+      <span class="vd-label">Elsewhere</span>
+      <ul style="list-style:none;margin:var(--vd-space-h) 0 0;padding:0;display:flex;gap:var(--vd-space-1);flex-wrap:wrap">
+        <li><a class="vd-tag" href="#">GitHub</a></li>
+        <li><a class="vd-tag" href="#">LinkedIn</a></li>
+        <li><a class="vd-tag" href="docs/">Design system</a></li>
+        <li><a class="vd-tag" href="#">Résumé</a></li>
+      </ul>
+    </div>
+    <div class="vd-footer__sig">
+      <b>David Reyburn</b><br>
+      a studio practice by Chives<br>
+      built on Verdigris · AAA · ink and paper
+    </div>
+  </div>
+</vd-footer>
+
+</body>
+</html>

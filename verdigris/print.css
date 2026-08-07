@@ -1,0 +1,120 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   VERDIGRIS — print
+
+   This is the PRINT stylesheet, and it is not the light theme. Verdigris now
+   ships a paper theme for the screen; this is a third target with different
+   constraints — no field, no navigation, no interactive affordances, and link
+   destinations printed inline, because a printed underline pointing nowhere is
+   useless. Case studies and essays are meant to survive being printed and
+   handed to someone in a meeting.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media print{
+  @page{margin:18mm 20mm}
+
+  /* The attribute selectors are REQUIRED, not defensive. Since the theme
+     switch landed, an explicit choice is carried by :root[data-theme="…"] at
+     specificity (0,2,0); a bare :root here is (0,1,0) and would lose to it.
+     Printing with dark chosen would then emit a black page, and printing
+     with light chosen would emit coloured links and a bone ground — both
+     defeating the point of a print stylesheet. Matching the specificity and
+     relying on print.css loading second is what makes print always win.
+
+     Any new theme attribute value must be added to this list. */
+  :root,
+  :root[data-theme="light"],
+  :root[data-theme="dark"]{
+    --vd-surface:#fff; --vd-surface-sunken:#f4f2ed; --vd-surface-raised:#fff;
+    --vd-surface-selected:#fff;
+    --vd-text:#1a1a17; --vd-text-strong:#000; --vd-text-max:#000; --vd-text-muted:#4a463f;
+    --vd-link:#1a1a17; --vd-data:#1a1a17; --vd-rule:#c9c4b8; --vd-rule-strong:#8a857a;
+    --vd-structure:#1a1a17; --vd-danger:#1a1a17;
+
+    /* This list is EXHAUSTIVE by necessity, and that is a maintenance hazard
+       worth naming: any semantic token added to verdigris.css that resolves
+       to a tier-1 primitive must be added here too, or the screen value
+       prints. Teal is the worked example — --vd-editorial resolves to
+       --vd-teal-500 #4FB8AF, which measures 2.38:1 on white, so quote rules,
+       figure captions and marginalia printed almost invisibly until this line
+       existed.
+
+       --vd-ok and --vd-warn are the counter-example and are listed anyway:
+       they alias --vd-link and --vd-text, which are overridden above, so they
+       self-heal. Stating them makes the print palette readable in one place
+       rather than requiring the reader to chase an alias. */
+    --vd-editorial:#1a1a17;
+    --vd-ok:#1a1a17;
+    --vd-warn:#1a1a17;
+    --vd-control-border:#8a857a;
+
+    --vd-theme:print;
+  }
+
+  body{background:#fff;color:#1a1a17;font-size:10.5pt;line-height:1.55}
+  body::before{display:none}          /* no grain on paper */
+
+  /* .vd-hero__fieldwrap is the field's mask carrier; hiding only the canvas
+     inside it would leave an empty band in the stacked print layout. */
+  vd-nav,vd-footer,.vd-hero__fieldwrap,.vd-hero__field,.vd-skip,.vd-code__copy,vd-toc,
+  .vd-btn,.vd-nav__list{display:none !important}
+
+  .vd-spread{display:block}
+  .vd-spread__rail{
+    position:static;border-right:0;padding:0 0 6pt 0;margin-bottom:10pt;
+    border-bottom:.5pt solid #c9c4b8;display:flex;gap:18pt;flex-wrap:wrap;
+  }
+  .vd-readout{margin:0}
+  .vd-readout__value{color:#000;font-size:11pt}
+
+  h1{font-size:24pt;line-height:1.1}
+  h2{font-size:16pt;line-height:1.2;margin-top:18pt}
+  h3{font-size:11.5pt}
+  .vd-prose,.vd-hero__inner{max-width:none}
+
+  /* Print the destination. A printed link that hides its target is a dead end. */
+  a[href^="http"]::after{content:" <" attr(href) ">";font-size:8pt;color:#4a463f;word-break:break-all}
+  a[href^="#"]::after{content:""}
+
+  /* Never break a card or a quote across a page. */
+  vd-system-card,vd-note-card,vd-quote,vd-figure,vd-code{
+    break-inside:avoid;page-break-inside:avoid;
+  }
+  h1,h2,h3{break-after:avoid;page-break-after:avoid}
+
+  vd-system-card{border:.5pt solid #c9c4b8;padding:10pt;margin-bottom:10pt}
+  .vd-grid{display:block}
+  vd-code{background:#f4f2ed;border:.5pt solid #c9c4b8}
+  vd-quote{border-left:2pt solid #1a1a17}
+
+  /* Redactions stay redacted on paper. That is the point of them. */
+  vd-redact{background:#1a1a17;color:#1a1a17 !important}
+  vd-redact::after{content:" [" attr(data-reason) "]";color:#4a463f;position:static;margin:0}
+
+  .vd-table{font-size:9pt}
+  .vd-table td.vd-is-num{color:#000}
+
+  /* ── forms ────────────────────────────────────────────────────────────
+     Controls PRINT, flattened — they are not hidden. On the docs page the
+     form is a specimen and its state model is the point of the section, so
+     hiding it would delete the evidence. On a real form, a printed copy
+     showing what was entered is the useful artifact.
+
+     What goes is the affordance, not the information: no focus ring, no
+     fill, no interactive cursor. Buttons are already hidden by the .vd-btn
+     rule above, which is correct — a printed Send button is a lie. */
+  .vd-input,.vd-textarea,.vd-select{
+    background:#fff;border:.5pt solid #8a857a;color:#1a1a17;
+    min-height:0;padding:4pt 6pt;box-shadow:none;
+  }
+  .vd-textarea{min-height:36pt}
+  /* The chevron is a background gradient; on paper it points at nothing. */
+  .vd-select{background-image:none;padding-right:6pt}
+  .vd-field{margin-bottom:8pt;break-inside:avoid;page-break-inside:avoid}
+  .vd-field__msg{color:#1a1a17}
+  .vd-check{min-height:0;padding:1pt 0}
+  .vd-check input{border:.5pt solid #1a1a17}
+  .vd-check input:checked::after{background:#1a1a17}
+
+  /* A skeleton is a statement about the network, not about the document.
+     Printed, it is four grey bars that mean nothing. */
+  .vd-skeleton{display:none !important}
+}

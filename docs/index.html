@@ -1,0 +1,986 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verdigris — the design system behind dreyburn.com</title>
+<meta name="description" content="Verdigris: a documented design system with published contrast measurements, dichromat simulation, a conformant topolang runtime, and a stated list of non-goals.">
+<meta name="color-scheme" content="dark light">
+<script>
+try{var t=localStorage.getItem('verdigris-theme');
+    if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}
+catch(e){}
+</script>
+<link rel="stylesheet" href="../verdigris/verdigris.css?v=1.7.0">
+<link rel="stylesheet" href="../verdigris/print.css?v=1.7.0">
+<script src="../verdigris/topolang.js?v=1.7.0" defer></script>
+<script src="../verdigris/verdigris.js?v=1.7.0" defer></script>
+<!-- The audit is shipped, not a dev-only tool: open the console and run
+     verdigrisAudit() to re-measure every conformance claim on this page. -->
+<script src="../verdigris/audit.js?v=1.7.0" defer></script>
+<style>
+  /* page-local: the docs need a couple of layout helpers the site does not */
+  .doc-lede{font-size:var(--vd-size-m);line-height:var(--vd-lead-1);max-width:var(--vd-measure);
+    color:var(--vd-text-strong)}
+  .doc-demo{border:1px solid var(--vd-rule);border-radius:var(--vd-radius);
+    padding:var(--vd-space-1);margin:var(--vd-space-1) 0;background:var(--vd-surface-sunken)}
+  .doc-demo__label{display:block;margin-bottom:var(--vd-space-1)}
+  /* These MUST out-specify .vd-table td.vd-is-num, which is (0,2,1) and paints
+     every numeric cell with --vd-data. A cell carrying both classes would
+     otherwise render a measured FAILURE in the passing accent — the exact
+     inversion of what the table reports. Matching (0,2,1) and relying on this
+     block loading after verdigris.css is what makes the verdict win. */
+  /* --vd-ok, NOT --vd-data. A verdict is a status, not a quantity, and the
+     data colour is numerals only — the rule vd-system-card enforces in code.
+     This page was breaking it: every "PASS" rendered in lime. Caught by
+     verdigrisAudit()'s data-colour check, which is the point of having one.
+     --vd-ok is the success colour the form state model already uses. */
+  .vd-table td.doc-pass{color:var(--vd-ok)}
+  .vd-table td.doc-fail{color:var(--vd-danger)}
+  .doc-pass{color:var(--vd-ok)}
+  .doc-fail{color:var(--vd-danger)}
+  /* Colour is never the only channel: every table below states its verdict in
+     the surrounding prose, and a failing ratio also carries a dagger. */
+  .doc-fail--marked::after{content:"\2009\2020"}
+  /* flex-wrap and min-width:0 are both load-bearing at 320px: the label has a
+     14ch floor and the specimen is display-sized type, so without them the row
+     refuses to shrink and pushes the document into horizontal scroll — a 1.4.10
+     failure. Wrapping lets the specimen drop below its own label. */
+  .doc-scale-row{display:flex;align-items:baseline;gap:var(--vd-space-1);flex-wrap:wrap;
+    border-bottom:1px solid var(--vd-rule);padding:var(--vd-space-h) 0}
+  .doc-scale-row span:first-child{font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+    color:var(--vd-text-muted);min-width:14ch}
+  .doc-scale-row span+span{min-width:0;overflow-wrap:anywhere}
+  .doc-baseline{background-image:repeating-linear-gradient(180deg,
+    rgba(170,255,0,.10) 0 1px,transparent 1px 30px);background-position:0 0}
+</style>
+</head>
+<body>
+<a class="vd-skip" href="#main">Skip to content</a>
+
+<vd-nav>
+  <div class="vd-nav__inner">
+    <a class="vd-nav__mark" href="../index.html">David Reyburn</a>
+    <ul class="vd-nav__list">
+      <li><a href="../index.html#work">Work</a></li>
+      <li><a href="../index.html#notes">Field Notes</a></li>
+      <li><a href="../index.html#about">About</a></li>
+      <li><a href="./" aria-current="true">System</a></li>
+    </ul>
+    <vd-theme-toggle></vd-theme-toggle>
+  </div>
+</vd-nav>
+
+<main id="main" class="vd-page">
+
+  <vd-hero field="off"
+    thesis="Verdigris."
+    sub="The design system this site is built on, published as a portfolio piece rather than hidden in a repo. Every contrast figure below is measured live in your browser from the actual token values, not typed in by hand.">
+  </vd-hero>
+
+  <div class="vd-spread">
+
+    <!-- ── rail: TOC ────────────────────────────────────────────── -->
+    <div class="vd-spread__rail">
+      <vd-toc for="#doc-body"></vd-toc>
+    </div>
+
+    <!-- ── body ─────────────────────────────────────────────────── -->
+    <div class="vd-spread__body" id="doc-body">
+
+      <section class="vd-section">
+        <span class="vd-label">01 / Position</span>
+        <h2 id="position">Position</h2>
+        <div class="vd-prose" style="margin-top:var(--vd-space-1)">
+          <p>
+            Verdigris began as a terminal colour scheme: fifteen values for syntax highlighting,
+            named for the patina on aged copper. This is its translation to the web, which is not
+            a port. A terminal palette solves one problem, telling code apart at a glance. A web
+            system solves a different one, and only some of the answers carry over.
+          </p>
+          <p>
+            Three commitments shape everything else. <strong>AAA contrast on all text</strong>,
+            measured and published, including the values that fail and why they are never used for
+            text. <strong>One accent per salience tier</strong>, which is the rule that keeps a
+            fifteen-colour ancestry from turning into noise. And <strong>every claim testable</strong>
+            — the tables on this page are computed from the live tokens, and where a claim turned out
+            to be false it is corrected here in public rather than quietly deleted.
+          </p>
+          <p>
+            This page used to open with a fourth: <strong>dark only</strong>, stated as a position
+            rather than an omission. That position has been retired. There is a paper theme now, and
+            it is not an inversion — on a bone ground every ink accent fails, so the light set is
+            authored rather than flipped. Dark is emitted light; paper is absorbed pigment. Section
+            02 has both, and section 09 records what is still deliberately absent.
+          </p>
+        </div>
+
+        <vd-quote>
+          <blockquote>
+            An interface that hides its own decision boundaries has not removed them.
+            It has moved them somewhere you cannot argue with.
+          </blockquote>
+          <figcaption>The reason this page exists</figcaption>
+        </vd-quote>
+      </section>
+
+      <!-- ── colour ─────────────────────────────────────────────── -->
+      <section class="vd-section">
+        <span class="vd-label">02 / Colour</span>
+        <h2 id="colour">Colour</h2>
+        <p class="doc-lede" style="margin-top:var(--vd-space-1)">
+          Measured live from the tokens when this page loaded — the ink set against
+          <code>--vd-ink-000</code>, the paper set against <code>--vd-paper-000</code>.
+          Change a token and these tables change with it. They cannot drift.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-2)">Ink — text values, AAA required</h4>
+        <vd-swatch token="--vd-bone-500" note="primary text" min="7"></vd-swatch>
+        <vd-swatch token="--vd-bone-600" note="emphasis" min="7"></vd-swatch>
+        <vd-swatch token="--vd-bone-700" note="maximum" min="7"></vd-swatch>
+        <vd-swatch token="--vd-bone-400" note="muted — the lowest legal text value" min="7"></vd-swatch>
+        <vd-swatch token="--vd-blue-400" note="link text" min="7"></vd-swatch>
+        <vd-swatch token="--vd-lime-400" note="live and measured data" min="7"></vd-swatch>
+        <vd-swatch token="--vd-green-400" note="structure — rules, marks, region state" min="7"></vd-swatch>
+        <vd-swatch token="--vd-red-400" note="error text" min="7"></vd-swatch>
+        <vd-swatch token="--vd-teal-500" note="editorial voice — quote rules, captions, marginalia" min="7"></vd-swatch>
+
+        <h4 style="margin-top:var(--vd-space-2)">Non-text values, 3:1 required</h4>
+        <p class="vd-prose" style="margin-bottom:var(--vd-space-1)">
+          These fail text contrast and are never set as a text colour. Publishing the failures
+          is the point: a table with no failing rows usually means the failing values were
+          quietly left out.
+        </p>
+        <vd-swatch token="--vd-orange-400" note="category marks and rules — NOT text" min="3"></vd-swatch>
+        <vd-swatch token="--vd-red-300" note="error borders" min="3"></vd-swatch>
+        <vd-swatch token="--vd-shadow-400" note="decorative rules only — not a UI component, so 1.4.11 does not apply" min="0"></vd-swatch>
+        <vd-swatch token="--vd-purple-400" note="unassigned, non-text only" min="3"></vd-swatch>
+
+        <h4 style="margin-top:var(--vd-space-2)">Paper — the light theme, measured against bone</h4>
+        <p class="vd-prose" style="margin-bottom:var(--vd-space-1)">
+          Not an inversion of the ink set. On a bone ground <em>every</em> ink accent fails:
+          lime measures 1.05:1, green 2.13:1, blue 2.12:1. So the paper accents are authored
+          rather than flipped — same hue families, opposite physics. Saturation rises as
+          lightness falls, which is what makes them read as inks rather than as dimmed glows.
+          Hue drift from their ink counterparts is held under 13°, so the families survive the
+          theme change: green 120°&rarr;131°, lime 80°&rarr;68°, blue 208°&rarr;204°, red 0°&rarr;0°.
+        </p>
+        <vd-swatch token="--vd-graphite-500" against="--vd-paper-000" note="primary text" min="7"></vd-swatch>
+        <vd-swatch token="--vd-graphite-600" against="--vd-paper-000" note="emphasis" min="7"></vd-swatch>
+        <vd-swatch token="--vd-graphite-700" against="--vd-paper-000" note="maximum — the ink ground, reused" min="7"></vd-swatch>
+        <vd-swatch token="--vd-graphite-400" against="--vd-paper-000" note="muted — also clears AAA on the recessed surface" min="7"></vd-swatch>
+        <vd-swatch token="--vd-slate-500" against="--vd-paper-000" note="link text" min="7"></vd-swatch>
+        <vd-swatch token="--vd-citron-500" against="--vd-paper-000" note="data, and the focus ring" min="7"></vd-swatch>
+        <vd-swatch token="--vd-fir-500" against="--vd-paper-000" note="structure" min="7"></vd-swatch>
+        <vd-swatch token="--vd-oxide-500" against="--vd-paper-000" note="error text" min="7"></vd-swatch>
+        <vd-swatch token="--vd-patina-500" against="--vd-paper-000" note="editorial voice" min="7"></vd-swatch>
+        <vd-swatch token="--vd-chalk-400" against="--vd-paper-000" note="decorative rules only, exempt" min="0"></vd-swatch>
+
+        <p class="vd-prose" style="margin-top:var(--vd-space-1)">
+          Two consequences worth stating. The <strong>focus ring cannot stay lime</strong> — at
+          1.05:1 on bone it would be an invisible focus indicator, which is a conformance failure
+          rather than a matter of taste, so it becomes citron and the rule "the focus ring is the
+          data colour" stays true in both themes. And <strong>surfaces move away from the text
+          colour, not downward</strong>: the ink ramp's recessed panel is darker because bone text
+          is light, so on paper the recessed panel is <em>lighter</em>. Mirroring the direction
+          instead of the principle put every paper accent below AAA on the sunken surface — fir
+          6.73:1, citron 6.65:1, slate 6.45:1 — which is how the mistake was caught.
+        </p>
+
+        <div class="doc-demo" style="margin-top:var(--vd-space-2)">
+          <span class="vd-label doc-demo__label">Three accents, one per salience tier</span>
+          <p class="vd-prose" style="margin:0 0 var(--vd-space-1)">
+            An earlier draft capped this at two accents. That was the right instinct expressed as
+            the wrong constraint: counting colours is a crude proxy for "do not make a rainbow".
+            The real discipline is that accents occupy different <em>salience tiers</em>, so they
+            read as a hierarchy instead of as peers competing for the same attention.
+          </p>
+          <div class="vd-table-scroll">
+            <table class="vd-table">
+              <tr><th>Token</th><th>Frequency</th><th>Distance from ground</th><th>Job</th></tr>
+              <tr><td><span style="color:var(--vd-structure)">--vd-structure</span></td>
+                  <td>high</td><td>closest</td>
+                  <td>Rules, section marks, list markers, the active nav indicator, and card
+                      hover and focus. The state of a region.</td></tr>
+              <tr><td><span style="color:var(--vd-link)">--vd-link</span></td>
+                  <td>medium</td><td>middle</td>
+                  <td>Text that navigates, and the rule directly under it. Nothing else.</td></tr>
+              <tr><td><span class="vd-num">--vd-data</span></td>
+                  <td>very low</td><td>furthest</td>
+                  <td>Numerics only, plus the focus ring. Not a number? Not the data colour.</td></tr>
+            </table>
+          </div>
+          <p class="vd-prose" style="margin:var(--vd-space-1) 0 0">
+            <strong>Distance from ground, not brightness.</strong> The earlier wording said data
+            was "maximum salience at 14.68:1", which only means anything on a dark ground — on
+            paper the data colour has to be the <em>darkest</em> thing, not the brightest. Stated
+            as distance, the tier holds in both themes.
+          </p>
+          <p class="vd-prose" style="margin:var(--vd-space-1) 0 0">
+            <strong>Link marks text; structure marks regions.</strong> The old rule gave link
+            colour "links and hover affordances", which collided with structure's claim on rules
+            and state the moment a hover affordance <em>was</em> a rule. Drawing the line by what
+            is being marked resolves it: a nav item hovers in link colour because it is link text,
+            while its active indicator is structure colour because that is the item's state; a card
+            hovers in structure colour throughout, because the whole region is the target and its
+            title is not set in link colour.
+          </p>
+          <p class="vd-prose" style="margin:var(--vd-space-1) 0 0">
+            The data rule is enforced in code rather than by discipline:
+            <code>vd-system-card</code> tests each proof value and only grants the data colour to
+            one that starts with a digit. Grades like <code>AAA</code> take
+            <code>--vd-text-strong</code> instead — they are not measurements, and a non-numeric
+            value in the data colour has no carrying channel. See section 07 for what that means.
+          </p>
+        </div>
+      </section>
+
+      <!-- ── type ───────────────────────────────────────────────── -->
+      <section class="vd-section">
+        <span class="vd-label">03 / Type</span>
+        <h2 id="type">Type</h2>
+        <p class="doc-lede" style="margin-top:var(--vd-space-1)">
+          Chivo for display, Literata for reading, IBM Plex Mono for labels, metadata and code.
+          All three are open licence and self-hosted. Total webfont payload is 503 KB across
+          13 faces, with no external requests.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-2)">A two-register scale, with a deliberate gap</h4>
+        <p class="vd-prose">
+          There is no intermediate size between 18px and 56px, and that is not an oversight.
+          Below the section heading, hierarchy is carried by weight, case, rules and numbering
+          instead of by size. A scale with a step for every occasion produces pages where
+          nothing is emphatic.
+        </p>
+        <div style="margin-top:var(--vd-space-1)">
+          <div class="doc-scale-row"><span>--vd-size-2xl · 72</span>
+            <span style="font-family:var(--vd-face-display);font-size:56px;line-height:60px;font-weight:600;color:var(--vd-text-max)">Thesis</span></div>
+          <div class="doc-scale-row"><span>--vd-size-xl · 56</span>
+            <span style="font-family:var(--vd-face-display);font-size:40px;line-height:45px;font-weight:500;color:var(--vd-text-max)">Section</span></div>
+          <div class="doc-scale-row"><span>— gap —</span>
+            <span style="font-family:var(--vd-face-mono);font-size:12px;color:var(--vd-text-muted)">nothing lives here, on purpose</span></div>
+          <div class="doc-scale-row"><span>--vd-size-m · 18</span>
+            <span style="font-family:var(--vd-face-display);font-size:18px;font-weight:600;color:var(--vd-text-strong)">Subhead and lead paragraph</span></div>
+          <div class="doc-scale-row"><span>--vd-size-s · 16</span>
+            <span style="font-size:16px">Body copy, set in Literata at 58 characters</span></div>
+          <div class="doc-scale-row"><span>--vd-size-xs · 14</span>
+            <span class="vd-mono">Metadata and code</span></div>
+          <div class="doc-scale-row"><span>--vd-size-micro · 12</span>
+            <span class="vd-label" style="display:inline">Labels and eyebrows</span></div>
+        </div>
+      </section>
+
+      <!-- ── rhythm ─────────────────────────────────────────────── -->
+      <section class="vd-section">
+        <span class="vd-label">04 / Rhythm</span>
+        <h2 id="rhythm">Rhythm</h2>
+        <p class="doc-lede" style="margin-top:var(--vd-space-1)">
+          Baseline-derived. Every vertical measurement is a multiple or a half of one line of
+          body text. Body sets 16px over 30px leading, so the unit is 30.
+        </p>
+        <p class="vd-prose">
+          The calibration answer was 16px over 1.85, which gives 29.6px. That is not a number you
+          can build a grid on, so it was tuned to a round 30 (1.875). The deviation is recorded
+          here rather than silently absorbed.
+        </p>
+        <div class="doc-demo doc-baseline" style="margin-top:var(--vd-space-1)">
+          <span class="vd-label doc-demo__label">Lime lines mark the 30px baseline</span>
+          <h3>Every line sits on it</h3>
+          <p class="vd-prose" style="margin-top:var(--vd-space-1)">
+            Accessibility has always been machine legibility. The screen reader was the first
+            agent, and everything we learned making interfaces legible to it applies directly
+            to the agents now arriving.
+          </p>
+        </div>
+      </section>
+
+      <!-- ── components ─────────────────────────────────────────── -->
+      <section class="vd-section">
+        <span class="vd-label">05 / Components</span>
+        <h2 id="components">Components</h2>
+        <p class="doc-lede" style="margin-top:var(--vd-space-1)">
+          Framework-agnostic custom elements in light DOM. No shadow roots anywhere, because
+          shadow DOM hides structure from screen readers and from browsing agents alike, and
+          this system takes the position that those are the same problem.
+        </p>
+
+        <div class="doc-demo">
+          <span class="vd-label doc-demo__label">vd-system-card</span>
+          <vd-system-card index="01" kicker="Agent systems" title="The Agent Operating System"
+            href="#" proof="agents:4|externally adopted:2026">
+            Hairline box, no fill, 2px radius. Hover draws a rule under the title.
+            Nothing moves and nothing lifts.
+          </vd-system-card>
+        </div>
+
+        <div class="doc-demo">
+          <span class="vd-label doc-demo__label">vd-note-card</span>
+          <vd-note-card date="2026-08" length="2,400 words"
+            title="Agent-Mediated Interaction and Shared Legibility" href="#"
+            dek="Rule-separated rather than boxed. Density is editorial, not gallery."></vd-note-card>
+        </div>
+
+        <div class="doc-demo">
+          <span class="vd-label doc-demo__label">vd-redact — sanitization as a visible decision</span>
+          <p class="vd-prose" style="margin:0">
+            The assistant runs in
+            <vd-redact data-reason="employer IP">a regulated annuity domain</vd-redact>
+            and the boundary is part of the design. Click or tab to reveal.
+            Redactions stay redacted when printed.
+          </p>
+        </div>
+
+        <div class="doc-demo">
+          <span class="vd-label doc-demo__label">Buttons and tags</span>
+          <button class="vd-btn vd-btn--primary" type="button">Read case study</button>
+          <button class="vd-btn" type="button">Download résumé</button>
+          <span class="vd-tag" style="margin-left:var(--vd-space-h)">Design systems</span>
+          <span class="vd-tag">Agent experience</span>
+        </div>
+      </section>
+
+      <!-- ── topolang ───────────────────────────────────────────── -->
+      <section class="vd-section">
+        <span class="vd-label">06 / Signature element</span>
+        <h2 id="topolang">topolang</h2>
+        <p class="doc-lede" style="margin-top:var(--vd-space-1)">
+          The hero field is not a decorative canvas effect. It is <em>Drift</em>, rendered by a
+          conformant browser runtime for topolang v1.3.2 — a language I wrote and specified —
+          drawing a warped fractional Brownian motion field through the <strong>SHADE</strong>
+          character mode over a palette authored for this site.
+        </p>
+        <p class="vd-prose">
+          The noise primitives are bit-exact ports of the normative arithmetic and the fixed
+          pipeline is implemented in order. The spec publishes a conformance vector, so the
+          claim is testable rather than asserted. This runs when you load the page:
+        </p>
+
+        <div class="doc-demo">
+          <span class="vd-label doc-demo__label">Live conformance run</span>
+          <div id="conformance" class="vd-mono">Running…</div>
+        </div>
+
+        <h4 style="margin-top:var(--vd-space-2)">One character mode, at every width</h4>
+        <p class="vd-prose">
+          Earlier versions switched modes at 860px — STRATA contour lines on desktop, SHADE below.
+          <strong>SHADE now runs everywhere.</strong> It reads as dithered relief rather than
+          line-work, which is quieter and far more legible where the display line crosses the
+          field, and the line is now meant to cross it.
+        </p>
+        <p class="vd-prose">
+          There is a consequence worth naming: SHADE is defined with <code>cfn: null</code>, so the
+          contour pass never runs, which means <strong>there is no contour colour anywhere on this
+          site</strong>. The <code>contourColor</code> on each palette is dead configuration, kept
+          only so the palettes keep the shape the spec describes. The layout still changes at 860px
+          — the field stops being a masked background and becomes a band above the display line,
+          in its own grid row, where no text can be over it — but the mode does not.
+        </p>
+        <p class="vd-prose">
+          The caption on the home page no longer names the mode; a credit line that also tries to
+          be a spec sheet is neither. The runtime still fills any element marked
+          <code>data-topo-mode</code> with whichever mode is actually live, so a caption can never
+          claim STRATA while SHADE is on screen. This page is now that hook's only consumer.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-2)">Motion, measured</h4>
+        <p class="vd-prose">
+          The field travels right to left at about 13 cells per second, crossing a 174-column hero
+          in roughly thirteen seconds. Earlier values ran 15 to 91 cells per second — the top of
+          that range crossed the hero in under two seconds, which is a gale rather than a drift.
+        </p>
+        <p class="vd-prose">
+          Two faults were fixed together, and they had been masking each other. The offsets were
+          being passed as <code>warpedFbm</code>'s own <code>dx</code>/<code>dy</code> parameters,
+          and that function feeds <code>dx</code> into the warp at full weight but into the final
+          sample at 0.6 — so one change was two different translations fought out against each
+          other, and the field deformed in place instead of sliding. Cross-correlating frames two
+          seconds apart and finding the best-matching shift:
+        </p>
+        <div class="vd-table-scroll">
+          <table class="vd-table" style="margin-top:var(--vd-space-1)">
+            <tr><th>Driving the offset via</th><th>Shift</th><th>Coherence</th></tr>
+            <tr><td><code>warpedFbm</code>'s <code>dx</code> parameter</td>
+                <td class="vd-is-num">−6</td>
+                <td class="doc-fail">0.943, decaying to 0.669 by 16s</td></tr>
+            <tr><td>the <code>x</code> <em>argument</em></td>
+                <td class="vd-is-num">−9</td>
+                <td class="doc-pass">1.000, holding to 8s</td></tr>
+          </table>
+        </div>
+        <p class="vd-prose" style="margin-top:var(--vd-space-1)">
+          Coherence 1.000 is not luck: shifting the <code>x</code> argument shifts the entire
+          composite function, warp included, so it is a rigid translation by construction. It also
+          travels 1.5&times; further per unit of drift, carrying a coefficient of 1 rather than 0.6.
+          <code>warpedFbm</code> itself is untouched — the change is which arguments the renderer
+          passes, which is the sketch's business, not the spec's. The second fault was a sign error:
+          a rising offset slides features <em>left</em>, so the heading is 0, not π.
+        </p>
+        <p class="vd-prose">
+          A separate, much slower accumulator drives terrain evolution, so the field is not a rigid
+          photograph sliding past. It is deliberately tiny — 0.0002 per frame holds coherence at
+          0.992 over eight seconds, 0.0010 drops it to 0.853 — so it buys weather without spending
+          the sense of travel.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-2)">Two things worth stating plainly</h4>
+        <p class="vd-prose">
+          <strong>A discrepancy in my own spec.</strong> The canonical example traces
+          <code>colorSlot = 3</code> for elevation 0.30, justified as "0.12, 0.22, 0.30 are all
+          ≤ 0.30". But 0.30 is the elevation, not a threshold; the third threshold is 0.32. By
+          the normative rule the value is 2. It does not affect conformance, because the contour
+          pass overwrites the slot and the published vector still matches, but the prose needs
+          a correction in v1.3.3.
+        </p>
+        <p class="vd-prose">
+          <strong>A guarantee that moved.</strong> The bands used to be luminance-capped at source,
+          so the field was safe under text at any opacity. That made it too faint to be worth
+          rendering. The cap now lives in the mask instead: it holds the field to an effective 0.28
+          alpha in ink and 0.27 on paper across the text column, and only reaches full alpha past
+          it, where no text sits. The bands are consequently <em>not</em> safe at full alpha — the
+          darkest paper band alone is 1.40:1 under ink — which is fine because the mask guarantees
+          text never meets it, but it does mean the ramp and the mask alpha are a matched pair.
+          Change one without the other and the guarantee is gone.
+        </p>
+        <p class="vd-prose">
+          <strong>Density is a compensation, not a preference.</strong> SHADE's fill set is
+          <code>[' ', ' ', '.', '.', '+', '+', '#', '@']</code> — slots 0 <em>and</em> 1 are spaces,
+          so a quarter of the elevation range renders as nothing by definition, and a gamma above 1
+          pushes values down into exactly those two slots. Measured over 30 seconds of real drift at
+          the old gamma of 1.7: <strong>36.7% of cells blank</strong>. The clean fix would be a fill
+          set with one blank slot instead of two, but SHADE is spec-defined and editing it would
+          cost the conformance claim for a cosmetic gain. So gamma dropped to 1.15 and the sketch
+          lifts the whole range off a floor of 0.14 instead — <strong>9% blank</strong>, with a far
+          more even distribution across the glyph slots. Valleys survive; holes do not.
+        </p>
+      </section>
+
+      <!-- ── accessibility ──────────────────────────────────────── -->
+      <section class="vd-section">
+        <span class="vd-label">07 / Accessibility</span>
+        <h2 id="accessibility">Accessibility</h2>
+        <p class="doc-lede" style="margin-top:var(--vd-space-1)">
+          Target is WCAG 2.2 AAA for text, on a dark generative site. The measurements are
+          in section 02 and they are taken from the live tokens.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-1)">The generative field</h4>
+        <p class="vd-prose">
+          The canvas is <code>aria-hidden</code>, because it carries no information a reader
+          needs and describing a drifting noise field to a screen reader is noise, not access.
+          Its provenance is in the visible caption instead, where it is available to everyone.
+        </p>
+        <p class="vd-prose">
+          The field <em>does</em> run under the display line — that is deliberate — and the mask is
+          what keeps it conformant. It holds the field to a capped alpha across the text column and
+          only reaches full strength past it. The mask is a contrast constraint, not a stylistic
+          one, and it is load-bearing in both themes. Compositing the most extreme cell each palette
+          can produce, at the held alpha, over its own ground:
+        </p>
+        <div class="vd-table-scroll">
+          <table class="vd-table" style="margin-top:var(--vd-space-1)">
+            <tr><th>Theme</th><th>Worst composite</th><th>Display</th><th>Body</th><th>Muted</th></tr>
+            <tr><td>ink — held 0.452 &times; canvas 0.62 = 0.280</td>
+                <td class="vd-mono">#20381E</td>
+                <td class="vd-is-num doc-pass">10.89</td>
+                <td class="vd-is-num doc-pass">7.78</td>
+                <td class="vd-is-num doc-fail doc-fail--marked">4.97</td></tr>
+            <tr><td>paper — held 0.27 &times; canvas 1.0 = 0.270</td>
+                <td class="vd-mono">#C1BFB7</td>
+                <td class="vd-is-num doc-pass">9.81</td>
+                <td class="vd-is-num doc-pass">7.75</td>
+                <td class="vd-is-num doc-fail doc-fail--marked">5.40</td></tr>
+          </table>
+        </div>
+        <span class="vd-label" style="margin-top:var(--vd-space-q)">† below the 7:1 AAA threshold</span>
+        <p class="vd-prose" style="margin-top:var(--vd-space-1)">
+          The muted value fails in both themes, which is why the hero promotes its sub-line and its
+          caption one step: <strong>nothing inside the hero may use the muted text value.</strong>
+          That is a rule about one component, stated rather than left to be rediscovered.
+        </p>
+        <p class="vd-prose">
+          These alphas were lowered deliberately after the field's density went up. Until then the
+          measured worst case sat well above the arithmetic floor, because the extreme band rarely
+          landed inside the text column — 9.78:1 measured against a 7.51 floor in ink. Making the
+          field denser made that band commonplace and the measured worst collapsed onto the floor:
+          7.55:1 in ink, and 7.06:1 on paper with six hundredths of margin. Still conformant, but
+          the buffer had been luck rather than design, so it was bought back on purpose.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-1)">Colour vision, measured</h4>
+        <p class="vd-prose">
+          Contrast ratios are measured on rendered colour, and WCAG does not simulate colour vision
+          deficiency, so the AAA claim above stands whatever this section says. It is here because
+          the ratios are supposed to buy a <em>hierarchy</em>, and a hierarchy that dissolves for
+          one reader in twelve has not been delivered. Simulated with the Viénot 1999 dichromat
+          matrices, applied in linear RGB:
+        </p>
+        <div class="vd-table-scroll">
+          <table class="vd-table" style="margin-top:var(--vd-space-1)">
+            <tr><th>Pair, same context</th><th>Measured</th><th>Deuteranopia</th><th>Protanopia</th><th>What carries it</th></tr>
+            <tr><td>structure ↔ link</td><td class="vd-is-num">179°</td>
+                <td class="doc-pass">179.3°</td><td class="doc-pass">pass</td><td>colour alone</td></tr>
+            <tr><td>data ↔ link</td><td class="vd-is-num">128°</td>
+                <td class="doc-pass">179.7°</td><td class="doc-pass">179.8°</td><td>colour alone</td></tr>
+            <tr><td>structure ↔ data</td><td class="vd-is-num">40°</td>
+                <td class="doc-fail">0.4°</td><td class="doc-fail">0.3°</td>
+                <td>size and position — both are mono tabular numerals, so hue does nothing.
+                    The card index is 12px in an uppercase kicker row; the proof figures are
+                    12px below a rule, 330px away.</td></tr>
+            <tr><td>data ↔ body text</td><td class="vd-is-num">35°</td>
+                <td class="doc-fail">0.3°</td><td class="doc-fail">3.1°</td>
+                <td>the mono face and tabular figures. Data is always monospaced; prose never is.
+                    That is why a data figure still reads as a figure at 1.27:1.</td></tr>
+          </table>
+        </div>
+        <p class="vd-prose" style="margin-top:var(--vd-space-1)">
+          <strong>The rule, stated so it can be checked.</strong> Any two tokens carrying different
+          meanings in the same context must separate after dichromat simulation — 20° of hue or 3:1
+          of value — and where colour cannot do it, a named non-colour channel must, and is named
+          above.
+        </p>
+        <p class="vd-prose">
+          An earlier version of this page claimed green and lime "stay distinguishable under
+          deuteranopia, where hue alone would fail". Measured, that is false: they simulate to the
+          <em>same hue</em>, 0.4° apart. The absolute form of the rule turned out to be
+          unsatisfiable by any chromatic palette on a dark ground — every accent is AAA against the
+          same ground, which compresses their mutual ratios to 1–2:1, and two of three dichromat
+          axes collapse hue to a single yellow–blue opposition, so at most one accent can sit on the
+          blue side. Sweeping 115°–185° at AAA on <code>--vd-ink-000</code>, the flip lands between
+          160° and 165°: no structure hue is far from both lime and blue. Structure picks a side.
+          Green picks the yellow side, which separates it from link blue and collides it with data.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-1)">Reachable pairs</h4>
+        <p class="vd-prose">
+          An accent over <code>--vd-surface-selected</code> measures 5.6–5.9:1 on paper and 5.5–5.7:1
+          in ink, and that state cannot occur: selection forces the maximum text value, and the only
+          other use of that surface is a collapsed redaction, which sets the text transparent. The
+          same holds for the raised surface, where the two rules that use it set either the maximum
+          or the primary text value. Combinations that are unreachable by construction are listed
+          as such rather than tested, because testing them proves nothing.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-1)">Reduced motion</h4>
+        <p class="vd-prose">
+          Not "everything stops". The field freezes to a single deterministic seeded frame, so
+          it is still generative and still rendered by the DSL, just not advancing. The same
+          seed always produces the same frame. topolang v1.3.2 requires runtimes to expose
+          exactly this. Rule-draw hovers resolve to a static underline at reduced opacity,
+          because a hover affordance that vanishes entirely is a usability regression.
+        </p>
+        <p class="vd-prose">
+          The setting is honoured live. Flipping it in the OS reconfigures the field without
+          a reload.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-1)">Agent legibility</h4>
+        <p class="vd-prose">
+          Every component is light DOM and upgrades markup that is already valid and semantic
+          without JavaScript. The page carries JSON-LD, real landmarks, and a heading order that
+          matches its visual order. The argument is that a browsing agent and a screen reader
+          want the same thing, and that treating them as one requirement is cheaper and more
+          honest than treating them as two.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-1)">Reflow, measured</h4>
+        <p class="vd-prose">
+          WCAG 1.4.10 requires content to reflow at 320 CSS pixels, which is what 400% zoom on a
+          1280px screen produces. Tested by loading this site in a 320px iframe, because
+          constraining an element does not fire media queries and a resized window on a scaled
+          display does not either. <strong>Result: document scroll width 305px against a 305px
+          viewport. No horizontal scrolling.</strong>
+        </p>
+        <p class="vd-prose">
+          It failed the first time. The navigation was the single offending element in the whole
+          page: a non-wrapping flex row inside a fixed 60px bar cannot reflow no matter what the
+          viewport does. That is recorded here rather than quietly fixed, because the useful part
+          of an audit is what it caught.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-1)">Target size, measured</h4>
+        <p class="vd-prose">
+          WCAG 2.5.8 (AA) requires 24&times;24 CSS pixels. <strong>Every target passes.</strong>
+          WCAG 2.5.5 (AAA) requires 44&times;44, and that is met for every standalone control:
+          navigation, masthead, tags, table-of-contents entries, buttons and the copy control.
+        </p>
+        <p class="vd-prose">
+          <strong>Heading links used to be a stated deviation. They are not any more.</strong>
+          System-card and note-card titles sit at 30px, and the two ways of reaching 44 were both
+          rejected: 45px leading on 18px type wrecks a two-line title, and a stretched overlay link
+          breaks text selection across the card. The card itself is now the target instead — far
+          past 44&times;44 — with the click forwarded in script under three guards: a press that
+          moved more than 6px was a drag, a non-empty selection means the reader is highlighting,
+          and a target inside another interactive element handles itself. So the prose stays
+          selectable and no overlay exists.
+        </p>
+        <p class="vd-prose">
+          The anchor remains the only focusable thing in the card. No <code>tabindex</code>, no
+          <code>role="link"</code> on the region — that would announce the same destination twice —
+          and <code>:focus-within</code> carries the visual state so keyboard and pointer get the
+          identical affordance. Modifier keys survive because the event is re-dispatched rather than
+          synthesised, so ctrl and cmd click still open a tab. One gap, stated rather than papered
+          over: middle-clicking the card <em>body</em> does not open a tab, because that is browser
+          behaviour attached to a real anchor hit and cannot be synthesised. Middle-clicking the
+          title works.
+        </p>
+        <p class="vd-prose">
+          Inline links in prose are exempt under 2.5.8 and are left alone. The claim is therefore
+          AA on every target and AAA on every standalone control and card.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-1)">Still missing</h4>
+        <p class="vd-prose">
+          Screen-reader transcripts, and the other known gaps, are listed together in
+          <a href="#non-goals">§09</a> rather than split across two sections.
+        </p>
+      </section>
+
+      <!-- ── usage ──────────────────────────────────────────────── -->
+      <section class="vd-section">
+        <span class="vd-label">08 / Usage</span>
+        <h2 id="usage">Usage</h2>
+        <vd-code file="index.html">
+<pre>&lt;link rel="stylesheet" href="verdigris/verdigris.css"&gt;
+&lt;link rel="stylesheet" href="verdigris/print.css"&gt;
+&lt;script src="verdigris/topolang.js" defer&gt;&lt;/script&gt;
+&lt;script src="verdigris/verdigris.js" defer&gt;&lt;/script&gt;
+
+&lt;vd-hero
+  thesis="Designing instruments for cognition, creativity, and complex systems."
+  seed="20260801"&gt;&lt;/vd-hero&gt;
+
+&lt;vd-system-card index="01" kicker="Agent systems"
+  title="The Agent Operating System" href="/work/agent-os"
+  proof="agents:4|externally adopted:2026"&gt;
+  A governed multi-agent organization on infrastructure I own.
+&lt;/vd-system-card&gt;</pre>
+        </vd-code>
+        <p class="vd-prose" style="margin-top:var(--vd-space-1)">
+          Editors and frameworks can read the element API from
+          <code>custom-elements.json</code> at the repository root — a Custom Elements Manifest
+          covering all nine elements, their attributes and their events. It is hand-authored; see
+          <a href="#non-goals">§09</a> for why, and for what that costs.
+        </p>
+        <p class="vd-prose">
+          Tailwind is deliberately absent. A hand-authored system is the argument this site is
+          making, and utility classes would undercut it.
+        </p>
+        <p class="vd-prose">
+          The theme control is an empty element that the script upgrades:
+          <code>&lt;vd-theme-toggle&gt;&lt;/vd-theme-toggle&gt;</code>. With script off it renders
+          nothing and <code>prefers-color-scheme</code> still selects the theme, which is why it is
+          not a <code>&lt;button&gt;</code> in the markup — a control that cannot work should not be
+          advertised. A stored choice overrides the OS in both directions, on specificity alone, with
+          no <code>!important</code> anywhere.
+        </p>
+      </section>
+
+      <!-- ── non-goals ──────────────────────────────────────────── -->
+      <section class="vd-section">
+        <span class="vd-label">09 / Non-goals</span>
+        <h2 id="non-goals">Non-goals</h2>
+        <p class="doc-lede" style="margin-top:var(--vd-space-1)">
+          Measured against a general-purpose enterprise design system, this one has gaps. Most of
+          them are decisions. Listing them is cheaper than being asked, and an unacknowledged gap
+          reads as an oversight where a stated one reads as scope.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-2)">Not built, on purpose</h4>
+        <div class="vd-table-scroll">
+          <table class="vd-table" style="margin-top:var(--vd-space-1)">
+            <tr><th>Absent</th><th>Why</th></tr>
+            <tr><td>Framework adapters for React, Vue, Svelte</td>
+                <td>React 19 consumes custom elements without a wrapper, so three published
+                    packages would triple the maintained surface and guarantee behavioural drift —
+                    which would mean auditing accessibility three times per component, forever. The
+                    substitute now exists: <code>custom-elements.json</code>, one artifact consumed
+                    by every editor and framework, and the same machine-legibility argument this
+                    system already makes about screen readers. It is hand-authored, because adding
+                    an analyzer would put npm and a build step into a project that has neither — so
+                    it carries a <code>checkedAgainst</code> field recording when it was last
+                    verified against the source, since a hand-written manifest can drift and a
+                    generated one cannot.</td></tr>
+            <tr><td>A published Figma or Penpot kit</td>
+                <td>The tokens live in CSS with their measured ratios in comments beside them. A
+                    design tool cannot hold that, so a kit would either drop the measurements or
+                    become a second source of truth to keep in sync. This page is the reference.</td></tr>
+            <tr><td>A bidirectional token pipeline</td>
+                <td>Same reason inverted: moving the source of truth into a hosted file would take
+                    it out of version control and away from the place the contrast numbers are
+                    computed and enforced. A one-way DTCG export is the ceiling here.</td></tr>
+            <tr><td>Dropdown menus, tabs, pagination, breadcrumbs</td>
+                <td>Nothing in this site needs them, and a four-item nav does not want full ARIA
+                    menu semantics. Speculative primitives rot.</td></tr>
+            <tr><td>A working contact form</td>
+                <td>The form <em>kit</em> in §10 is built and the form is not, which looks like the
+                    contradiction of the row above and is worth separating rather than glossing.
+                    A speculative primitive is one built against an imagined future requirement,
+                    and it rots because nothing exercises it and no one notices when it breaks. The
+                    form kit is built against a stated present one: it is the specimen that carries
+                    §10's argument about the success colour, and that argument cannot be made in
+                    prose alone. It is exercised every time the page is opened. What is absent is
+                    the <em>endpoint</em> — submitting anywhere needs a third-party service, which
+                    is a runtime dependency this site does not have and does not currently need.</td></tr>
+            <tr><td>A modal dialog</td>
+                <td>Confirmations, errors and disclosures resolve inline. That is more accessible,
+                    and it is consistent with the argument that an interface hiding its decision
+                    boundaries has not removed them — an inline confirmation <em>is</em> a visible
+                    boundary.</td></tr>
+          </table>
+        </div>
+
+        <h4 style="margin-top:var(--vd-space-2)">Known limits of what is built</h4>
+        <p class="vd-prose">
+          Screen-reader transcripts have not been recorded — that needs NVDA or VoiceOver driven by
+          hand and cannot be automated honestly. Middle-clicking a card body does not open a tab.
+          The field's seed is fixed, so every visitor sees the same sequence at the same moment. And
+          the metadata strip is single-line by design: it changes form below 860px rather than
+          wrapping, because wrapping it leaves a rule hanging in space.
+        </p>
+        <p class="vd-prose">
+          <strong>What this page is not.</strong> It documents one site's system. It is published as
+          a portfolio piece — evidence of how the decisions were made and what they cost — rather
+          than as a dependency for anyone else to install. If that changes, most of the table above
+          becomes debt rather than scope, and it should be re-read in that light.
+        </p>
+      </section>
+
+      <!-- ── forms ──────────────────────────────────────────────── -->
+      <section class="vd-section">
+        <span class="vd-label">10 / Forms</span>
+        <h2 id="forms">Forms and feedback</h2>
+        <p class="doc-lede" style="margin-top:var(--vd-space-1)">
+          Every control below is live. Submit the form with it empty, or type a bad address and
+          tab away — the states are the real ones, driven by the browser's own Constraint
+          Validation API with the native bubble replaced.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-2)">There is no colour left for success</h4>
+        <p class="vd-prose">
+          Validation wants two new meanings — <em>this is wrong</em> and <em>this is fine</em> —
+          and the second one has no hue available. Simulated with the Viénot matrices, every
+          conventional success colour collapses against the error colour. This is the canonical
+          red-versus-green failure, and the system's own tokens reproduce it exactly.
+        </p>
+        <div class="vd-table-scroll">
+          <table class="vd-table" style="margin-top:var(--vd-space-1)">
+            <tr><th>Success candidate, against error</th><th>Deuteranopia</th><th>Protanopia</th><th>Value</th><th>Verdict</th></tr>
+            <tr><td>green <span class="vd-mono">#44BB44</span> — ink</td>
+                <td class="vd-is-num doc-fail doc-fail--marked">0.7°</td>
+                <td class="vd-is-num doc-fail doc-fail--marked">4.1°</td>
+                <td class="vd-is-num">1.01:1</td><td class="doc-fail">collapses</td></tr>
+            <tr><td>lime <span class="vd-mono">#AAFF00</span> — ink</td>
+                <td class="vd-is-num doc-fail doc-fail--marked">0.3°</td>
+                <td class="vd-is-num doc-fail doc-fail--marked">4.4°</td>
+                <td class="vd-is-num">2.00:1</td><td class="doc-fail">collapses</td></tr>
+            <tr><td>teal <span class="vd-mono">#4FB8AF</span> — ink</td>
+                <td class="vd-is-num">180.0°</td>
+                <td class="vd-is-num doc-fail doc-fail--marked">4.6°</td>
+                <td class="vd-is-num">1.04:1</td><td class="doc-fail">collapses on one axis</td></tr>
+            <tr><td>fir <span class="vd-mono">#12551E</span> — paper</td>
+                <td class="vd-is-num doc-fail doc-fail--marked">0.0°</td>
+                <td class="vd-is-num doc-fail doc-fail--marked">1.2°</td>
+                <td class="vd-is-num">1.02:1</td><td class="doc-fail">collapses</td></tr>
+            <tr><td>blue <span class="vd-mono">#7FA9CE</span> — ink</td>
+                <td class="vd-is-num">180.0°</td><td class="vd-is-num">175.4°</td>
+                <td class="vd-is-num">1.00:1</td><td class="doc-pass">separable</td></tr>
+            <tr><td>slate <span class="vd-mono">#22506F</span> — paper</td>
+                <td class="vd-is-num">180.0°</td><td class="vd-is-num">180.0°</td>
+                <td class="vd-is-num">1.06:1</td><td class="doc-pass">separable</td></tr>
+          </table>
+        </div>
+        <span class="vd-label" style="margin-top:var(--vd-space-q)">† below the 20° separation floor</span>
+
+        <p class="vd-prose" style="margin-top:var(--vd-space-1)">
+          Blue is the only hue that clears both axes — and it is already the link colour. So
+          <code>--vd-ok</code> aliases <code>--vd-link</code>, and the collision is paid for
+          rather than denied. A success line is separated from a real link by two things, both
+          required: <strong>it carries a glyph, and it is not underlined.</strong>
+        </p>
+        <p class="vd-prose">
+          Which is why inline links are underlined now, and were not before. That change was
+          overdue on its own: a link identified by colour alone needs 3:1 against the surrounding
+          text under WCAG G183, and measured, link-against-body is
+          <span class="vd-mono">1.51:1</span> in ink and <span class="vd-mono">1.67:1</span> on
+          paper. It was a 1.4.1 failure independent of forms. Components that already carry a
+          non-colour channel — the nav, card titles, buttons, the table of contents — opt out.
+        </p>
+        <p class="vd-prose">
+          <strong>Warning carries no hue at all.</strong> Orange is
+          <span class="vd-mono">5.77:1</span>, a non-text value, so a warning
+          <em>message</em> could not be orange without breaking the AAA commitment. Inventing a
+          fourth accent to say "careful" was not worth a fourth accent. The glyph and the wording
+          carry it, and <code>--vd-warn</code> resolves to the ordinary text colour — named, so
+          that it is a decision rather than an omission.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-2)">The specimen</h4>
+        <div class="doc-demo">
+          <span class="doc-demo__label vd-label">Live — validates on blur, then on every keystroke</span>
+          <vd-form>
+            <form class="vd-form">
+              <p class="vd-form__legend">Fields marked <span class="vd-form__req">*</span> are required.</p>
+
+              <div class="vd-field">
+                <label class="vd-field__label" for="d-name">Full name<span class="vd-form__req" aria-hidden="true">*</span></label>
+                <input class="vd-input" id="d-name" name="name" type="text" required
+                       data-msg-required="Enter your name so I know who I am replying to.">
+              </div>
+
+              <div class="vd-field">
+                <label class="vd-field__label" for="d-email">Email<span class="vd-form__req" aria-hidden="true">*</span></label>
+                <input class="vd-input" id="d-email" name="email" type="email" required
+                       data-msg-required="An email address is required."
+                       data-msg-type="This address is missing an @, or has a typo after it."
+                       data-msg-valid="That address will work.">
+                <p class="vd-field__hint" id="d-email-hint">Only used to reply. Nothing is stored.</p>
+              </div>
+
+              <div class="vd-field">
+                <label class="vd-field__label" for="d-kind">Enquiry type</label>
+                <select class="vd-select" id="d-kind" name="kind">
+                  <option>Consulting</option>
+                  <option>Speaking</option>
+                  <option>Something else</option>
+                </select>
+              </div>
+
+              <div class="vd-field">
+                <label class="vd-field__label" for="d-msg">Message<span class="vd-form__req" aria-hidden="true">*</span></label>
+                <textarea class="vd-textarea" id="d-msg" name="message" required minlength="20"
+                          data-msg-required="Say something about what you are working on."
+                          data-msg-short="A little more detail would help — twenty characters minimum."></textarea>
+              </div>
+
+              <fieldset>
+                <legend>Preferences</legend>
+                <label class="vd-check"><input type="checkbox" checked><span>Send me a copy of this message</span></label>
+                <label class="vd-check"><input type="checkbox"><span>I am happy to be quoted</span></label>
+                <label class="vd-check"><input type="radio" name="d-when" checked><span>Reply whenever</span></label>
+                <label class="vd-check"><input type="radio" name="d-when"><span>Reply this week</span></label>
+                <label class="vd-check"><input type="checkbox" disabled><span>Disabled, to show the state</span></label>
+              </fieldset>
+
+              <div class="vd-field">
+                <label class="vd-field__label" for="d-search">Search</label>
+                <input class="vd-input" id="d-search" type="search" placeholder="Type to filter">
+              </div>
+
+              <div style="display:flex;gap:var(--vd-space-h);margin-top:var(--vd-space-1)">
+                <button class="vd-btn vd-btn--primary" type="submit">Send</button>
+                <button class="vd-btn" type="reset">Reset</button>
+              </div>
+            </form>
+          </vd-form>
+        </div>
+        <p class="vd-prose">
+          Nothing is submitted anywhere — there is no endpoint, by choice. The form is here to be
+          <em>inspected</em>, which §09 distinguishes from being built speculatively: a specimen
+          that demonstrates a documented state model is the deliverable, not scaffolding for a
+          feature nobody asked for.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-2)">What each state does</h4>
+        <div class="vd-table-scroll">
+          <table class="vd-table vd-table--zebra" style="margin-top:var(--vd-space-1)">
+            <thead>
+              <tr><th>State</th><th>Border</th><th>Message</th><th>Announced as</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>rest</td><td>rule-strong hairline</td><td>none</td><td>—</td></tr>
+              <tr><td>focus</td><td>focus ring, 3px, offset 1</td><td>unchanged</td><td>—</td></tr>
+              <tr><td>invalid</td><td>danger, plus a 2px inset left bar</td><td><span class="vd-mono">!</span> below the control</td><td><code>aria-invalid</code> + <code>aria-describedby</code></td></tr>
+              <tr><td>valid</td><td>ok, which is the link colour</td><td><span class="vd-mono">✓</span> below the control</td><td><code>aria-describedby</code></td></tr>
+              <tr><td>warn</td><td>rule-strong, unchanged</td><td><span class="vd-mono">‼</span>, ordinary text colour</td><td><code>aria-describedby</code></td></tr>
+              <tr><td>disabled</td><td>dashed, muted text</td><td>none</td><td>native <code>disabled</code></td></tr>
+              <tr><td>readonly</td><td>plain rule, page surface</td><td>none</td><td>native <code>readonly</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="vd-prose" style="margin-top:var(--vd-space-1)">
+          <strong>Disabled is muted, never faded.</strong> The usual treatment is
+          <code>opacity:.5</code>, which composites the text toward the surface and destroys the
+          measured ratio — an AAA token becomes whatever falls out of the blend. Muted text on the
+          page ground is <span class="vd-mono">7.06:1</span> in ink and
+          <span class="vd-mono">8.50:1</span> on paper, so the disabled state is still legible,
+          which is the point: a control you cannot use is still a control you must be able to read.
+        </p>
+        <p class="vd-prose">
+          The message glyph is a real character in the mono face, not an icon font and not a
+          background image, so it survives forced-colours mode, copy-paste and a failed asset
+          load. It is <code>aria-hidden</code>, because the sentence beside it already says the
+          same thing in words — and that sentence is author-supplied via
+          <code>data-msg-*</code>, so the form can say "This address is missing an @" instead of
+          "Please fill out this field."
+        </p>
+        <p class="vd-prose">
+          <strong>No error summary.</strong> On submit, focus moves to the first invalid control
+          and its message is already wired to it, so moving focus is what announces it. A summary
+          block duplicates every message and lets the two drift apart; on a form this length it
+          is scaffolding around a molehill. On a twenty-field form the trade reverses, and that
+          is worth stating rather than pretending the choice is universal.
+        </p>
+
+        <h4 style="margin-top:var(--vd-space-2)">Loading and empty</h4>
+        <div class="vd-grid" style="margin-top:var(--vd-space-1)">
+          <div class="doc-demo">
+            <span class="doc-demo__label vd-label">Skeleton</span>
+            <span class="vd-skeleton vd-skeleton--title"></span>
+            <span class="vd-skeleton"></span>
+            <span class="vd-skeleton"></span>
+            <span class="vd-skeleton vd-skeleton--short"></span>
+          </div>
+          <div class="doc-demo">
+            <span class="doc-demo__label vd-label">Empty</span>
+            <div class="vd-empty" style="padding-block:0">
+              <div class="vd-empty__value">0</div>
+              <div class="vd-empty__label">results</div>
+              <p class="vd-empty__note">No filter matches. The instrument reads zero; it has not
+                broken and it is not apologising.</p>
+            </div>
+          </div>
+        </div>
+        <p class="vd-prose" style="margin-top:var(--vd-space-1)">
+          The skeleton does not shimmer. A sweep animation on a block that may sit there for
+          several seconds is what 2.2.2 exists to prevent, and a loading state has nowhere sensible
+          to put a pause control — so the movement had to go rather than acquire one.
+        </p>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<vd-footer>
+  <div class="vd-footer__inner">
+    <div>
+      <span class="vd-label">Verdigris</span>
+      <p class="vd-mono" style="margin-top:var(--vd-space-h);color:var(--vd-text-muted)">
+        v1.7.0 · ink and paper · AAA
+      </p>
+    </div>
+    <div class="vd-footer__sig">
+      <b>David Reyburn</b><br>
+      a studio practice by Chives
+    </div>
+  </div>
+</vd-footer>
+
+<script>
+window.addEventListener('load', function () {
+  const el = document.getElementById('conformance');
+  if (!el || !window.topolang) { if (el) el.textContent = 'topolang did not load.'; return; }
+  const t = window.topolang.selfTest();
+  const rows = t.results.map(function (r) {
+    return '<div>' + (r.pass ? '<span class="doc-pass">PASS</span>' : '<span class="doc-fail">FAIL</span>') +
+      '  ' + r.name + (r.pass ? '' : '  (got ' + r.got + ', want ' + r.want + ')') + '</div>';
+  }).join('');
+  el.innerHTML = rows +
+    '<div style="margin-top:var(--vd-space-h);border-top:1px solid var(--vd-rule);padding-top:var(--vd-space-h)">' +
+    '<span class="' + (t.conformant ? 'doc-pass' : 'doc-fail') + '">' +
+    t.passed + '/' + t.total + ' · ' +
+    (t.conformant ? 'CONFORMANT with spec-topolang v1.3.2' : 'NON-CONFORMANT') + '</span></div>';
+});
+</script>
+</body>
+</html>

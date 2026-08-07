@@ -1,0 +1,1673 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   VERDIGRIS
+   Design system for dreyburn.com
+
+   Spine        Signal Lab
+   Guests       Verdigris Native (long-form) · Black Box (technical detail)
+                Prismatic Instrument (multi-pillar only)
+   Type         Chivo · Literata · IBM Plex Mono
+   Rhythm       Baseline-derived, 30px
+   Container    Asymmetric, content column plus persistent rail
+   Contrast     WCAG 2.2 AAA on all text. Measured values are in comments.
+   Theme        Dark only, by design. See print.css for the paper stylesheet.
+
+   Three tiers, in order: primitives, semantic, component.
+   Never reference a tier-1 primitive directly in a component. Go through
+   the semantic layer so the system stays re-themeable.
+
+   CONVENTION — no padding/margin shorthands on composable classes.
+   Classes that can land on the SAME element (.vd-page + .vd-section do, on
+   every homepage section) must use padding-inline / padding-block, never the
+   shorthand. `padding: 90px 0` does not mean "set the vertical padding", it
+   means "set all four, horizontal to zero", so it silently wipes whatever
+   the other class set. Desktop hides that behind auto margins; mobile puts
+   the text against the screen edge.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── fonts ───────────────────────────────────────────────────────────── */
+@font-face{font-family:Chivo;src:url(fonts/chivo-400-normal.woff2)format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:Chivo;src:url(fonts/chivo-400-italic.woff2)format('woff2');font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:Chivo;src:url(fonts/chivo-500-normal.woff2)format('woff2');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:Chivo;src:url(fonts/chivo-600-normal.woff2)format('woff2');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:Chivo;src:url(fonts/chivo-700-normal.woff2)format('woff2');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:Literata;src:url(fonts/literata-400-normal.woff2)format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:Literata;src:url(fonts/literata-400-italic.woff2)format('woff2');font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:Literata;src:url(fonts/literata-600-normal.woff2)format('woff2');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:Literata;src:url(fonts/literata-700-normal.woff2)format('woff2');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:PlexMono;src:url(fonts/plex-mono-400-normal.woff2)format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:PlexMono;src:url(fonts/plex-mono-400-italic.woff2)format('woff2');font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:PlexMono;src:url(fonts/plex-mono-500-normal.woff2)format('woff2');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:PlexMono;src:url(fonts/plex-mono-600-normal.woff2)format('woff2');font-weight:600;font-style:normal;font-display:swap}
+
+/* ═══ TIER 1 · PRIMITIVES ══════════════════════════════════════════════
+   Raw values. Never used directly by a component.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root{
+  /* surfaces */
+  --vd-ink-000:#161614;   /* page ground, faintly warm near-black          */
+  --vd-ink-050:#111110;   /* recessed panels                               */
+  --vd-ink-100:#1e1d1b;   /* raised surface                                */
+  --vd-ink-200:#2c2b28;   /* selection, hairline                           */
+  --vd-ink-300:#3a3835;   /* hairline, emphasised                          */
+
+  /* bone ramp — every value below is measured against --vd-ink-000 */
+  --vd-bone-400:#A8A192;  /*  7.06:1  AAA · lowest legal text value        */
+  --vd-bone-500:#D0CAB8;  /* 11.06:1  AAA · primary text                   */
+  --vd-bone-600:#E8E2D0;  /* 14.00:1  AAA · emphasis                       */
+  --vd-bone-700:#F0EDE4;  /* 15.48:1  AAA · maximum                        */
+
+  /* decorative only — FAILS text contrast, never set as a text colour */
+  --vd-shadow-400:#524e48; /* 2.19:1 · decorative rules only, exempt       */
+  --vd-ink-400:#6E6963;   /* 3.33:1 · INTERACTIVE boundaries — see below   */
+
+  /* accents */
+  --vd-blue-400:#7FA9CE;  /*  7.31:1  AAA · links                          */
+  --vd-lime-400:#AAFF00;  /* 14.68:1  AAA · live and measured data         */
+  --vd-green-400:#44BB44; /*  7.28:1  AAA · reserved, multi-pillar only    */
+  --vd-red-400:#E68C8C;   /*  7.33:1  AAA · error text                     */
+  --vd-red-300:#CC5555;   /*  4.31:1        error borders, non-text only   */
+  --vd-orange-400:#C4834A;/*  5.77:1        non-text only, see usage note  */
+  --vd-teal-500:#4FB8AF;  /*  7.60:1  AAA · editorial voice — see below    */
+  --vd-purple-400:#8855BB;/*  3.51:1        unassigned, non-text only      */
+
+  /* --vd-teal-400 #4AACA4 was RETIRED at 6.67:1. It was the only token in
+     the system that failed its own tier and stayed, carried as "unassigned"
+     for two calibrations. The system is named for that patina, so leaving
+     it unusable was the wrong kind of honest. #4FB8AF is the same hue at
+     7.60:1, which makes it legal as text — vd-quote renders at 18px
+     regular, which is NOT large text, so it needs the full 7:1 and the old
+     value missed it. Anything still referencing --vd-teal-400 is a bug.
+
+     CONSTRAINT, and it is not optional: teal and link blue simulate to a
+     0.0° hue gap under deuteranopia. Wherever teal sits near a link, the
+     underline on inline links is what separates them — see the `a` rule. */
+
+  /* ── PAPER SET · the light theme's primitives ────────────────────────
+     Dark is emitted light; paper is absorbed pigment. That is not a
+     metaphor for its own sake, it is why the values could not be derived
+     by inverting the ink ramp: on a bone ground EVERY dark accent fails.
+     Measured, lime is 1.05:1 on #F0EDE4, green 2.13:1, blue 2.12:1. So the
+     accents here are authored, not flipped — same hue families, opposite
+     physics. Saturation RISES as lightness falls, which is what makes them
+     read as inks rather than as dimmed glows.
+
+     SURFACES, AND THE MISTAKE WORTH RECORDING. The first pass at this
+     mirrored the ink ramp's DIRECTION — recessed goes darker, because that
+     is what a shadow does. Measured, every accent then failed AAA on the
+     recessed surface: fir 6.73:1, citron 6.65:1, slate 6.45:1, oxide 6.87:1.
+
+     The ink ramp's actual invariant is not "recessed is darker", it is
+     "every surface moves AWAY FROM THE TEXT COLOUR", which is why contrast
+     improves on a sunken panel in dark mode rather than getting worse. Text
+     on paper is dark, so away-from-text means lighter. Both sunken and
+     raised therefore move toward white here.
+
+     That reads correctly for a second reason: this system carries elevation
+     with hairline rules and a 2px radius, never with fill or shadow, so a
+     sunken panel was never doing the work by being darker anyway.
+
+     Selection is the exception — it has to be a visible tint, so it moves
+     toward the text instead, and is checked against text explicitly.
+     Every value below is measured against --vd-paper-000.                */
+  --vd-paper-000:#F0EDE4; /* page ground — reuses the top of the bone ramp  */
+  --vd-paper-050:#F7F5EF; /* recessed panels — AWAY from ink, so lighter    */
+  --vd-paper-100:#FAF8F2; /* raised surface                                */
+  --vd-paper-200:#D6D0BF; /* selection — a tint, so toward the ink          */
+  --vd-paper-300:#C2BBA8; /* hairline, emphasised — non-text, exempt        */
+
+  /* ink ramp for text on paper — measured against --vd-paper-000, and each
+     also clears AAA on --vd-paper-050, because sunken panels carry text */
+  --vd-graphite-400:#47423B; /*  8.50:1  AAA · lowest legal (7.47 on 050)   */
+  --vd-graphite-500:#2C2A26; /* 12.23:1  AAA · primary text                 */
+  --vd-graphite-600:#1E1D1B; /* 14.39:1  AAA · emphasis                     */
+  --vd-graphite-700:#161614; /* 15.48:1  AAA · maximum — the ink ground     */
+
+  /* decorative only — FAILS text contrast, never set as a text colour */
+  --vd-chalk-400:#ABA492;    /*  2.12:1 · decorative rules only, exempt     */
+  --vd-slate-300:#868074;    /*  3.35:1 · INTERACTIVE boundaries            */
+
+  /* paper accents. Hue drift from their ink counterparts is held under 13°
+     so the families survive the theme change: green 120→131, lime 80→68,
+     blue 208→204, red 0→0, teal 176→175. */
+  --vd-fir-500:#12551E;      /*  7.65:1  AAA · structure, hue 130.7         */
+  --vd-citron-500:#454F00;   /*  7.56:1  AAA · data + focus ring, hue 67.6  */
+  --vd-slate-500:#22506F;    /*  7.34:1  AAA · links, hue 204.2             */
+  --vd-oxide-500:#8A1F1F;    /*  7.81:1  AAA · error text, hue 0            */
+  --vd-patina-500:#0F4F4A;   /*  8.02:1  AAA · editorial voice, hue 175.3   */
+
+  /* type */
+  --vd-face-display:Chivo,"Segoe UI",system-ui,sans-serif;
+  --vd-face-text:Literata,Georgia,"Times New Roman",serif;
+  --vd-face-mono:PlexMono,"Cascadia Mono",Consolas,ui-monospace,monospace;
+
+  /* two-register scale: flat body, large display, deliberate gap */
+  --vd-size-micro:12px;
+  --vd-size-xs:14px;
+  --vd-size-s:16px;
+  --vd-size-m:18px;
+  --vd-size-xl:56px;
+  --vd-size-2xl:72px;
+
+  /* every line-height is a multiple or half of the 30px baseline */
+  --vd-lead-half:15px;
+  --vd-lead-1:30px;
+  --vd-lead-2:60px;
+  --vd-lead-hero:75px;
+
+  --vd-track-label:.14em;
+  --vd-track-display:-.02em;
+
+  /* baseline-derived space. 16px body over 30px leading = 1.875 */
+  --vd-baseline:30px;
+  /* The sticky nav's height, named so the sticky rail can offset itself by it.
+     vd-nav__inner sets `height:var(--vd-nav-h)`; anything that has to clear
+     the nav reads this rather than hard-coding 60px. */
+  --vd-nav-h:60px;
+
+  --vd-space-q:7.5px;
+  --vd-space-h:15px;
+  --vd-space-1:30px;
+  --vd-space-2:60px;
+  --vd-space-3:90px;
+  --vd-space-4:120px;
+  --vd-space-5:180px;
+
+  /* geometry */
+  --vd-radius:2px;              /* barely there, per calibration §06 */
+  --vd-hairline:1px;
+  --vd-measure:58ch;
+  --vd-rail:132px;
+  --vd-gutter:var(--vd-space-2);
+  --vd-page:1180px;
+
+  /* motion — tempo 3/7, sharp out */
+  --vd-dur-fast:110ms;
+  --vd-dur:180ms;
+  --vd-dur-slow:300ms;
+  --vd-ease:cubic-bezier(.2,.6,.2,1);
+}
+
+/* ═══ TIER 2 · SEMANTIC ════════════════════════════════════════════════
+   What a value MEANS. Components reference only this tier.
+
+   USAGE RULE — three accents, one per salience tier.
+   This supersedes the earlier "two accents per viewport". Counting colours
+   was a crude proxy for "do not make a rainbow". The real discipline is that
+   accents must sit at DIFFERENT salience tiers, so they read as a hierarchy
+   rather than as peers competing:
+
+     --vd-structure  green  7.28:1   high frequency, low salience
+                     rules, section marks, contour lines, list markers,
+                     active-state indicators. The skeleton of content.
+     --vd-link       blue   7.31:1   medium frequency, medium salience
+                     link TEXT, and the rule under link text. Nothing else.
+
+   ── LINK vs STRUCTURE ────────────────────────────────────────────────
+   The old wording gave blue "links and hover affordances", which collided
+   with structure's claim on "rules and active-state indicators" the moment
+   a hover affordance WAS a rule. Card hover was blue on that reading, and
+   it read wrong for a reason worth naming: a card title is --vd-text-max,
+   not blue, so a blue rule appeared under text that was not a link colour
+   anywhere else in the system. The affordance contradicted the palette.
+
+   The line is now drawn by WHAT IS BEING MARKED, not by the interaction:
+
+     --vd-link       marks TEXT THAT NAVIGATES. Inline links in prose, the
+                     nav items, and the rule directly under either. It
+                     answers "this string is a destination."
+     --vd-structure  marks THE STATE OF A REGION. Rules, section marks,
+                     contour lines, list markers, the active nav indicator,
+                     and card hover and focus. It answers "this block is in
+                     a state."
+
+   So a nav item hovers blue (it is link text) while its active indicator is
+   green (that is the item's state), and a card hovers green throughout (the
+   whole region is the target, and its title is not set in link colour).
+   Both were already true in the code; only now are they principled.
+
+   The pair survives simulation — structure and link sit 179.3° apart under
+   deuteranopia — so the two affordances stay distinguishable to a reader who
+   cannot separate the hues by name.
+     --vd-data       lime  14.68:1   very low frequency, maximum salience
+                     NUMERICS ONLY, plus the focus ring. If it is not a
+                     number and not focus, it is not lime.
+
+   ── COLOUR SEPARATION RULE ───────────────────────────────────────────
+   Any two tokens that carry different meanings in the same context must
+   separate after dichromat simulation — 20 degrees of hue OR 3:1 of value,
+   measured on Viénot 1999 output. Where colour cannot do it, a NAMED
+   non-colour channel must, and it is named here.
+
+   This supersedes the earlier claim that green and lime "stay
+   distinguishable under deuteranopia". Measured, they do not. The full
+   sweep is published in the accessibility notes; the short version is that
+   deuteranopia collapses the hue wheel to a single yellow-blue axis with
+   the flip between 160 and 165 degrees, so no structure hue can be far
+   from lime AND far from blue. Structure picks a side. Green picks the
+   yellow side, which separates it from blue and collides it with lime.
+
+   Simulated pairs, and what carries each one:
+
+     structure ↔ link    179.3°  colour alone
+     data      ↔ link    179.7°  colour alone
+     structure ↔ data      0.4°  SIZE + POSITION. Both are mono tabular
+                                 numerals, so hue does nothing here. The
+                                 card index is 12px inside an uppercase
+                                 kicker row; the proof figures are 12px
+                                 below a rule, 330px away. Never place an
+                                 ordinal and a quantity on one baseline.
+     data      ↔ body      0.3°  MONO FACE + TABULAR FIGURES. Lime numerals
+                                 are always var(--vd-face-mono); prose is
+                                 never mono. This is why a lime figure
+                                 still reads as a figure at 1.27:1.
+
+   Two consequences that are easy to get wrong later:
+     · Lime is NUMERICS ONLY. Not grades, not statuses, not asterisks. A
+       non-numeric value in lime has no carrying channel and breaks the
+       rule above. Use --vd-text-strong.
+     · Ordinals in structure colour must never sit in a rail beside
+       quantities in data colour. That configuration was removed from the
+       home page for exactly this reason.
+
+   Orange, teal and purple remain held back for Prismatic Instrument
+   contexts (multi-pillar or spectrum content) where colour coding is the
+   explicit subject. A fourth accent outside that context is a violation.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root{
+  --vd-surface:var(--vd-ink-000);
+  --vd-surface-sunken:var(--vd-ink-050);
+  --vd-surface-raised:var(--vd-ink-100);
+  --vd-surface-selected:var(--vd-ink-200);
+
+  --vd-text:var(--vd-bone-500);
+  --vd-text-strong:var(--vd-bone-600);
+  --vd-text-max:var(--vd-bone-700);
+  --vd-text-muted:var(--vd-bone-400);      /* lowest legal text value */
+
+  --vd-structure:var(--vd-green-400);      /* HIGH frequency, LOW salience  */
+  --vd-link:var(--vd-blue-400);            /* MED  frequency, MED salience  */
+  --vd-link-hover:var(--vd-bone-700);
+  --vd-data:var(--vd-lime-400);            /* LOW  frequency, MAX salience  */
+  --vd-danger:var(--vd-red-400);
+  --vd-editorial:var(--vd-teal-500);       /* the voice that is not the page */
+
+  /* FEEDBACK. --vd-ok deliberately aliases --vd-link, and that is a measured
+     decision rather than laziness. Success has to separate from error for a
+     dichromat, and nothing else does: against red-400, green collapses to
+     0.7°, lime to 0.3°, teal to 4.6° under protanopia, and on paper fir and
+     citron both hit 0.0°. Blue is the ONLY hue that clears both axes —
+     180.0° deuteranopia, 175.4° protanopia.
+
+     The cost is that a success message and a link are now the same colour.
+     That is paid for by the underline on inline links plus the glyph on the
+     message: a success line is never underlined and always carries one. If
+     the underline is ever removed, this aliasing becomes a real collision.
+
+     --vd-warn carries no hue at all. Orange is 5.77:1 and cannot be text,
+     and inventing a fourth accent to say "careful" was not worth it. The
+     glyph and the wording carry it. */
+  --vd-ok:var(--vd-link);
+  --vd-warn:var(--vd-text);
+
+  --vd-rule:var(--vd-ink-200);             /* the primary structural device */
+  --vd-rule-strong:var(--vd-ink-300);
+  /* NOT --vd-rule-strong. A decorative hairline is exempt from 1.4.11; the
+     boundary of a form control is not, and needs 3:1 against what sits
+     beside it. Measured, rule-strong is 1.28:1 in ink and 1.64:1 on paper
+     against the page — so every control at rest was failing until this
+     token existed. Do not "simplify" this back to rule-strong. */
+  --vd-control-border:var(--vd-ink-400);  /* 3.33 page · 3.48 sunken */
+  --vd-rule-accent:var(--vd-structure);
+
+  /* Was `3px solid var(--vd-lime-400)` — a component reaching straight into
+     tier 1, which the header of this file forbids. It has to go through the
+     semantic layer or the ring cannot follow the theme, and lime measures
+     1.05:1 on paper: an invisible focus indicator, which is a conformance
+     failure rather than a matter of taste. */
+  --vd-focus-ring:3px solid var(--vd-data);
+  --vd-focus-offset:2px;
+
+  /* Mask alpha held across the hero's text column. THEME-DEPENDENT, which is
+     why it lives here and not on the component: each field ramp is authored
+     against its own value, so the two must move together or a published
+     contrast figure breaks. See .vd-hero__field. */
+  --vd-field-text-alpha:.452;
+
+  /* Prismatic context only. See usage rule above. */
+  --vd-pillar-1:var(--vd-green-400);
+  --vd-pillar-2:var(--vd-blue-400);
+  --vd-pillar-3:var(--vd-orange-400);
+  --vd-pillar-4:var(--vd-purple-400);
+
+  /* Read by verdigris.js to pick the topolang palette, and by anything else
+     that needs to branch on theme without re-deriving it from a media query. */
+  --vd-theme:dark;
+}
+
+/* ═══ TIER 2b · THE LIGHT MAPPING ══════════════════════════════════════
+   Selection is prefers-color-scheme by default, with a manual override that
+   wins in BOTH directions. Specificity does the work: `:root[data-theme=…]`
+   is (0,2,0) and plain `:root` inside a media query is still (0,1,0), so an
+   explicit choice always beats the OS signal without !important.
+
+   The two light blocks below are identical by necessity — plain CSS has no
+   way to apply one declaration list from two unrelated conditions, and the
+   alternative (a JS-only toggle) would break the no-JS case. THEY MUST BE
+   EDITED TOGETHER. Only the semantic mapping is duplicated; the values
+   themselves live once, in tier 1.
+
+   SALIENCE, RESTATED. The old wording was "data is maximum salience at
+   14.68:1" — brightness. That only means anything on a dark ground; on
+   paper the data colour must be the DARKEST thing, not the brightest. So
+   all three tiers are now stated as DISTANCE FROM GROUND:
+
+     --vd-structure  closest to the ground   high frequency, low salience
+     --vd-link       mid distance            medium frequency and salience
+     --vd-data       furthest from ground    very low frequency, max salience
+
+   Medium-agnostic, true in both themes, and a better description of what
+   was always meant.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --vd-surface:var(--vd-paper-000);
+    --vd-surface-sunken:var(--vd-paper-050);
+    --vd-surface-raised:var(--vd-paper-100);
+    --vd-surface-selected:var(--vd-paper-200);
+
+    --vd-text:var(--vd-graphite-500);
+    --vd-text-strong:var(--vd-graphite-600);
+    --vd-text-max:var(--vd-graphite-700);
+    --vd-text-muted:var(--vd-graphite-400);
+
+    --vd-structure:var(--vd-fir-500);
+    --vd-link:var(--vd-slate-500);
+    --vd-link-hover:var(--vd-graphite-700);
+    --vd-data:var(--vd-citron-500);
+    --vd-danger:var(--vd-oxide-500);
+    --vd-editorial:var(--vd-patina-500);
+    --vd-ok:var(--vd-link);   /* slate — see the ink block for why */
+    --vd-warn:var(--vd-text);
+
+    --vd-rule:var(--vd-paper-200);
+    --vd-rule-strong:var(--vd-paper-300);
+    --vd-control-border:var(--vd-slate-300);  /* 3.35 page · 3.69 sunken */
+    --vd-rule-accent:var(--vd-structure);
+
+    --vd-pillar-1:var(--vd-fir-500);
+    --vd-pillar-2:var(--vd-slate-500);
+    --vd-pillar-3:#6B3A12;
+    --vd-pillar-4:#4A2A6B;
+
+    /* Lower than dark's .484 so the ramp can go far darker. The composite
+       over the text column is pinned by the AAA floor either way, so this
+       costs nothing behind text and darkens everything outside it. */
+    --vd-field-text-alpha:.27;
+
+    --vd-theme:light;
+  }
+}
+/* Manual override. Keep in step with the block above. */
+:root[data-theme="light"] {
+  --vd-surface:var(--vd-paper-000);
+  --vd-surface-sunken:var(--vd-paper-050);
+  --vd-surface-raised:var(--vd-paper-100);
+  --vd-surface-selected:var(--vd-paper-200);
+
+  --vd-text:var(--vd-graphite-500);
+  --vd-text-strong:var(--vd-graphite-600);
+  --vd-text-max:var(--vd-graphite-700);
+  --vd-text-muted:var(--vd-graphite-400);
+
+  --vd-structure:var(--vd-fir-500);
+  --vd-link:var(--vd-slate-500);
+  --vd-link-hover:var(--vd-graphite-700);
+  --vd-data:var(--vd-citron-500);
+  --vd-danger:var(--vd-oxide-500);
+  --vd-editorial:var(--vd-patina-500);
+  --vd-ok:var(--vd-link);   /* slate — see the ink block for why */
+  --vd-warn:var(--vd-text);
+
+  --vd-rule:var(--vd-paper-200);
+  --vd-rule-strong:var(--vd-paper-300);
+  --vd-control-border:var(--vd-slate-300);  /* 3.35 page · 3.69 sunken */
+  --vd-rule-accent:var(--vd-structure);
+
+  --vd-pillar-1:var(--vd-fir-500);
+  --vd-pillar-2:var(--vd-slate-500);
+  --vd-pillar-3:#6B3A12;
+  --vd-pillar-4:#4A2A6B;
+
+  --vd-field-text-alpha:.27;
+
+  --vd-theme:light;
+}
+
+/* ═══ BASE ═════════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--vd-surface);
+  color:var(--vd-text);
+  font-family:var(--vd-face-text);
+  font-size:var(--vd-size-s);
+  line-height:var(--vd-lead-1);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+/* flat ground plus 5% grain, per calibration §04. Fixed so it does not
+   scroll, which would read as texture-in-motion. */
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+body>*{position:relative;z-index:1}
+/* REACHABLE PAIRS. An accent on --vd-surface-selected measures 5.6–5.9:1 in
+   light and 5.5–5.7:1 in dark, but that state cannot occur: selection forces
+   text-max, and the only other use of the selected surface is a collapsed
+   vd-redact, which sets color:transparent. Same for --vd-surface-raised —
+   the two rules that use it set text-max or text, both AAA in both themes.
+   The accessibility notes list which surface/text pairs are reachable rather
+   than claiming every combination holds, because several combinations are
+   unreachable by construction and testing them proves nothing. */
+::selection{background:var(--vd-surface-selected);color:var(--vd-text-max)}
+
+:focus-visible{outline:var(--vd-focus-ring);outline-offset:var(--vd-focus-offset)}
+:focus:not(:focus-visible){outline:none}
+
+.vd-skip{
+  position:absolute;left:var(--vd-space-h);top:calc(var(--vd-space-h) * -6);
+  background:var(--vd-surface-raised);color:var(--vd-text-max);
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-xs);
+  padding:var(--vd-space-h) var(--vd-space-1);border:1px solid var(--vd-rule);
+  z-index:100;transition:top var(--vd-dur) var(--vd-ease);
+}
+.vd-skip:focus{top:var(--vd-space-h)}
+
+/* ── type ────────────────────────────────────────────────────────────── */
+h1,h2,h3,h4{font-family:var(--vd-face-display);margin:0;font-weight:600;color:var(--vd-text-max)}
+h1{font-size:var(--vd-size-2xl);line-height:var(--vd-lead-hero);letter-spacing:var(--vd-track-display)}
+h2{font-size:var(--vd-size-xl);line-height:var(--vd-lead-2);letter-spacing:var(--vd-track-display);font-weight:500}
+/* No intermediate sizes exist by design. Below h2, hierarchy is carried by
+   weight, case, rules and numbering rather than by size. */
+h3{font-size:var(--vd-size-m);line-height:var(--vd-lead-1);font-weight:600;color:var(--vd-text-strong)}
+h4{font-family:var(--vd-face-mono);font-size:var(--vd-size-xs);line-height:var(--vd-lead-1);
+   font-weight:500;text-transform:uppercase;letter-spacing:var(--vd-track-label);color:var(--vd-text-muted)}
+p{margin:0 0 var(--vd-space-1)}
+p:last-child{margin-bottom:0}
+
+/* UNDERLINED BY DEFAULT, and components opt out — not the other way round.
+
+   This was `text-decoration:none`, which made an inline link identifiable by
+   colour alone. WCAG G183 permits that only at 3:1 against the surrounding
+   text; measured, link-vs-body is 1.51:1 in ink and 1.67:1 on paper. So it
+   was a 1.4.1 failure independent of anything else, and it is also the
+   channel two other decisions now lean on: --vd-ok aliases --vd-link, and
+   --vd-editorial teal collapses onto link blue for a deuteranope. The
+   underline is what tells all three apart. Do not remove it without
+   replacing it.
+
+   The colour is deliberately inherited rather than set: an underline in the
+   link colour at these weights reads as part of the glyph run. */
+a{color:var(--vd-link);
+  text-decoration:underline;
+  text-decoration-thickness:1px;
+  text-underline-offset:.18em;
+  text-decoration-color:color-mix(in srgb, currentColor 45%, transparent);
+  transition:color var(--vd-dur-fast) var(--vd-ease),
+             text-decoration-color var(--vd-dur-fast) var(--vd-ease)}
+a:hover{color:var(--vd-link-hover);text-decoration-color:currentColor}
+
+/* Components that already carry a non-colour channel of their own opt out.
+   Each of these has position, a rule, a box or an ::after underline doing
+   the same job, so a second underline would be noise. */
+.vd-nav__mark,
+.vd-nav__list a,
+.vd-toc a,
+.vd-btn,
+.vd-skip,
+.vd-system-card__title a,
+.vd-note-card__title a,
+vd-footer a,
+.vd-hero__caption a{text-decoration:none}
+strong,b{font-weight:600;color:var(--vd-text-strong)}
+em,i{font-style:italic}
+abbr[title]{text-decoration:none;border-bottom:1px dotted var(--vd-rule-strong);cursor:help}
+
+/* ── primitives ──────────────────────────────────────────────────────── */
+.vd-prose{max-width:var(--vd-measure);font-size:var(--vd-size-s);line-height:var(--vd-lead-1)}
+.vd-prose--lead{font-size:var(--vd-size-m);line-height:var(--vd-lead-1);color:var(--vd-text-strong)}
+.vd-mono{font-family:var(--vd-face-mono);font-size:var(--vd-size-xs);
+  letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.vd-label{
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);line-height:var(--vd-lead-half);
+  text-transform:uppercase;letter-spacing:var(--vd-track-label);color:var(--vd-text-muted);
+  font-weight:500;display:block;
+}
+.vd-num{color:var(--vd-data);font-family:var(--vd-face-mono);font-variant-numeric:tabular-nums}
+.vd-rule{border:0;border-top:var(--vd-hairline) solid var(--vd-rule);margin:var(--vd-space-1) 0}
+.vd-visually-hidden{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
+
+/* ── layout: asymmetric, content column plus persistent rail ─────────── */
+/* padding-INLINE, not the padding shorthand. An element can carry both
+   .vd-page and .vd-section (every section on the homepage does), and a
+   shorthand on either one silently zeroes the other axis. Desktop hides the
+   damage behind auto margins; mobile puts the text on the screen edge. */
+.vd-page{max-width:var(--vd-page);margin:0 auto;padding-inline:var(--vd-space-1)}
+.vd-spread{
+  display:grid;
+  grid-template-columns:var(--vd-rail) minmax(0,1fr);
+  gap:var(--vd-gutter);
+  align-items:start;
+}
+/* top must clear the sticky nav. It was var(--vd-space-1) = 30px, while
+   vd-nav occupies 0-60px at z-index 50 — so the rail stuck INTO the nav and
+   its first line was sliced in half. --vd-space-h beyond the nav gives the
+   readout the same breathing room it has when it is not stuck. */
+.vd-spread__rail{
+  position:sticky;top:calc(var(--vd-nav-h) + var(--vd-space-h));
+  border-right:var(--vd-hairline) solid var(--vd-rule);
+  padding-right:var(--vd-space-h);
+  min-height:var(--vd-space-2);
+}
+.vd-spread__body{min-width:0}
+/* NO full-width rule between sections. There was one; it is gone deliberately.
+   Sections are already separated by --vd-space-3 of padding on both sides,
+   which is 90px of clear ground, and a hairline across that much emptiness
+   was announcing a boundary the whitespace had already made. */
+.vd-section{padding-block:var(--vd-space-3);position:relative}
+/* The signature survives the rule it used to sit on. It was a green segment
+   OVERLAYING the start of the section rule; now it is a freestanding mark,
+   which is the stronger version of the same idea — structure as a mark, not
+   as a decoration applied to a line. High frequency, low salience: you stop
+   noticing it and start reading it as structure, which is the job. */
+.vd-section::before{
+  content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:var(--vd-space-2);height:1px;
+  background:var(--vd-structure);
+}
+/* Centred on the SECTION, not on the page. On the home page a section is the
+   page container, so the two are the same thing. On the docs page a section
+   sits inside the spread body, so the mark lands 96px right of page centre —
+   rail 132 plus gutter 60, halved. That is intended: the mark belongs to the
+   section and centres what it actually marks. Centring it on the page instead
+   would mean lifting it out to a .vd-page-level box, at which point it stops
+   belonging to the thing it labels. */
+.vd-section:first-of-type::before{display:none}
+
+/* rail entries: the readout that justifies the rail existing */
+.vd-readout{display:block;margin-bottom:var(--vd-space-1)}
+.vd-readout__value{
+  display:block;font-family:var(--vd-face-mono);font-size:var(--vd-size-m);line-height:var(--vd-lead-half);
+  color:var(--vd-data);font-variant-numeric:tabular-nums;font-weight:500;
+}
+/* Non-numeric readouts. A grade ("AAA") is not a measurement, so it cannot
+   take data colour — lime has no carrying channel for non-numerics. See the
+   colour separation rule in tier 2. */
+.vd-readout__value--grade{color:var(--vd-text-strong);letter-spacing:.04em}
+/* NOTE: .vd-readout__value--ordinal is deliberately gone. An ordinal in
+   structure colour beside a quantity in data colour is the one adjacency
+   the separation rule forbids, and the rail is where it happened. Section
+   position is carried by the eyebrow label and the nav, not by a readout. */
+.vd-readout__key{
+  display:block;font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);line-height:var(--vd-lead-half);
+  text-transform:uppercase;letter-spacing:var(--vd-track-label);color:var(--vd-text-muted);margin-top:var(--vd-space-q);
+}
+
+@media(max-width:860px){
+  :root{--vd-size-2xl:40px;--vd-size-xl:32px;--vd-lead-hero:45px;--vd-lead-2:40px;--vd-gutter:var(--vd-space-1)}
+  .vd-spread{grid-template-columns:1fr}
+  .vd-spread__rail{
+    position:static;border-right:0;padding-right:0;padding-bottom:var(--vd-space-h);
+    border-bottom:var(--vd-hairline) solid var(--vd-rule);
+    display:flex;gap:var(--vd-space-1);flex-wrap:wrap;
+  }
+  .vd-readout{margin-bottom:0}
+}
+
+/* ═══ TIER 3 · COMPONENTS ══════════════════════════════════════════════ */
+
+/* ── vd-hero ─────────────────────────────────────────────────────────── */
+vd-hero{display:block;position:relative;padding:var(--vd-space-4) 0 var(--vd-space-3);overflow:hidden}
+
+/* ── the field's two masks ─────────────────────────────────────────────
+   NESTED, not composited. The wrapper masks vertically; the canvas inside it
+   masks horizontally. Browsers multiply nested element masks natively, so
+   this needs no `mask-composite` — which matters, because two mask layers on
+   one element default to `mask-composite: add`, and `add` UNIONS the alphas.
+   Under `add` the vertical layer being opaque would drag the horizontal
+   layer's carefully held 0.484 up to 1.0 and silently break the contrast
+   figure across the text column on any engine not honouring `intersect`.
+   Nesting has no such failure mode.
+
+   An earlier version painted a --vd-surface gradient over the canvas instead.
+   That also avoided compositing, but body::before (the 5% grain) is fixed at
+   z-index 0 BELOW every body child, so anything painted opaque above the
+   canvas hides the grain too. In dark mode the grain lightens the ground, so
+   the band lost its lift and read DARKER than the page. In light mode the
+   grain darkens, so the same bug read as very slightly lighter and passed
+   unnoticed. Masking paints nothing, so the grain survives in both themes.
+
+   Measured in BASELINE LENGTHS, not percentages. A percentage of the hero's
+   height cannot stay matched to the left edge, which is a percentage of the
+   viewport's width — an earlier attempt drifted 29px apart the moment the
+   content reflowed. Absolute stops on the 30px scale hold at every height:
+   fully faded for the last 30px, ramping in over the 210px above that, which
+   matches the left edge's 220px at the page measure. */
+.vd-hero__fieldwrap{
+  position:absolute;inset:0;z-index:0;pointer-events:none;
+  -webkit-mask-image:linear-gradient(to top,
+    transparent 0, transparent var(--vd-space-1),
+    #000 calc(var(--vd-space-5) + var(--vd-space-2)));
+  mask-image:linear-gradient(to top,
+    transparent 0, transparent var(--vd-space-1),
+    #000 calc(var(--vd-space-5) + var(--vd-space-2)));
+}
+.vd-hero__field{
+  position:absolute;inset:0;z-index:0;pointer-events:none;
+  /* canvas is a replaced element: inset:0 alone will NOT stretch it, it
+     falls back to the intrinsic 300x150. The explicit size is required. */
+  width:100%;height:100%;
+  /* ── THE CONTRAST MASK ─────────────────────────────────────────────
+     This used to be a hard cut: the field was masked entirely out of the
+     text column so contrast was always measured against flat ground. The
+     field now runs UNDER the display line deliberately, so the guarantee
+     has to be arithmetic rather than geometric.
+
+     FRAME OF REFERENCE: vd-hero is full-bleed, so these percentages are of
+     the VIEWPORT, not of the page measure. That is the whole reason the hero
+     sits outside .vd-page — the field has to reach the right edge of the
+     screen, and a masked canvas cannot escape a centred 1180px container.
+
+     Five stops, and the held middle is the whole point:
+
+       0%   → 32%   mask alpha 0      field absent
+       32%  → 46%   0 → 0.484         fades in
+       46%  → 62%   0.484 held        ← the text column, capped
+       62%  → 78%   0.484 → 1         ramps up past the text
+       78%  → 100%  1                 full field, to the screen edge
+
+     The transparent HOLD to 30% is required. Without the duplicated stop a
+     gradient interpolates from 0% and the field bleeds faintly across the
+     whole hero, which is the bug this comment exists to prevent.
+
+     LOAD-BEARING IN BOTH THEMES. The held 0.484 is the only thing keeping
+     text over the field at AAA, in light as well as dark. Both field ramps
+     are authored on the assumption that this number holds; change it and two
+     published contrast figures go with it.
+
+     THESE ALPHAS WERE LOWERED once the field's density went up. Until then
+     the measured worst case sat well above the arithmetic floor, because the
+     extreme band rarely landed inside the text column — 9.78:1 measured
+     against a 7.51 floor in dark. Raising the density (see gamma and floor in
+     topolang.js) made the extreme band commonplace, and the measured worst
+     collapsed onto the floor: 7.55:1 dark, and 7.06:1 light with 0.06 of
+     margin. Still conformant, but the buffer had been luck, not design. The
+     alphas now buy it back deliberately, and only the strip BEHIND TEXT gets
+     fainter — the field mass outside it is untouched, so the ramps keep the
+     darkness and the green they were tuned for.
+
+     DARK. Canvas at 0.62 (set in verdigris.js), so the effective alpha across
+     the text column is 0.62 × 0.452 = 0.280. Compositing the brightest cell
+     VERDIGRIS_BAND can produce (#389038) over --vd-ink-000:
+
+       composite            #20381E
+       bone-700 display     10.90:1  AAA
+       bone-500 body         7.79:1  AAA
+       bone-400 muted        4.97:1  — must not be placed over the field
+
+     LIGHT. Canvas at 1.0, because subtractive marks on bone have far less
+     room to work in, so the mask alone limits — and the held alpha is LOWER
+     here, 0.27, which is what lets VERDIGRIS_PAPER run 2.65x darker at its
+     bottom end. The composite over text is pinned by the AAA floor either
+     way, so the darker ramp is free behind text and only darkens the mass
+     outside it. Compositing the darkest cell (#42413e) over --vd-paper-000:
+
+       composite            #C1BFB7
+       graphite-700 display  9.84:1  AAA
+       graphite-500 body     7.78:1  AAA
+       graphite-400 muted    5.40:1  — must not be placed over the field
+
+     The muted value fails in both themes, which is why the hero promotes its
+     sub-line and caption a step. See the rule further down.
+
+     WHY THE HOLD ENDS AT 62%. The display line is 58% of the page measure,
+     but the mask is in viewport units, so the two do not share a
+     denominator. The text's right edge as a fraction of the viewport is
+     worst at ~1400px, where the centred 1180px page still has no side
+     margin to spare:
+
+       viewport   page content   text right edge   as % of viewport
+        900px         840px          517px              57.4%
+       1180px        1120px          680px              57.6%
+       1400px        1120px          820px              58.6%  ← worst
+       1920px        1120px         1050px              54.7%
+       2560px        1120px         1370px              53.5%
+
+     62% clears the worst case with margin at every width above the 860
+     breakpoint. Widen the display measure past 58% and this table has to be
+     recomputed — the two numbers are a pair even though they are not the
+     same number.
+
+     SCOPE: this mask is DESKTOP ONLY. Below 860 the field becomes a static
+     band in its own grid row and the mask is set to none — see MOBILE at
+     the end of this file. Masking is the wrong tool once the layout stacks,
+     because a percentage fade line lands wherever the paragraph happens to
+     end. Do not port this cap into a breakpoint; the band already makes
+     overlap structurally impossible, which is the stronger guarantee.
+
+     This mask is a contrast constraint, not a stylistic one. */
+  -webkit-mask-image:linear-gradient(90deg,
+    transparent 0%, transparent 32%,
+    rgba(0,0,0,var(--vd-field-text-alpha)) 46%,
+    rgba(0,0,0,var(--vd-field-text-alpha)) 62%,
+    #000 78%, #000 100%);
+  mask-image:linear-gradient(90deg,
+    transparent 0%, transparent 32%,
+    rgba(0,0,0,var(--vd-field-text-alpha)) 46%,
+    rgba(0,0,0,var(--vd-field-text-alpha)) 62%,
+    #000 78%, #000 100%);
+}
+/* The hero is full-bleed, so the page measure is re-applied here rather than
+   by a .vd-page wrapper. Mirrors .vd-page exactly — keep them in step. */
+.vd-hero__inner{
+  position:relative;z-index:1;
+  max-width:var(--vd-page);margin:0 auto;padding-inline:var(--vd-space-1);
+}
+/* 58% of the page measure. Pairs with the 62% mask hold above; see that
+   comment, and the table in it, before changing either. */
+.vd-hero__thesis{text-wrap:balance;margin:0;max-width:58%}
+/* bone-500, NOT bone-400. The sub-line now sits inside the field's text
+   column, and bone-400 measures 4.82:1 against the worst-case composite —
+   below AAA. bone-500 measures 7.56:1 there and holds. This is the one
+   place the overrun decision forced a text colour to change; the muted
+   value is still correct anywhere the field cannot reach. */
+.vd-hero__sub{
+  margin-top:var(--vd-space-1);max-width:44ch;font-size:var(--vd-size-m);
+  line-height:var(--vd-lead-1);color:var(--vd-text);
+}
+/* Nothing here for narrow widths. Below 860 the field stops being a
+   background and becomes a band in its own grid row with the mask removed
+   entirely — see the MOBILE section at the end of this file. Overlap is
+   structurally impossible there, so the alpha cap above is a desktop-only
+   device and must not be duplicated into a breakpoint. */
+/* ONE RULE FOR THE WHOLE HERO: nothing inside vd-hero may use
+   --vd-text-muted. On desktop the field is inset:0 and the mask varies only
+   horizontally, so there is no ROW at which bone-400 is safe — it measures
+   4.82:1 against the worst-case composite where bone-500 measures 7.56:1.
+   Below 860 the field is a separate band, so bone-400 would in fact be safe
+   there; a text value that changes with viewport is a worse rule than one
+   that does not, so the promotion is unconditional. The caption stays quiet
+   through size, the mono face and letter-spacing, not a lower value. */
+.vd-hero__caption{
+  position:relative;z-index:1;margin-top:var(--vd-space-2);
+  padding-left:var(--vd-space-h);border-left:1px solid var(--vd-rule);
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);line-height:var(--vd-lead-half);
+  color:var(--vd-text);letter-spacing:.06em;
+  /* Tied to the field-safe zone, not counted in characters.
+     A ch-based measure was wrong twice here: `ch` is the advance of "0" with
+     NO letter-spacing, and this block adds .06em per character, so 47
+     characters need ~53.7ch. Measured, the line wants 387px and 50ch gave
+     360px — which broke "DSL." onto a row of its own.
+     58% is the same value .vd-hero__thesis uses and the same one the field
+     mask is calibrated against, so the caption cannot outgrow the zone where
+     contrast is guaranteed no matter how the wording changes. The ch term is
+     only an upper bound so the line does not sprawl on a very wide screen. */
+  max-width:min(58%, 62ch);
+}
+.vd-hero__caption a{color:var(--vd-text);border-bottom:1px solid var(--vd-rule-strong)}
+.vd-hero__caption a:hover{color:var(--vd-data);border-color:var(--vd-data)}
+/* The field has a name, and a title takes <cite>. Declared rather than left
+   to the UA default so it is a decision, and because the value here is not
+   the default: PlexMono ships a real 400 italic, so this is a drawn italic
+   and not a synthesised slant. Tracking is eased slightly — mono italic at
+   12px inside .06em already crowds, and the letterforms lean into it. */
+.vd-hero__caption cite{
+  font-style:italic;letter-spacing:.03em;color:var(--vd-text-strong);
+}
+@media(max-width:860px){
+  /* The 58% cap exists to keep the caption inside the field's guaranteed
+     zone. Below 860 the field is a separate band with no text over it, so
+     there is no zone to stay inside and the cap would only squeeze the line
+     into needless wrapping. */
+  .vd-hero__caption{margin-top:var(--vd-space-1);max-width:none}
+}
+
+/* ── vd-system-card · the four proof pillars ─────────────────────────── */
+vd-system-card{
+  display:block;position:relative;
+  border:var(--vd-hairline) solid var(--vd-rule);   /* hairline box, no fill */
+  border-radius:var(--vd-radius);
+  padding:var(--vd-space-1);
+  transition:border-color var(--vd-dur) var(--vd-ease);
+}
+/* The WHOLE card is the target, so the whole card takes the state. Border to
+   structure colour, plus a sunken fill so the region reads as one object
+   rather than as a box containing a link.
+
+   The fill is --vd-surface-sunken and that is a measured choice, not a
+   stylistic one. Raised was the intuitive pick — the card lifts toward you —
+   but --vd-text-muted over the raised surface is 6.56:1 in dark, below AAA,
+   and the note-card dek is muted. Over sunken it is 7.36:1 dark and 9.13:1
+   light. Sunken is the only surface where every text value the cards use
+   clears AAA in both themes. */
+vd-system-card:hover,vd-system-card:focus-within{
+  border-color:var(--vd-rule-accent);
+  background:var(--vd-surface-sunken);
+}
+/* Only when a link was actually found. A region that looks clickable and
+   is not is worse than one that never claimed to be. */
+vd-system-card[data-clickable],vd-note-card[data-clickable]{cursor:pointer}
+.vd-system-card__index{
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);line-height:var(--vd-lead-half);
+  letter-spacing:var(--vd-track-label);color:var(--vd-text-muted);text-transform:uppercase;
+  display:flex;gap:var(--vd-space-h);align-items:baseline;
+}
+/* Ordinals count POSITION and are structure. Quantities count AMOUNT and
+   are data. Same digits, different jobs, different colours. This is what
+   gives green presence: it appears on every card and every section. */
+.vd-system-card__index b{color:var(--vd-structure);font-weight:500}
+.vd-system-card__title{
+  font-family:var(--vd-face-display);font-size:var(--vd-size-m);line-height:var(--vd-lead-1);
+  font-weight:600;margin:var(--vd-space-h) 0 0;
+}
+.vd-system-card__title a{
+  color:var(--vd-text-max);position:relative;display:inline-block;
+}
+/* rule-draw hover, per calibration §07. Nothing moves.
+   Structure colour, not link colour — see the LINK vS STRUCTURE note in
+   tier 2. This rule marks the state of a region, not a string of link text. */
+.vd-system-card__title a::after{
+  content:"";position:absolute;left:0;right:0;bottom:-2px;height:1px;
+  background:var(--vd-structure);transform:scaleX(0);transform-origin:left;
+  transition:transform var(--vd-dur-slow) var(--vd-ease);
+}
+vd-system-card:hover .vd-system-card__title a::after,
+.vd-system-card__title a:focus-visible::after{transform:scaleX(1)}
+.vd-system-card__body{margin:var(--vd-space-h) 0 0;font-size:var(--vd-size-s);
+  line-height:var(--vd-lead-1);color:var(--vd-text)}
+.vd-system-card__proof{
+  margin-top:var(--vd-space-1);padding-top:var(--vd-space-h);
+  border-top:var(--vd-hairline) solid var(--vd-rule);
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);line-height:var(--vd-lead-half);
+  letter-spacing:.05em;color:var(--vd-text-muted);
+  display:flex;gap:var(--vd-space-1);flex-wrap:wrap;
+}
+/* Non-numeric proof values are emphasis, not data. Lime is reserved. */
+.vd-system-card__proof b{color:var(--vd-text-strong);font-weight:500}
+.vd-system-card__proof b.vd-is-data{color:var(--vd-data);font-variant-numeric:tabular-nums}
+
+.vd-grid{display:grid;gap:var(--vd-space-1);grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
+
+/* ── vd-note-card · field notes ──────────────────────────────────────── */
+/* Inline padding with matching negative margin: the hover fill extends past
+   the text so the row reads as a struck object, and nothing shifts, because
+   the padding is cancelled by the margin. */
+vd-note-card{
+  display:block;
+  padding:var(--vd-space-1) var(--vd-space-h);
+  margin-inline:calc(var(--vd-space-h) * -1);
+  border-top:var(--vd-hairline) solid var(--vd-rule);
+  /* box-shadow, not border-color: the hover accent is the left bar now. */
+  transition:background-color var(--vd-dur) var(--vd-ease),
+             box-shadow var(--vd-dur) var(--vd-ease);
+}
+/* Closes the list. Stays INERT on hover — see below. */
+vd-note-card:last-of-type{border-bottom:var(--vd-hairline) solid var(--vd-rule)}
+
+/* The accent is a LEFT BAR, not the horizontal rules, and that is the whole
+   point of this rule.
+
+   The first version accented border-top on hover, plus border-bottom on
+   :last-of-type. It looked wrong and the reason is structural: in a ruled
+   list the horizontal rules are SHARED BOUNDARIES. A row's lower boundary is
+   the next row's border-top, so accenting only your own borders outlines the
+   last item on two sides and every other item on one. The last card was not
+   getting too much; the others were getting half an outline.
+
+   Reaching to the sibling with `:hover + vd-note-card` would even it up, but
+   it makes hovering one row mutate another, and it has to be repeated for
+   :focus-within. A left bar sidesteps the problem instead of patching it: it
+   belongs to one row only, so it cannot be asymmetric at any list position or
+   length.
+
+   It is also the vocabulary this system already uses for marking a block —
+   vd-quote and .vd-toc a[aria-current] both take a 2px left rule in the
+   accent colour. So a hovered note reads the same way a quoted or active
+   block does.
+
+   inset box-shadow rather than border-left, so nothing reflows: a real border
+   would shift the row's content by 2px on hover.
+
+   NOTE the deliberate divergence: vd-system-card keeps its full-box border
+   accent, because it IS a box and can be outlined without touching anything
+   else. The shared signal between the two is the sunken fill, not the mark. */
+vd-note-card:hover,vd-note-card:focus-within{
+  background:var(--vd-surface-sunken);
+  box-shadow:inset 2px 0 0 var(--vd-rule-accent);
+}
+.vd-note-card__row{display:flex;gap:var(--vd-space-1);align-items:baseline;flex-wrap:wrap}
+.vd-note-card__date{
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);letter-spacing:.08em;
+  color:var(--vd-text-muted);min-width:9ch;font-variant-numeric:tabular-nums;
+}
+.vd-note-card__title{
+  font-family:var(--vd-face-display);font-size:var(--vd-size-m);line-height:var(--vd-lead-1);
+  font-weight:600;margin:0;flex:1;min-width:min(100%,22ch);
+}
+.vd-note-card__title a{color:var(--vd-text-max);position:relative;display:inline-block}
+.vd-note-card__title a::after{
+  content:"";position:absolute;left:0;right:0;bottom:-2px;height:1px;background:var(--vd-structure);
+  transform:scaleX(0);transform-origin:left;transition:transform var(--vd-dur-slow) var(--vd-ease);
+}
+vd-note-card:hover .vd-note-card__title a::after,
+.vd-note-card__title a:focus-visible::after{transform:scaleX(1)}
+.vd-note-card__len{font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  color:var(--vd-text-muted);letter-spacing:.06em;margin-left:auto}
+.vd-note-card__dek{margin:var(--vd-space-h) 0 0 0;max-width:var(--vd-measure);
+  color:var(--vd-text-muted);font-size:var(--vd-size-s)}
+
+/* ── vd-nav ──────────────────────────────────────────────────────────── */
+/* Opaque, not translucent. A see-through bar lets body text scroll visibly
+   behind the nav labels, which destroys their measured contrast the moment
+   anything passes under them. Blur is also an explicit anti-goal. */
+vd-nav{
+  display:block;border-bottom:var(--vd-hairline) solid var(--vd-rule);
+  position:sticky;top:0;z-index:50;background:var(--vd-surface);
+}
+/* ASYMMETRIC BY INTENT. The bar is full-bleed but its contents used to be
+   boxed into the 1180px page measure, which left the nav stopping 224px short
+   of the bar's own right edge at 1569px wide. That was invisible until the
+   hero field started bleeding to the screen edge; next to it the header read
+   as inset.
+
+   So: LEFT edge stays on the page measure, because the mark has to align with
+   the display line beneath it — that alignment is load-bearing and is the
+   first thing you notice if it drifts. RIGHT edge goes to the screen gutter,
+   like the field.
+
+   The max() guards narrow viewports, where the centring term goes negative
+   and the gutter should simply be the gutter.
+
+   CONSEQUENCE worth knowing: the nav's right edge no longer lines up with the
+   section content's right edge. That is the trade — the grid holds on the
+   left and is allowed to bleed on the right, which is the same rule the hero
+   field follows. */
+.vd-nav__inner{
+  display:flex;align-items:center;gap:var(--vd-space-1);
+  height:var(--vd-nav-h);
+  padding-left:max(var(--vd-space-1),
+    calc((100% - var(--vd-page)) / 2 + var(--vd-space-1)));
+  padding-right:var(--vd-space-1);
+}
+.vd-nav__mark{
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-xs);font-weight:500;
+  letter-spacing:.04em;color:var(--vd-text-max);
+}
+.vd-nav__list{display:flex;gap:var(--vd-space-1);list-style:none;margin:0;padding:0;margin-left:auto}
+/* 44px tall to clear WCAG 2.5.5 (AAA target size), not just the 24px of
+   2.5.8. The rule sits at the text baseline, not the box edge, so the larger
+   hit area is invisible. */
+.vd-nav__list a{
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);text-transform:uppercase;
+  letter-spacing:var(--vd-track-label);color:var(--vd-text-muted);
+  position:relative;display:inline-flex;align-items:center;min-height:44px;
+}
+.vd-nav__list a::after{bottom:calc(50% - 11px)}
+.vd-nav__list a::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--vd-link);
+  transform:scaleX(0);transform-origin:left;transition:transform var(--vd-dur) var(--vd-ease);
+}
+.vd-nav__list a:hover,.vd-nav__list a[aria-current]{color:var(--vd-text-max)}
+.vd-nav__list a:hover::after,.vd-nav__list a[aria-current]::after{transform:scaleX(1)}
+.vd-nav__list a[aria-current]::after{background:var(--vd-structure)}
+
+/* ── vd-theme-toggle ──────────────────────────────────────────────────
+   Sits in the nav but is NOT a nav item. The nav has four items and that
+   balance is part of why it reads calm; a fifth text entry that is a control
+   rather than a destination would lie about the structure. A glyph settles
+   that on its own — it is visibly not a word in a list of words, so it needs
+   no rule to separate it and none is drawn.                            */
+vd-theme-toggle{display:inline-flex;align-items:center}
+vd-theme-toggle:empty{display:none}   /* no JS, no control */
+/* A glyph button, 44x44 so it clears 2.5.5 AAA on its own without needing a
+   region to enlarge. The hit box is the square; the glyph inside is 20px, so
+   the target is generous without the control looking heavy. */
+.vd-theme-toggle{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:44px;height:44px;flex-shrink:0;
+  background:none;border:0;cursor:pointer;padding:0;
+  margin-left:var(--vd-space-h);
+  color:var(--vd-text-muted);
+  transition:color var(--vd-dur) var(--vd-ease);
+}
+.vd-theme-toggle:hover{color:var(--vd-text-max)}
+.vd-theme-toggle__glyph{
+  width:20px;height:20px;display:block;
+  /* Geometric precision over friendliness, to match the 2px radius and the
+     hairline rules: mitred joins, square caps, no rounding. */
+  stroke-linecap:square;stroke-linejoin:miter;
+}
+@media(max-width:860px){
+  /* No longer a row of its own. .vd-nav__list takes width:100% here, so
+     source order alone pushes the toggle to a third row; reordering lifts it
+     onto the MARK's row, pinned right by the auto margin.
+
+     WHY NOT beside the nav links, which is the literal reading. At 375px the
+     inner has 345px to work with and the four links plus their gaps already
+     need about 330 — a 44px glyph does not fit on that row at any sane
+     spacing, and at 320px it is not close. The mark's row has room to spare,
+     so the toggle goes there and the links keep a full row. Same result
+     either way: no wasted third row.
+
+     The 44px box also stops being square here — it keeps its height for the
+     target but sheds the fixed width, so the auto margin can do its job. */
+  vd-theme-toggle{order:1;margin-left:auto}
+  .vd-nav__list{order:2}
+  .vd-theme-toggle{margin-left:0}
+}
+
+/* ── vd-footer · carries the Chives signature, footer only ───────────── */
+vd-footer{
+  display:block;border-top:var(--vd-hairline) solid var(--vd-rule);
+  margin-top:var(--vd-space-4);padding:var(--vd-space-2) 0 var(--vd-space-3);
+}
+.vd-footer__inner{
+  max-width:var(--vd-page);margin:0 auto;padding:0 var(--vd-space-1);
+  display:flex;gap:var(--vd-space-2);flex-wrap:wrap;align-items:flex-start;
+}
+.vd-footer__sig{
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);letter-spacing:.08em;
+  color:var(--vd-text-muted);margin-left:auto;text-align:right;line-height:var(--vd-lead-half);
+}
+.vd-footer__sig b{color:var(--vd-text);font-weight:400}
+
+/* ── vd-meta · metadata strip ──────────────────────────────────────────
+   SINGLE-LINE BY DESIGN, and the wrap case is handled by changing form
+   rather than by letting it wrap. Two things break when this strip wraps:
+
+     1. The separator is a border-right cleared by :last-child, and
+        :last-child cannot know which item ends a VISUAL ROW. Every wrap
+        therefore leaves a rule hanging in empty space.
+     2. There is no row-gap, so the label/value pairs collide vertically and
+        read as one confused block instead of four items.
+
+   Both were visible at 390px. Rather than paper over them, below 860 this
+   stops being a strip and becomes a list — see the MOBILE override.
+
+   If the content ever grows past what fits on one line at 861px, raise the
+   breakpoint or shorten the content. Do not simply let it wrap. */
+vd-meta{display:flex;gap:0;flex-wrap:wrap;font-family:var(--vd-face-mono);
+  border-top:var(--vd-hairline) solid var(--vd-rule);padding-top:var(--vd-space-h)}
+vd-meta>*{
+  padding-right:var(--vd-space-1);margin-right:var(--vd-space-1);
+  border-right:var(--vd-hairline) solid var(--vd-rule);
+  font-size:var(--vd-size-micro);line-height:var(--vd-lead-half);
+  text-transform:uppercase;letter-spacing:var(--vd-track-label);color:var(--vd-text-muted);
+}
+vd-meta>*:last-child{border-right:0;margin-right:0;padding-right:0}
+vd-meta b{display:block;font-size:var(--vd-size-xs);color:var(--vd-text);
+  font-weight:400;letter-spacing:.03em;margin-top:var(--vd-space-q)}
+vd-meta b.vd-is-data{color:var(--vd-data);font-variant-numeric:tabular-nums}
+/* Grades are not numerics. See the colour separation rule in tier 2. */
+vd-meta b.vd-is-grade{color:var(--vd-text-strong);letter-spacing:.04em}
+
+/* ── vd-tag ──────────────────────────────────────────────────────────── */
+.vd-tag{
+  display:inline-block;font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  line-height:var(--vd-lead-half);text-transform:uppercase;letter-spacing:var(--vd-track-label);
+  color:var(--vd-text-muted);border:var(--vd-hairline) solid var(--vd-rule);
+  border-radius:var(--vd-radius);padding:var(--vd-space-q) var(--vd-space-h);
+}
+/* Interactive tags are real targets and get the AAA 44px box. Static tags
+   are not targets and stay compact. */
+a.vd-tag{display:inline-flex;align-items:center;min-height:44px}
+a.vd-tag:hover{color:var(--vd-text-max);border-color:var(--vd-rule-strong)}
+
+/* ── buttons ─────────────────────────────────────────────────────────── */
+.vd-btn{
+  display:inline-block;font-family:var(--vd-face-mono);font-size:var(--vd-size-xs);
+  text-transform:uppercase;letter-spacing:var(--vd-track-label);font-weight:500;
+  padding:var(--vd-space-h) var(--vd-space-1);border-radius:var(--vd-radius);
+  /* --vd-control-border, not --vd-rule. A button is a UI component and its
+     visible boundary is bound by 1.4.11 at 3:1. --vd-rule measured 1.32:1 on
+     paper: the secondary button had a boundary you could not reliably see.
+     Same reasoning as the form controls; see --vd-control-border. */
+  border:var(--vd-hairline) solid var(--vd-control-border);background:none;color:var(--vd-text);
+  cursor:pointer;position:relative;overflow:hidden;
+  transition:color var(--vd-dur) var(--vd-ease),border-color var(--vd-dur) var(--vd-ease);
+}
+.vd-btn::after{
+  content:"";position:absolute;left:0;bottom:0;width:100%;height:1px;background:var(--vd-link);
+  transform:scaleX(0);transform-origin:left;transition:transform var(--vd-dur-slow) var(--vd-ease);
+}
+.vd-btn:hover{color:var(--vd-text-max);border-color:var(--vd-text-muted)}
+.vd-btn:hover::after{transform:scaleX(1)}
+.vd-btn--primary{border-color:var(--vd-link);color:var(--vd-link)}
+.vd-btn--primary:hover{color:var(--vd-text-max)}
+.vd-btn--danger{border-color:var(--vd-red-300);color:var(--vd-danger)}
+
+/* ── vd-code ─────────────────────────────────────────────────────────── */
+vd-code{display:block;margin:var(--vd-space-1) 0;border:var(--vd-hairline) solid var(--vd-rule);
+  border-radius:var(--vd-radius);background:var(--vd-surface-sunken)}
+.vd-code__bar{
+  display:flex;align-items:center;gap:var(--vd-space-h);
+  padding:var(--vd-space-q) var(--vd-space-h);border-bottom:var(--vd-hairline) solid var(--vd-rule);
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);letter-spacing:.06em;
+  color:var(--vd-text-muted);
+}
+.vd-code__copy{margin-left:auto;background:none;border:0;cursor:pointer;
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);letter-spacing:var(--vd-track-label);
+  text-transform:uppercase;color:var(--vd-text-muted);padding:var(--vd-space-q)}
+.vd-code__copy:hover{color:var(--vd-data)}
+vd-code pre{margin:0;padding:var(--vd-space-h);overflow-x:auto;
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-xs);line-height:var(--vd-lead-1);color:var(--vd-text)}
+code{font-family:var(--vd-face-mono);font-size:.92em}
+:not(pre)>code{color:var(--vd-text-strong);background:var(--vd-surface-sunken);
+  padding:1px 5px;border-radius:var(--vd-radius)}
+
+/* ── vd-quote · needed for the VawterLabs citation ───────────────────── */
+/* ══ THE EDITORIAL VOICE ═════════════════════════════════════════════
+   --vd-editorial is patina teal, the colour this system is named for. It
+   went unassigned for two calibrations because there was no job for it that
+   did not collide with something. This is the job: the marks that indicate
+   the page is quoting, crediting or annotating rather than speaking.
+
+   The rule takes teal; the quote TEXT does not. A left rule is a non-text
+   element at a 3:1 floor, which teal clears on both grounds with room, and
+   an 18px run of teal body copy would be the loudest thing in the system.
+
+   Adjacency constraint: teal and link blue are 0.0° apart for a deuteranope.
+   Marginalia sits beside prose, and prose contains links — the underline on
+   inline links is what keeps those apart. See the `a` rule.
+   ═══════════════════════════════════════════════════════════════════════ */
+vd-quote{display:block;margin:var(--vd-space-2) 0;padding-left:var(--vd-space-1);
+  border-left:2px solid var(--vd-editorial)}
+vd-quote blockquote{margin:0;font-size:var(--vd-size-m);line-height:var(--vd-lead-1);
+  color:var(--vd-text-strong)}
+vd-quote figcaption{margin-top:var(--vd-space-h);font-family:var(--vd-face-mono);
+  font-size:var(--vd-size-micro);letter-spacing:.06em;color:var(--vd-text-muted)}
+
+/* ── vd-cite · marginalia, uses the rail ─────────────────────────────── */
+/* Inline superscript — no box to hang a rule on, so this one takes the
+   colour itself. Legal because teal-500 is 7.60:1 / 8.02:1, which is why
+   the token had to be lifted before the editorial family could exist. */
+.vd-cite{font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  line-height:var(--vd-lead-half);color:var(--vd-editorial);vertical-align:super}
+.vd-marginalia{font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  line-height:var(--vd-lead-half);color:var(--vd-text-muted);margin-bottom:var(--vd-space-1);
+  padding-left:var(--vd-space-h);border-left:2px solid var(--vd-editorial)}
+
+/* ══ FORMS ══════════════════════════════════════════════════════════════
+   Calibration 05. The controls did not exist before this block — there was
+   no `input` rule anywhere in the system — so this is the kit and the state
+   model together.
+
+   Three decisions here are measured rather than stylistic, and each is
+   commented at the place it takes effect:
+
+   1. Success is --vd-ok, which aliases --vd-link, because no other hue
+      separates from error for a dichromat. The glyph and the absence of an
+      underline are what keep a success line from reading as a link.
+   2. Warning carries no hue. Orange is 5.77:1 and cannot be text.
+   3. Required is marked with an asterisk, which is a symbol with no
+      intrinsic meaning — so .vd-form__legend is not optional decoration,
+      it is what makes the asterisk parseable.
+
+   Validation timing lives in verdigris.js: validate on blur, then
+   re-validate on every input once a field has been marked.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.vd-form{max-width:var(--vd-measure)}
+.vd-form__legend{
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  line-height:var(--vd-lead-half);color:var(--vd-text-muted);
+  margin-bottom:var(--vd-space-1);
+}
+/* The asterisk is the error colour used as a marker rather than as a state.
+   That is a deliberate reuse: it says "this field can fail", which is the
+   same family of meaning. It is never the only channel — the control also
+   carries the required attribute, so assistive tech hears it without
+   seeing the mark. */
+.vd-form__req{color:var(--vd-danger);margin-left:.15em}
+
+fieldset{border:0;margin:0 0 var(--vd-space-2);padding:0;min-width:0}
+legend{
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  text-transform:uppercase;letter-spacing:var(--vd-track-label);
+  color:var(--vd-text-muted);font-weight:500;padding:0;margin-bottom:var(--vd-space-h);
+}
+
+.vd-field{margin-bottom:var(--vd-space-1)}
+.vd-field:last-child{margin-bottom:0}
+.vd-field__label{
+  display:block;font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  line-height:var(--vd-lead-half);text-transform:uppercase;
+  letter-spacing:var(--vd-track-label);color:var(--vd-text-muted);
+  font-weight:500;margin-bottom:var(--vd-space-q);
+}
+
+/* THE CONTROL. Hairline box, no fill beyond the sunken surface, and a
+   min-height of 44px so every control clears 2.5.5 target size without a
+   per-control override. font-family is load-bearing — form controls do not
+   inherit type by default and would otherwise silently drop to 13px Arial. */
+.vd-input,.vd-textarea,.vd-select{
+  display:block;width:100%;min-height:44px;
+  background:var(--vd-surface-sunken);color:var(--vd-text);
+  border:var(--vd-hairline) solid var(--vd-control-border);
+  border-radius:var(--vd-radius);
+  padding:var(--vd-space-q) var(--vd-space-h);
+  font-family:var(--vd-face-text);font-size:var(--vd-size-s);
+  line-height:var(--vd-lead-1);
+  transition:border-color var(--vd-dur) var(--vd-ease),
+             box-shadow var(--vd-dur) var(--vd-ease);
+}
+.vd-textarea{min-height:120px;resize:vertical}
+.vd-input::placeholder,.vd-textarea::placeholder{color:var(--vd-text-muted);opacity:1}
+
+/* Native select, per Calibration 05 section 03. The closed control is ours;
+   the open panel belongs to the OS and is left alone. That is the same
+   argument section 09 makes about the modal and the dropdown menu: native
+   affordances win, and owning a listbox means owning its ARIA forever. */
+.vd-select{
+  appearance:none;-webkit-appearance:none;
+  padding-right:var(--vd-space-2);
+  background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),
+                   linear-gradient(135deg,currentColor 50%,transparent 50%);
+  background-position:calc(100% - 20px) calc(50% + 2px),calc(100% - 14px) calc(50% + 2px);
+  background-size:6px 6px,6px 6px;
+  background-repeat:no-repeat;
+}
+/* The chevron is painted with currentColor, so it follows the text colour
+   into the disabled state without a second declaration. */
+.vd-select:disabled{color:var(--vd-text-muted)}
+
+.vd-input:focus-visible,.vd-textarea:focus-visible,.vd-select:focus-visible{
+  outline:var(--vd-focus-ring);outline-offset:1px;border-color:transparent;
+}
+
+/* Disabled is MUTED, never faded. opacity:.5 is the usual move and it is
+   wrong here: it composites the text toward the surface and destroys the
+   measured ratio, turning an AAA token into whatever falls out. Muted text
+   on the page ground is 7.06:1 in ink and 8.50:1 on paper — still legal. */
+.vd-input:disabled,.vd-textarea:disabled,.vd-select:disabled{
+  color:var(--vd-text-muted);background:var(--vd-surface);
+  border-style:dashed;cursor:not-allowed;
+}
+.vd-input[readonly],.vd-textarea[readonly]{
+  background:var(--vd-surface);border-color:var(--vd-rule);
+}
+
+/* ── the message line ────────────────────────────────────────────────── */
+.vd-field__msg{
+  display:flex;gap:var(--vd-space-q);align-items:flex-start;
+  margin-top:var(--vd-space-q);
+  font-size:var(--vd-size-xs);line-height:var(--vd-lead-half);
+}
+/* The glyph is a real character in the mono face, not an icon font and not
+   a background image — it survives high-contrast mode, copy-paste and a
+   failed asset load, and a screen reader ignores it because the message
+   text says the same thing in words. */
+.vd-field__glyph{
+  font-family:var(--vd-face-mono);font-weight:700;flex-shrink:0;
+  line-height:var(--vd-lead-half);
+}
+.vd-field__hint{
+  margin-top:var(--vd-space-q);
+  font-size:var(--vd-size-xs);line-height:var(--vd-lead-half);color:var(--vd-text-muted);
+}
+
+/* ── states ──────────────────────────────────────────────────────────── */
+.vd-field.is-invalid .vd-input,
+.vd-field.is-invalid .vd-textarea,
+.vd-field.is-invalid .vd-select{
+  border-color:var(--vd-danger);
+  box-shadow:inset 2px 0 0 var(--vd-danger);
+}
+.vd-field.is-invalid .vd-field__msg{color:var(--vd-danger)}
+
+/* SUCCESS. --vd-ok is --vd-link, so this line is exactly the colour of a
+   hyperlink. Two things keep them apart and both are required:
+     - the glyph, which no link has
+     - the absence of an underline, which every inline link has
+   text-decoration:none is stated explicitly rather than inherited, so that
+   a future link inside a success message cannot quietly pick one up. */
+.vd-field.is-valid .vd-input,
+.vd-field.is-valid .vd-textarea,
+.vd-field.is-valid .vd-select{border-color:var(--vd-ok)}
+.vd-field.is-valid .vd-field__msg{color:var(--vd-ok);text-decoration:none}
+
+/* WARNING carries no hue — it is the ordinary text colour, and the glyph
+   plus the wording do the work. See --vd-warn for why there is no amber. */
+.vd-field.is-warn .vd-input,
+.vd-field.is-warn .vd-textarea,
+.vd-field.is-warn .vd-select{border-color:var(--vd-control-border)}
+.vd-field.is-warn .vd-field__msg{color:var(--vd-warn)}
+
+/* ── checkbox and radio ──────────────────────────────────────────────── */
+/* Drawn rather than native, because a native box cannot take the hairline
+   treatment. The input stays in the DOM and stays focusable — it is
+   restyled, not replaced, so it remains a real control. */
+.vd-check{
+  display:flex;gap:var(--vd-space-h);align-items:flex-start;
+  min-height:44px;padding:var(--vd-space-q) 0;cursor:pointer;
+  font-size:var(--vd-size-s);line-height:var(--vd-lead-1);color:var(--vd-text);
+}
+.vd-check input{
+  appearance:none;-webkit-appearance:none;
+  width:18px;height:18px;margin:0;flex-shrink:0;
+  background:var(--vd-surface-sunken);
+  border:var(--vd-hairline) solid var(--vd-control-border);
+  border-radius:var(--vd-radius);
+  position:relative;cursor:pointer;
+  transition:border-color var(--vd-dur) var(--vd-ease);
+  /* nudged down to sit on the first line's optical centre */
+  margin-top:calc((var(--vd-lead-1) - 18px) / 2);
+}
+.vd-check input[type="radio"]{border-radius:50%}
+.vd-check input:checked{border-color:var(--vd-structure)}
+.vd-check input:checked::after{
+  content:"";position:absolute;inset:3px;
+  background:var(--vd-structure);border-radius:1px;
+}
+.vd-check input[type="radio"]:checked::after{border-radius:50%}
+.vd-check input:focus-visible{outline:var(--vd-focus-ring);outline-offset:2px}
+.vd-check input:disabled{border-style:dashed;cursor:not-allowed}
+.vd-check input:disabled+span{color:var(--vd-text-muted)}
+
+/* ── search ──────────────────────────────────────────────────────────── */
+.vd-input[type="search"]{appearance:none;-webkit-appearance:none}
+.vd-input[type="search"]::-webkit-search-cancel-button{
+  appearance:none;-webkit-appearance:none;
+  width:14px;height:14px;cursor:pointer;
+  background:currentColor;opacity:.55;
+  /* an X, drawn as a mask so it follows the text colour into both themes */
+  -webkit-mask:linear-gradient(45deg,transparent 44%,#000 44% 56%,transparent 56%),
+              linear-gradient(-45deg,transparent 44%,#000 44% 56%,transparent 56%);
+  mask:linear-gradient(45deg,transparent 44%,#000 44% 56%,transparent 56%),
+       linear-gradient(-45deg,transparent 44%,#000 44% 56%,transparent 56%);
+}
+.vd-input[type="search"]::-webkit-search-cancel-button:hover{opacity:1}
+
+/* ── zebra tables ────────────────────────────────────────────────────── */
+/* The stripe is a surface, not a tint of the text colour, so the measured
+   ratios of everything sitting on it are the same ones published for the
+   sunken surface. Every accent already clears AAA there. */
+.vd-table--zebra tbody tr:nth-child(even){background:var(--vd-surface-sunken)}
+
+/* ── skeleton loading ────────────────────────────────────────────────── */
+/* No shimmer sweep. A looping animation on a block that may persist for
+   several seconds is exactly what 2.2.2 is about, and there is no pause
+   control on a loading state, so the movement would have to stop anyway. */
+.vd-skeleton{
+  display:block;height:var(--vd-size-s);border-radius:var(--vd-radius);
+  background:var(--vd-surface-sunken);margin-bottom:var(--vd-space-h);
+}
+.vd-skeleton:last-child{margin-bottom:0}
+.vd-skeleton--title{height:var(--vd-size-l);width:60%}
+.vd-skeleton--short{width:48%}
+
+/* ── empty state ─────────────────────────────────────────────────────── */
+/* The instrument reads zero rather than apologising. A dial at 0 is not an
+   error and does not get an illustration or an exclamation mark. */
+.vd-empty{padding:var(--vd-space-2) 0;text-align:left}
+.vd-empty__value{
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-xl);
+  line-height:var(--vd-lead-half);color:var(--vd-text-muted);
+  font-variant-numeric:tabular-nums;
+}
+.vd-empty__label{
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  text-transform:uppercase;letter-spacing:var(--vd-track-label);
+  color:var(--vd-text-muted);margin-top:var(--vd-space-q);
+}
+.vd-empty__note{
+  margin-top:var(--vd-space-h);font-size:var(--vd-size-xs);
+  line-height:var(--vd-lead-half);color:var(--vd-text-muted);max-width:52ch;
+}
+
+/* ── tables ──────────────────────────────────────────────────────────── */
+.vd-table{width:100%;border-collapse:collapse;font-size:var(--vd-size-xs)}
+.vd-table th{
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);text-transform:uppercase;
+  letter-spacing:var(--vd-track-label);color:var(--vd-text-muted);font-weight:500;text-align:left;
+  padding:0 var(--vd-space-1) var(--vd-space-q) 0;border-bottom:var(--vd-hairline) solid var(--vd-rule);
+}
+.vd-table td{padding:var(--vd-space-q) var(--vd-space-1) var(--vd-space-q) 0;
+  border-bottom:var(--vd-hairline) solid var(--vd-rule);vertical-align:top}
+.vd-table td.vd-is-num{font-family:var(--vd-face-mono);color:var(--vd-data);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.vd-table-scroll{overflow-x:auto}
+
+/* ── vd-figure ───────────────────────────────────────────────────────── */
+vd-figure{display:block;margin:var(--vd-space-2) 0}
+vd-figure img,vd-figure svg{max-width:100%;height:auto;display:block;
+  border:var(--vd-hairline) solid var(--vd-rule);border-radius:var(--vd-radius)}
+vd-figure figcaption{margin-top:var(--vd-space-h);font-family:var(--vd-face-mono);
+  font-size:var(--vd-size-micro);line-height:var(--vd-lead-half);color:var(--vd-text-muted);
+  padding-left:var(--vd-space-h);border-left:2px solid var(--vd-editorial)}
+
+/* ── vd-redact · turns the IP constraint into a visible design decision ─ */
+vd-redact{
+  display:inline-block;background:var(--vd-surface-selected);color:transparent;
+  border-radius:var(--vd-radius);padding:0 var(--vd-space-q);cursor:help;
+  transition:color var(--vd-dur-slow) var(--vd-ease),background var(--vd-dur-slow) var(--vd-ease);
+  user-select:none;
+}
+/* No inline reason label on screen: absolutely positioning it collides with
+   surrounding prose at any realistic measure. The reason is carried by
+   aria-label and by the title tooltip instead, and printed inline by
+   print.css where there is no hover to reveal it. */
+vd-redact[aria-expanded="true"]{color:var(--vd-text);background:var(--vd-surface-raised)}
+
+/* ── vd-toc ──────────────────────────────────────────────────────────── */
+.vd-toc{list-style:none;margin:0;padding:0}
+.vd-toc li{margin-bottom:var(--vd-space-h)}
+.vd-toc a{
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);line-height:var(--vd-lead-half);
+  color:var(--vd-text-muted);display:block;
+}
+.vd-toc a:hover,.vd-toc a[aria-current]{color:var(--vd-text-max)}
+.vd-toc a[aria-current]{border-left:2px solid var(--vd-structure);padding-left:var(--vd-space-h);
+  margin-left:calc(var(--vd-space-h) * -1 - 2px)}
+
+/* ── vd-swatch · for the design system page, portfolio piece five ────── */
+/* The middle cell is an unclassed <span> wrapping name + meta. A flex item
+   defaults to min-width:auto, so it refuses to shrink below its content and
+   pushes the nowrap ratio past the viewport — measured 11px of overflow at
+   320px, which is a 1.4.10 failure. min-width:0 lets it shrink and
+   overflow-wrap lets a long token name break rather than win the argument. */
+.vd-swatch{display:flex;gap:var(--vd-space-h);align-items:flex-start;
+  padding:var(--vd-space-h) 0;border-bottom:var(--vd-hairline) solid var(--vd-rule)}
+.vd-swatch>span:not([class]){min-width:0;overflow-wrap:anywhere}
+.vd-swatch__chip{width:var(--vd-space-1);height:var(--vd-space-1);flex-shrink:0;
+  border-radius:var(--vd-radius);border:var(--vd-hairline) solid var(--vd-rule)}
+.vd-swatch__name{font-family:var(--vd-face-mono);font-size:var(--vd-size-xs);color:var(--vd-text)}
+.vd-swatch__meta{font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  color:var(--vd-text-muted);display:block;margin-top:2px}
+.vd-swatch__ratio{margin-left:auto;font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  color:var(--vd-data);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vd-swatch__ratio[data-fail]{color:var(--vd-danger)}
+
+/* ── vd-diagram primitives · for the agent architecture ──────────────── */
+.vd-node{
+  border:var(--vd-hairline) solid var(--vd-rule);border-radius:var(--vd-radius);
+  padding:var(--vd-space-h);font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  text-transform:uppercase;letter-spacing:var(--vd-track-label);color:var(--vd-text-muted);
+  text-align:center;background:var(--vd-surface-sunken);
+}
+.vd-node--active{border-color:var(--vd-rule-accent);color:var(--vd-text-max)}
+.vd-stack{display:grid;gap:var(--vd-space-h)}
+
+/* ── reduced motion ──────────────────────────────────────────────────────
+   Not "everything stops". Structure-drawing is removed because it carries
+   no information. The topolang field freezes to a single deterministic
+   seeded frame, so it is still generative and still rendered by the DSL,
+   just not advancing. topolang v1.3.2 requires runtimes to expose exactly
+   this (Constraints > must: "Provide a way to freeze t or set speed to 0").
+   ─────────────────────────────────────────────────────────────────────── */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;scroll-behavior:auto !important;
+  }
+  .vd-system-card__title a::after,.vd-note-card__title a::after,
+  .vd-nav__list a::after,.vd-btn::after{transform:scaleX(1);opacity:.4}
+  vd-redact{color:var(--vd-text-muted)}
+}
+
+
+/* ═══ RESPONSIVE + TARGET SIZE ═════════════════════════════════════════
+   Deliberately last in the file. These override component rules defined
+   above, and @media adds no specificity, so source order is the mechanism.
+   Moving this block earlier silently breaks it.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* WCAG 1.4.10 reflow at 320 CSS px. The nav was the only element in the
+   whole page that overflowed: a non-wrapping flex row inside a fixed 60px
+   bar cannot reflow, whatever the viewport does. Verified in a 320px
+   iframe, because constraining an element does not fire media queries and
+   a hand-resized window on a scaled display does not either. */
+@media(max-width:640px){
+  .vd-nav__inner{
+    height:auto;flex-wrap:wrap;row-gap:var(--vd-space-h);column-gap:var(--vd-space-1);
+    padding-top:var(--vd-space-h);padding-bottom:var(--vd-space-h);
+  }
+  .vd-nav__list{
+    margin-left:0;width:100%;flex-wrap:wrap;
+    row-gap:0;column-gap:var(--vd-space-1);
+  }
+}
+
+/* WCAG 2.5.5 (AAA, 44x44) on standalone controls. The hit box grows; the
+   rule stays on the text baseline, so nothing looks bigger. */
+.vd-nav__mark{display:inline-flex;align-items:center;min-height:44px}
+.vd-nav__list a{display:inline-flex;align-items:center;min-height:44px}
+.vd-nav__list a::after{bottom:calc(50% - 11px)}
+a.vd-tag{display:inline-flex;align-items:center;min-height:44px}
+.vd-toc a{display:flex;align-items:center;min-height:44px}
+.vd-code__copy{min-height:44px;min-width:44px}
+
+/* RESOLVED — this used to be a stated deviation from 2.5.5.
+   Card and note titles sit at 30px, which met 2.5.8 AA (24px) but not 2.5.5
+   AAA (44px). The two ways out were both rejected: 45px leading on 18px type
+   wrecks a two-line title, and a stretched overlay link breaks text selection
+   across the card.
+
+   The whole card is now the target instead, forwarded in JS with a drag and
+   selection guard (see makeRegionClickable in verdigris.js). The target is
+   the full card — far past 44x44 — the prose is still selectable, and no
+   overlay exists. 2.5.5 AAA now holds for these, so the accessibility notes
+   should drop the deviation rather than keep publishing it.
+
+   The 44px minimums below still apply to standalone controls, where there is
+   no region to enlarge. */
+
+
+/* ═══ MOBILE ═══════════════════════════════════════════════════════════
+   Below 860 the hero column is narrow and tall. A percentage mask cannot
+   keep a full-bleed field clear of text at an unknown content height: the
+   fade line lands wherever the paragraph happens to end. Masking is the
+   wrong tool once the layout stacks.
+
+   So the field stops being a background and becomes a BAND: its own grid
+   row under the text, no mask at all. Overlap is then structurally
+   impossible rather than approximately avoided, which is the only version
+   of the AAA claim worth publishing.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media(max-width:860px){
+  /* Field FIRST, flush to the nav. No top padding: the band is full-bleed and
+     reads as a header plate, so a gap above it would leave it floating. The
+     30px grid gap does the separating below it instead. */
+  vd-hero{
+    display:grid;grid-template-columns:100%;gap:var(--vd-space-1);
+    padding:0 0 var(--vd-space-1);
+  }
+  /* Text SECOND, below the field. max-width MUST stay — it now carries the
+     page measure that .vd-page used to provide, since the hero is full-bleed.
+     Setting it to none here would run the text to the screen edge. */
+  .vd-hero__inner{order:2}
+  /* The display line takes the full measure once the layout stacks. */
+  .vd-hero__thesis{max-width:none}
+  /* Band, not background: its own grid row, so text can never be over it.
+     Sits ABOVE the display line and carries NO rule of its own — the fade is
+     the edge. A hairline across the top would read as a bar separating the
+     band from the nav, which is the opposite of the intent: the band should
+     look like the page starting, not like a panel bolted under the header.
+
+     The horizontal mask goes — it was calibrated against a text column that
+     no longer overlaps anything — and is replaced by a vertical-only fade so
+     the band dissolves DOWNWARD into the display line. ONE layer, so no
+     compositing and none of the risk described up at .vd-hero__field.
+
+     The WRAPPER is the band — it carries the grid placement and the vertical
+     fade, exactly as it does on desktop, just with different stops. The
+     desktop fade is in baseline lengths measured from the bottom of a tall
+     hero; here the band is a fixed 200px, so percentages of it are stable and
+     say the intent more directly.
+
+     The canvas drops its horizontal mask entirely: that mask was calibrated
+     against a text column, and no text overlaps the band. */
+  .vd-hero__fieldwrap{
+    order:1;position:relative;inset:auto;width:100%;height:200px;
+    -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 52%,transparent 94%);
+    mask-image:linear-gradient(180deg,#000 0%,#000 52%,transparent 94%);
+  }
+  .vd-hero__field{-webkit-mask-image:none;mask-image:none}
+  /* the rail is a strip above the content; it needs to read as a strip */
+  .vd-spread__rail{gap:var(--vd-space-2);margin-bottom:var(--vd-space-h)}
+  .vd-section{padding-block:var(--vd-space-2)}
+
+  /* vd-meta stops being a strip and becomes a list. The separator moves to
+     the BOTTOM edge, which is the whole point: in a single column "last in
+     row" and ":last-child" are the same element, so the dangling-rule bug
+     cannot occur. That is also why this is ONE column and not an auto-fit
+     grid — two columns would reintroduce exactly the same bug on the final
+     row, where the second-to-last item ends a row but is not :last-child. */
+  vd-meta{display:grid;grid-template-columns:1fr}
+  vd-meta>*{
+    border-right:0;margin-right:0;padding-right:0;
+    padding-block:var(--vd-space-h);
+    border-bottom:var(--vd-hairline) solid var(--vd-rule);
+  }
+  vd-meta>*:first-child{padding-top:0}
+  vd-meta>*:last-child{border-bottom:0;padding-bottom:0}
+}
+
+@media(max-width:480px){
+  /* 40px display in a 260px column gives two words a line. Step it down and
+     buy back gutter width; the two-register gap is preserved either way. */
+  :root{--vd-size-2xl:32px;--vd-lead-hero:40px;--vd-size-xl:28px;--vd-lead-2:35px}
+  .vd-page{padding-inline:var(--vd-space-h)}
+  /* .vd-hero__inner MIRRORS .vd-page and has to be stepped down with it.
+     Missing this left the hero text on a 30px gutter while the nav, sections
+     and footer all moved to 15px — so the display line no longer lined up
+     with the mark above it, which is the one alignment that must not drift.
+     Anything that mirrors .vd-page belongs in this list. */
+  .vd-hero__inner{padding-inline:var(--vd-space-h)}
+  .vd-nav__inner{padding-left:var(--vd-space-h);padding-right:var(--vd-space-h)}
+  .vd-footer__inner{padding-left:var(--vd-space-h);padding-right:var(--vd-space-h)}
+  /* The wrapper is the band, so the band height lives on it, not the canvas. */
+  .vd-hero__fieldwrap{height:160px}
+  .vd-spread__rail{gap:var(--vd-space-1)}
+}
+
+/* Note cards. The desktop row is date | title | length on one baseline.
+   That layout collapses badly under ~640px: the title claims the full width,
+   the date orphans above it, and margin-left:auto strands the word count on
+   a line of its own. A two-row grid is the honest small-screen form —
+   metadata paired on one line, title given the full measure below it. */
+@media(max-width:640px){
+  .vd-note-card__row{
+    display:grid;grid-template-columns:1fr auto;
+    gap:var(--vd-space-q) var(--vd-space-1);align-items:baseline;
+  }
+  .vd-note-card__date{grid-area:1/1;min-width:0}
+  .vd-note-card__len{grid-area:1/2;margin-left:0;text-align:right}
+  .vd-note-card__title{grid-area:2/1/3/3;min-width:0}
+  .vd-note-card__dek{margin-top:var(--vd-space-q)}
+}

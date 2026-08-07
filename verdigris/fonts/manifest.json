@@ -1,0 +1,86 @@
+{
+ "chivo": [
+  {
+   "file": "chivo-400-italic.woff2",
+   "weight": "400",
+   "style": "italic",
+   "kb": 16
+  },
+  {
+   "file": "chivo-400-normal.woff2",
+   "weight": "400",
+   "style": "normal",
+   "kb": 32
+  },
+  {
+   "file": "chivo-500-normal.woff2",
+   "weight": "500",
+   "style": "normal",
+   "kb": 32
+  },
+  {
+   "file": "chivo-600-normal.woff2",
+   "weight": "600",
+   "style": "normal",
+   "kb": 32
+  },
+  {
+   "file": "chivo-700-normal.woff2",
+   "weight": "700",
+   "style": "normal",
+   "kb": 32
+  }
+ ],
+ "literata": [
+  {
+   "file": "literata-400-italic.woff2",
+   "weight": "400",
+   "style": "italic",
+   "kb": 47
+  },
+  {
+   "file": "literata-400-normal.woff2",
+   "weight": "400",
+   "style": "normal",
+   "kb": 84
+  },
+  {
+   "file": "literata-600-normal.woff2",
+   "weight": "600",
+   "style": "normal",
+   "kb": 84
+  },
+  {
+   "file": "literata-700-normal.woff2",
+   "weight": "700",
+   "style": "normal",
+   "kb": 84
+  }
+ ],
+ "plex-mono": [
+  {
+   "file": "plex-mono-400-italic.woff2",
+   "weight": "400",
+   "style": "italic",
+   "kb": 16
+  },
+  {
+   "file": "plex-mono-400-normal.woff2",
+   "weight": "400",
+   "style": "normal",
+   "kb": 14
+  },
+  {
+   "file": "plex-mono-500-normal.woff2",
+   "weight": "500",
+   "style": "normal",
+   "kb": 15
+  },
+  {
+   "file": "plex-mono-600-normal.woff2",
+   "weight": "600",
+   "style": "normal",
+   "kb": 15
+  }
+ ]
+}

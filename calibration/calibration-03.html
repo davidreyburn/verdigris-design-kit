@@ -1,0 +1,1657 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verdigris · Calibration 03 — Colour, Hero, Scope</title>
+<script src="verdigris/topolang.js"></script>
+<style>
+/* ══════════════════════════════════════════════════════════
+   CHROME — same Signal Lab shell as Calibration 02, so this
+   reads as the next pass and not a different instrument.
+   Deliberately NOT using --vd-* tokens: this page argues
+   about those tokens, so it cannot depend on them.
+   ══════════════════════════════════════════════════════════ */
+:root{
+  --bg:#161614; --bg-dim:#111110; --bg-hi:#1e1d1b; --bg-sel:#2c2b28;
+  --dim:#524e48; --dim2:#8B8478; --bone:#D0CAB8; --bone-b:#E8E2D0; --white:#F0EDE4;
+  --blue:#7FA9CE; --lime:#AAFF00; --green:#44BB44; --teal:#4FB8AF;
+  --orange:#C4834A; --red:#CC5555;
+  --line:#2c2b28; --line-soft:#211f1d;
+  --f-sans:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+  --f-tech:Bahnschrift,"DIN Alternate","Segoe UI",sans-serif;
+  --f-mono:"Cascadia Mono","Cascadia Code",Consolas,ui-monospace,monospace;
+  --ease:cubic-bezier(.2,.6,.2,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--bone);font-family:var(--f-sans);font-size:15px;line-height:1.6;
+  -webkit-font-smoothing:antialiased}
+::selection{background:var(--bg-sel);color:var(--white)}
+.lbl{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim2)}
+
+#shell{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh}
+#rail{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--bg-dim);
+  border-right:1px solid var(--line);padding:20px 0 24px;display:flex;flex-direction:column}
+#rail::-webkit-scrollbar{width:7px}#rail::-webkit-scrollbar-thumb{background:var(--bg-sel)}
+.rail-head{padding:0 18px 16px;border-bottom:1px solid var(--line-soft);margin-bottom:10px}
+.rail-title{font-family:var(--f-mono);font-size:12.5px;color:var(--bone-b);letter-spacing:.05em}
+.rail-title b{color:var(--lime);font-weight:400}
+.rail-sub{font-size:11px;color:var(--dim2);margin-top:5px;line-height:1.45}
+.nav-item{display:flex;gap:10px;align-items:baseline;width:100%;text-align:left;padding:7px 18px;
+  background:none;border:0;cursor:pointer;color:var(--dim2);font-family:var(--f-sans);font-size:13.5px;
+  border-left:2px solid transparent;transition:color .15s,background .15s}
+.nav-item:hover{color:var(--bone);background:#00000030}
+.nav-item.on{color:var(--bone-b);border-left-color:var(--blue);background:#00000040}
+.nav-item .n{font-family:var(--f-mono);font-size:10.5px;color:var(--dim2);min-width:16px}
+.nav-item.on .n{color:var(--blue)}
+.nav-item .ct{margin-left:auto;font-family:var(--f-mono);font-size:10px;color:var(--dim2)}
+.nav-item.done .ct{color:var(--lime)}
+.rail-foot{margin-top:auto;padding:14px 18px 0;border-top:1px solid var(--line-soft)}
+.bar{height:3px;background:var(--bg-sel);overflow:hidden;margin-bottom:7px}
+.bar i{display:block;height:100%;background:var(--lime);width:0;transition:width .4s var(--ease)}
+.rail-foot .lbl{display:flex;justify-content:space-between}
+.mini{margin-top:11px;display:flex;gap:6px;flex-wrap:wrap}
+.mini button{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+  background:none;border:1px solid var(--line);color:var(--dim2);padding:4px 7px;cursor:pointer}
+.mini button:hover{color:var(--bone);border-color:var(--dim2)}
+
+#main{padding:0 0 110px;min-width:0}
+.wrap{max-width:900px;margin:0 auto;padding:0 40px}
+
+.sec-head{padding:58px 0 26px;margin-bottom:32px;position:relative;border-bottom:1px solid var(--line)}
+.sec-head::after{content:"";position:absolute;left:0;bottom:-1px;width:56px;height:1px;background:var(--lime)}
+.sec-num{font-family:var(--f-mono);font-size:11px;color:var(--lime);letter-spacing:.18em;margin-bottom:11px;
+  display:flex;align-items:center;gap:9px}
+.sec-num::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,#aaff0038,transparent)}
+.sec-title{font-family:var(--f-tech);font-size:38px;line-height:1.05;font-weight:400;color:var(--white);margin:0 0 13px}
+.sec-lede{font-size:15.5px;color:var(--bone);max-width:66ch;line-height:1.65;margin:0}
+.sec-lede em{color:var(--bone-b);font-style:italic}
+.sec-lede code,.q-help code,.spnote code,.warn code{font-family:var(--f-mono);font-size:12.5px;color:var(--orange);
+  background:#0000004d;padding:1px 4px}
+
+.q{padding:28px 0;border-bottom:1px solid var(--line-soft)}
+.q:last-of-type{border-bottom:0}
+.q-top{display:flex;gap:12px;align-items:baseline;margin-bottom:5px}
+.q-id{font-family:var(--f-mono);font-size:10px;color:var(--dim2);padding-top:3px;min-width:30px}
+.q-label{font-size:17px;color:var(--bone-b);line-height:1.45;font-weight:500;margin:0}
+.q-help{font-size:13.5px;color:var(--dim2);line-height:1.6;margin:6px 0 0 42px;max-width:70ch}
+.q-help b{color:var(--bone);font-weight:500}
+.q-body{margin:16px 0 0 42px}
+@media(max-width:820px){.q-help,.q-body{margin-left:0}}
+
+textarea{width:100%;background:var(--bg-dim);border:1px solid var(--line);color:var(--bone-b);
+  font-family:var(--f-sans);font-size:14.5px;line-height:1.6;padding:11px 13px;resize:vertical}
+textarea:focus{outline:2px solid var(--blue);outline-offset:-1px;border-color:var(--blue)}
+textarea::placeholder{color:#6B665E}
+
+.opts{display:flex;flex-direction:column;gap:1px}
+.opt{display:flex;gap:12px;padding:12px 14px;background:var(--bg-dim);border:1px solid var(--line-soft);
+  cursor:pointer;transition:all .12s;align-items:flex-start}
+.opt:hover{border-color:var(--dim2);background:var(--bg-hi)}
+.opt.on{border-color:var(--blue);background:#7fa9ce0f}
+.opt .box{width:14px;height:14px;border:1px solid var(--dim2);flex-shrink:0;margin-top:4px;position:relative;border-radius:50%}
+.opt.multi .box{border-radius:0}
+.opt.on .box{border-color:var(--blue)}
+.opt.on .box::after{content:"";position:absolute;inset:3px;background:var(--blue);border-radius:50%}
+.opt.multi.on .box::after{border-radius:0;inset:2px}
+.opt .txt{min-width:0;display:block}
+.opt .t{display:block;font-size:14.5px;color:var(--bone-b);line-height:1.45}
+.opt .d{display:block;font-size:12.5px;color:var(--dim2);line-height:1.55;margin-top:3px}
+.opt .d code{font-family:var(--f-mono);color:var(--orange);font-size:11.5px}
+.opt .d b{color:var(--bone);font-weight:500}
+.opt .pill{margin-left:auto;flex-shrink:0;font-family:var(--f-mono);font-size:9px;letter-spacing:.07em;
+  padding:2px 6px;border:1px solid var(--line);color:var(--dim2);align-self:flex-start;margin-top:3px}
+
+.spgrid{display:grid;gap:14px;grid-template-columns:1fr}
+.spwrap{border:1px solid var(--line);background:var(--bg-dim);transition:border-color .15s}
+.spwrap:hover{border-color:var(--dim2)}
+.spwrap.on{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue)}
+.sphead{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid var(--line);
+  cursor:pointer;user-select:none;flex-wrap:wrap}
+.sphead .box{width:13px;height:13px;border:1px solid var(--dim2);border-radius:50%;position:relative;flex-shrink:0}
+.spwrap.on .sphead .box{border-color:var(--blue)}
+.spwrap.on .sphead .box::after{content:"";position:absolute;inset:3px;background:var(--blue);border-radius:50%}
+.sphead .k{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.07em;color:var(--bone)}
+.spwrap.on .sphead .k{color:var(--bone-b)}
+.sphead .cost{font-family:var(--f-mono);font-size:10px;letter-spacing:.05em;padding:2px 7px;border:1px solid}
+.cost.free{color:var(--lime);border-color:#aaff0040}
+.cost.paid{color:var(--orange);border-color:#c4834a55}
+.cost.over{color:var(--red);border-color:#cc555555}
+.sphead .tag{margin-left:auto;font-family:var(--f-mono);font-size:9.5px;color:var(--dim2);letter-spacing:.05em}
+.spnote{font-size:12.5px;color:var(--dim2);padding:10px 12px 12px;line-height:1.55;border-top:1px solid var(--line-soft)}
+.spnote b{color:var(--bone);font-weight:500}
+.spnote .m{font-family:var(--f-mono);color:var(--bone)}
+.spstage{padding:20px;overflow:hidden}
+.spstage.tight{padding:0}
+.spstage.pad0{padding:0}
+
+.secnav{display:flex;gap:10px;margin-top:42px;padding-top:24px;border-top:1px solid var(--line)}
+.btn{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;background:none;
+  border:1px solid var(--line);color:var(--bone);padding:11px 20px;cursor:pointer;transition:all .14s}
+.btn:hover{border-color:var(--dim2);background:var(--bg-hi)}
+.btn.pri{border-color:var(--blue);color:var(--blue)}
+.btn.pri:hover{background:var(--blue);color:#0d1620}
+.btn:disabled{opacity:.3;cursor:default}
+.spacer{flex:1}
+
+.warn{border-left:2px solid var(--orange);padding:2px 0 2px 16px;margin:24px 0;font-size:14px;
+  color:var(--bone);line-height:1.65}
+.warn b{color:var(--orange);font-weight:500}
+.warn.ok{border-color:var(--lime)}.warn.ok b{color:var(--lime)}
+.warn.bad{border-color:var(--red)}.warn.bad b{color:var(--red)}
+.kv{display:grid;grid-template-columns:160px 1fr;gap:9px 18px;font-size:14px;margin:22px 0}
+.kv dt{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--dim2);padding-top:3px}
+.kv dd{margin:0;color:var(--bone)}
+.kv dd b{color:var(--lime);font-weight:500;font-family:var(--f-mono)}
+
+table.px{width:100%;border-collapse:collapse;font-size:13px;margin:18px 0}
+table.px th{font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim2);
+  text-align:left;padding:0 12px 8px 0;font-weight:400;border-bottom:1px solid var(--line)}
+table.px td{padding:8px 12px 8px 0;border-bottom:1px solid var(--line-soft);color:var(--bone);vertical-align:top}
+table.px td.n{font-family:var(--f-mono);white-space:nowrap}
+table.px td.n.over{color:var(--red)}
+table.px td.n.ok{color:var(--lime)}
+table.px td.n.mid{color:var(--orange)}
+table.px td.sw span{display:inline-block;width:11px;height:11px;margin-right:6px;vertical-align:-1px;border:1px solid #ffffff20}
+
+.outbox{background:var(--bg-dim);border:1px solid var(--line);padding:16px;font-family:var(--f-mono);
+  font-size:11.5px;line-height:1.65;color:var(--bone);white-space:pre-wrap;max-height:440px;overflow:auto}
+.outbox::-webkit-scrollbar{width:8px}.outbox::-webkit-scrollbar-thumb{background:var(--bg-sel)}
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,90px);background:var(--lime);color:#141a06;
+  font-family:var(--f-mono);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;padding:11px 22px;
+  transition:transform .3s var(--ease);z-index:99}
+.toast.on{transform:translate(-50%,0)}
+@media(max-width:900px){#shell{grid-template-columns:1fr}
+  #rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+  .wrap{padding:0 20px}.sec-title{font-size:30px}}
+
+/* ── vision-simulation bar ─────────────────────────────────
+   The whole colour argument turns on what survives CVD, so
+   the simulator is a first-class control, not a footnote. */
+.vbar{position:sticky;top:0;z-index:40;display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+  background:#0e0e0d;border:1px solid var(--line);padding:9px 12px;margin:0 0 22px}
+.vbar .lbl{margin-right:2px}
+.vbar button{font-family:var(--f-mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+  background:none;border:1px solid var(--line);color:var(--dim2);padding:5px 9px;cursor:pointer;transition:all .12s}
+.vbar button:hover{color:var(--bone);border-color:var(--dim2)}
+.vbar button.on{color:#141a06;background:var(--lime);border-color:var(--lime)}
+.vbar .hint{font-size:11.5px;color:var(--dim2);margin-left:auto}
+body.sim-deuter .spstage,body.sim-deuter .swrow{filter:url(#f-deuter)}
+body.sim-protan .spstage,body.sim-protan .swrow{filter:url(#f-protan)}
+body.sim-gray   .spstage,body.sim-gray   .swrow{filter:grayscale(1)}
+#svgf{position:absolute;width:0;height:0;overflow:hidden}
+
+/* ── swatch strip ─────────────────────────────────────────── */
+.swrow{display:grid;gap:1px;background:var(--line-soft);border:1px solid var(--line);margin:16px 0}
+.swrow>div{background:#131211;padding:11px 13px;display:flex;gap:11px;align-items:center}
+.swrow .chip{width:30px;height:30px;flex-shrink:0;border:1px solid #ffffff18}
+.swrow .nm{font-family:var(--f-mono);font-size:11.5px;color:var(--bone-b)}
+.swrow .mt{font-family:var(--f-mono);font-size:10px;color:var(--dim2);display:block;margin-top:2px;letter-spacing:.04em}
+.swrow .rt{margin-left:auto;font-family:var(--f-mono);font-size:11px;color:var(--lime);white-space:nowrap}
+.swrow .rt.bad{color:var(--red)}
+.swrow .rt.mid{color:var(--orange)}
+
+/* ══════════════════════════════════════════════════════════
+   SPECIMENS — each is a scoped miniature of the real site.
+   Colours are literal hex, never inherited, so a specimen
+   never accidentally shows the palette it is arguing against.
+   ══════════════════════════════════════════════════════════ */
+.sp{background:#161614;color:#D0CAB8;font-size:14px;font-family:var(--f-sans)}
+.sp .mono{font-family:var(--f-mono)}
+
+/* §01 — the rail: the actual collision site */
+.rl{padding:22px;display:grid;grid-template-columns:132px 1fr;gap:30px;align-items:start}
+.rl .rail{border-right:1px solid #2c2b28;padding-right:15px}
+.rl .ro{display:block;margin-bottom:26px}
+.rl .ro:last-child{margin-bottom:0}
+.rl .rv{display:block;font-family:var(--f-mono);font-size:18px;line-height:15px;font-weight:500;
+  font-variant-numeric:tabular-nums}
+.rl .rk{display:block;font-family:var(--f-mono);font-size:12px;line-height:15px;text-transform:uppercase;
+  letter-spacing:.14em;color:#A8A192;margin-top:8px}
+.rl .e{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A8A192}
+.rl h4{font-family:var(--f-tech);font-size:30px;font-weight:400;color:#F0EDE4;margin:12px 0 0;line-height:1.1}
+.rl p{font-family:Georgia,serif;font-size:14px;line-height:26px;color:#D0CAB8;margin:14px 0 0;max-width:46ch}
+.rl .card{border:1px solid #2c2b28;border-radius:2px;padding:18px;margin-top:22px}
+.rl .cx{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A8A192;
+  display:flex;gap:15px;align-items:baseline}
+.rl .cx b{font-weight:500}
+.rl .ct{font-family:var(--f-tech);font-size:18px;font-weight:500;color:#E8E2D0;margin:10px 0 0}
+.rl .pf{margin-top:14px;padding-top:12px;border-top:1px solid #211f1d;font-family:var(--f-mono);font-size:12px;
+  letter-spacing:.05em;color:#A8A192;display:flex;gap:26px;flex-wrap:wrap}
+.rl .pf b{font-weight:500;font-variant-numeric:tabular-nums}
+/* horizontal rail: the ≤860px case, worst-case adjacency */
+.rlh{padding:22px}
+.rlh .rail{display:flex;gap:30px;flex-wrap:wrap;border-right:0;border-bottom:1px solid #2c2b28;
+  padding:0 0 15px;margin-bottom:20px}
+.rlh .ro{margin-bottom:0}
+
+/* §02 — hero field */
+.hr{position:relative;overflow:hidden;min-height:290px;padding:34px 0 30px;background:#161614}
+.hr .fieldbox{position:absolute;inset:0;z-index:0;pointer-events:none}
+.hr canvas{position:absolute;inset:0;width:100%;height:100%}
+.hr .in{position:relative;z-index:1;padding:0 26px}
+.hr .e{font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#A8A192}
+.hr h3{font-family:var(--f-tech);font-weight:500;color:#F0EDE4;margin:14px 0 0;
+  font-size:38px;line-height:41px;letter-spacing:-.02em}
+.hr .sub{font-family:Georgia,serif;font-size:14px;line-height:26px;color:#A8A192;margin:18px 0 0;max-width:40ch}
+.hr .cap{position:relative;z-index:1;margin:26px 26px 0;padding-left:15px;border-left:1px solid #2c2b28;
+  font-family:var(--f-mono);font-size:11px;line-height:15px;color:#A8A192;letter-spacing:.06em;max-width:44ch}
+/* scrim treatments for the overrun case */
+.hr.sc-none h3{}
+.hr.sc-shadow h3{text-shadow:0 0 14px #161614,0 0 7px #161614,0 0 3px #161614}
+.hr.sc-plate h3 span{background:#161614;box-decoration-break:clone;-webkit-box-decoration-break:clone;
+  padding:2px 6px;margin-left:-6px}
+.hr.sc-dim .fieldbox{opacity:.4}
+
+/* §03 — section heads without ordinals */
+.hd{padding:24px 26px;background:#161614}
+.hd .e{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#A8A192;display:block}
+.hd h4{font-family:var(--f-tech);font-size:30px;font-weight:400;color:#F0EDE4;margin:12px 0 0;line-height:1.1}
+.hd p{font-family:Georgia,serif;font-size:14px;line-height:26px;color:#D0CAB8;margin:14px 0 0;max-width:48ch}
+.hd .rule{height:1px;background:#2c2b28;position:relative;margin-bottom:22px}
+.hd .rule i{position:absolute;left:0;top:0;width:60px;height:1px;background:#44BB44}
+.hd .rdo{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;color:#A8A192;text-transform:uppercase;
+  display:flex;gap:20px;margin-bottom:14px}
+.hd .rdo b{color:#AAFF00;font-weight:500;font-variant-numeric:tabular-nums}
+
+/* §04 — light mode */
+.lt{padding:22px;font-family:var(--f-sans)}
+.lt .e{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.lt h4{font-family:var(--f-tech);font-size:24px;font-weight:400;margin:11px 0 0;line-height:1.15}
+.lt p{font-family:Georgia,serif;font-size:14px;line-height:25px;margin:12px 0 0;max-width:46ch}
+.lt .card{border:1px solid;border-radius:2px;padding:15px;margin-top:16px}
+.lt .cx{font-family:var(--f-mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+  display:flex;gap:13px;align-items:baseline}
+.lt .ct{font-family:var(--f-tech);font-size:16px;font-weight:500;margin:8px 0 0}
+.lt .pf{margin-top:12px;padding-top:10px;border-top:1px solid;font-family:var(--f-mono);font-size:11px;
+  display:flex;gap:22px;flex-wrap:wrap}
+.lt .pf b{font-variant-numeric:tabular-nums;font-weight:500}
+.lt a{text-decoration:none;border-bottom:1px solid}
+/* `duo` sits on the SAME element as `lt`, so these must be compound
+   selectors, not descendant ones. `.lt .duo` silently never matches. */
+.lt.duo{display:grid;grid-template-columns:1fr 1fr;gap:0;padding:0}
+.lt.duo>div{padding:20px;min-width:0}
+@media(max-width:760px){.lt.duo{grid-template-columns:1fr}}
+
+/* §05 — UI primitives */
+.ui{padding:20px 22px;background:#161614}
+.ui .lab{font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8B8478;
+  margin-bottom:12px;display:block}
+.ui .fld{margin-bottom:18px}
+.ui .fld:last-child{margin-bottom:0}
+.ui .fl{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:#A8A192;margin-bottom:8px}
+.ui .fh{display:block;font-family:var(--f-mono);font-size:11px;color:#8B8478;margin-top:7px;line-height:15px}
+.ui input[type=text],.ui select,.ui textarea{width:100%;font-family:var(--f-mono);font-size:14px;
+  color:#E8E2D0;padding:9px 11px;background:#111110;border:1px solid #2c2b28;border-radius:2px}
+.ui input::placeholder{color:#6B665E}
+.ui input:focus,.ui select:focus{outline:3px solid #AAFF00;outline-offset:2px;border-color:#3a3835}
+/* variant: underline */
+.ui.v-line input[type=text],.ui.v-line select{background:transparent;border:0;border-bottom:1px solid #3a3835;
+  border-radius:0;padding:8px 2px}
+.ui.v-line input:focus{outline:0;border-bottom:2px solid #AAFF00;padding-bottom:7px}
+/* variant: sunken well */
+.ui.v-well input[type=text],.ui.v-well select{background:#0d0d0c;border:1px solid #211f1d;
+  box-shadow:inset 0 1px 0 #00000060}
+/* checkbox / radio / toggle */
+.ui .cr{display:flex;gap:11px;align-items:center;font-family:var(--f-mono);font-size:13px;color:#D0CAB8;
+  margin-bottom:10px;cursor:default}
+.ui .bx{width:15px;height:15px;border:1px solid #8B8478;flex-shrink:0;position:relative;background:#111110}
+.ui .bx.rd{border-radius:50%}
+.ui .bx.on{border-color:#AAFF00}
+.ui .bx.on::after{content:"";position:absolute;inset:3px;background:#AAFF00}
+.ui .bx.rd.on::after{border-radius:50%}
+.ui .tg{width:34px;height:17px;border:1px solid #8B8478;position:relative;flex-shrink:0;background:#111110}
+.ui .tg i{position:absolute;top:2px;left:2px;width:11px;height:11px;background:#8B8478;transition:all .15s}
+.ui .tg.on{border-color:#AAFF00}.ui .tg.on i{left:18px;background:#AAFF00}
+/* table */
+.ui table{width:100%;border-collapse:collapse;font-size:13px}
+.ui th{font-family:var(--f-mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:#A8A192;
+  text-align:left;padding:0 18px 8px 0;font-weight:400;border-bottom:1px solid #2c2b28}
+.ui td{padding:8px 18px 8px 0;border-bottom:1px solid #211f1d;color:#D0CAB8;font-family:var(--f-mono);font-size:12.5px}
+.ui td.n{color:#AAFF00;font-variant-numeric:tabular-nums;text-align:right;padding-right:0}
+.ui.t-zebra tr:nth-child(even) td{background:#111110}
+.ui.t-grid table{border:1px solid #2c2b28}
+.ui.t-grid td,.ui.t-grid th{border-right:1px solid #211f1d;padding-left:11px}
+.ui.t-grid th{padding-top:8px}
+/* overlays */
+.ui .ovl{position:relative;min-height:150px;border:1px dashed #2c2b28;overflow:hidden}
+.ui .scrim{position:absolute;inset:0;background:#0b0b0acc}
+.ui .modal{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(100%,300px);
+  background:#1e1d1b;border:1px solid #3a3835;border-radius:2px;padding:18px}
+.ui .modal h5{font-family:var(--f-tech);font-size:17px;font-weight:500;color:#F0EDE4;margin:0}
+.ui .modal p{font-family:Georgia,serif;font-size:13px;line-height:22px;color:#A8A192;margin:9px 0 0}
+.ui .mact{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+.ui .b{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  padding:8px 14px;border:1px solid #2c2b28;color:#D0CAB8;background:none}
+.ui .b.p{border-color:#7FA9CE;color:#7FA9CE}
+.ui .dd{position:absolute;left:18px;top:18px;width:190px;background:#1e1d1b;border:1px solid #3a3835;border-radius:2px}
+.ui .dd div{font-family:var(--f-mono);font-size:12.5px;color:#D0CAB8;padding:8px 11px;border-bottom:1px solid #211f1d}
+.ui .dd div:last-child{border-bottom:0}
+.ui .dd div.sel{background:#2c2b28;color:#F0EDE4}
+.ui .tip{position:absolute;right:18px;top:44px;background:#2c2b28;border:1px solid #3a3835;
+  font-family:var(--f-mono);font-size:11.5px;color:#E8E2D0;padding:6px 10px;border-radius:2px}
+.ui .tip::after{content:"";position:absolute;top:-4px;right:16px;width:6px;height:6px;background:#2c2b28;
+  border-left:1px solid #3a3835;border-top:1px solid #3a3835;transform:rotate(45deg)}
+.ui .tst{position:absolute;left:18px;bottom:18px;right:18px;background:#1e1d1b;border-left:2px solid #44BB44;
+  padding:11px 13px;font-family:var(--f-mono);font-size:12px;color:#E8E2D0;display:flex;gap:10px;align-items:center}
+.ui .tst .x{margin-left:auto;color:#8B8478}
+
+/* §06/07 — code specimens */
+.cd{padding:18px 20px;background:#111110;font-family:var(--f-mono);font-size:12.5px;line-height:1.75;
+  color:#A8A192;white-space:pre;overflow-x:auto}
+.cd .k{color:#7FA9CE}.cd .s{color:#C4834A}.cd .n{color:#AAFF00}.cd .c{color:#524e48}
+.cd .t{color:#E8E2D0}.cd .g{color:#44BB44}
+.cd::-webkit-scrollbar{height:7px}.cd::-webkit-scrollbar-thumb{background:#2c2b28}
+
+/* §08 — states */
+.st{padding:20px 22px;background:#161614}
+.st .fld{margin-bottom:16px}
+.st .fl{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:#A8A192;margin-bottom:7px}
+.st input{width:100%;font-family:var(--f-mono);font-size:14px;color:#E8E2D0;padding:9px 11px;
+  background:#111110;border:1px solid #2c2b28;border-radius:2px}
+.st .err input{border-color:#CC5555}
+.st .ok input{border-color:#44BB44}
+.st .em{display:flex;gap:8px;align-items:flex-start;margin-top:8px;font-family:var(--f-mono);font-size:11.5px;
+  line-height:16px;color:#E68C8C}
+.st .em.good{color:#44BB44}
+.st .em i{font-style:normal;flex-shrink:0}
+/* rail-side annotation variant */
+.st.v-rail .fld{display:grid;grid-template-columns:1fr 150px;gap:16px;align-items:start}
+.st.v-rail .em{margin-top:0;padding-left:11px;border-left:1px solid #CC5555;grid-column:2;align-self:center}
+.st.v-rail .em.good{border-left-color:#44BB44}
+.st.v-rail .fl{grid-column:1}
+.st.v-rail .inw{grid-column:1}
+/* skeletons */
+.st .sk{height:15px;background:linear-gradient(90deg,#1e1d1b 0%,#2c2b28 50%,#1e1d1b 100%);
+  background-size:200% 100%;animation:shim 1.4s linear infinite;margin-bottom:15px;border-radius:1px}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.st .sk.w70{width:70%}.st .sk.w45{width:45%}.st .sk.w88{width:88%}
+.st .skq{height:15px;background:#1e1d1b;margin-bottom:15px}
+.st .rulel{height:1px;background:#211f1d;position:relative;overflow:hidden;margin-bottom:16px}
+.st .rulel i{position:absolute;inset:0;width:40%;background:#44BB44;animation:sweep 1.5s var(--ease) infinite}
+@keyframes sweep{0%{left:-40%}100%{left:100%}}
+.st .mt{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8B8478}
+/* empty states */
+.st .emp{border:1px solid #2c2b28;border-radius:2px;padding:26px;text-align:center}
+.st .emp.left{text-align:left}
+.st .emp h5{font-family:var(--f-tech);font-size:17px;font-weight:500;color:#E8E2D0;margin:0}
+.st .emp p{font-family:Georgia,serif;font-size:13px;line-height:22px;color:#A8A192;margin:8px 0 0}
+.st .zr{display:flex;gap:30px;justify-content:center;margin-bottom:18px}
+.st .zr.left{justify-content:flex-start}
+.st .zr div{font-family:var(--f-mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:#8B8478}
+.st .zr b{display:block;font-family:var(--f-mono);font-size:22px;font-weight:500;color:#3a3835;margin-bottom:3px;
+  font-variant-numeric:tabular-nums}
+.st .empfield{position:relative;height:74px;margin-bottom:16px;overflow:hidden}
+.st .empfield canvas{position:absolute;inset:0;width:100%;height:100%}
+
+/* ── dial (live slider playground) ─────────────────────────── */
+.dial{border:1px solid var(--line);background:var(--bg-dim)}
+.dialstage{padding:0;overflow:hidden;border-bottom:1px solid var(--line)}
+.dialctl{padding:14px 16px;display:grid;gap:13px}
+.dialrow{display:grid;grid-template-columns:150px 1fr 62px;gap:13px;align-items:center}
+.dialrow label{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim2)}
+.dialrow output{font-family:var(--f-mono);font-size:12px;color:var(--lime);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:3px;background:var(--bg-sel);outline:0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;background:var(--lime);
+  cursor:pointer;border:0;border-radius:0}
+input[type=range]::-moz-range-thumb{width:13px;height:13px;background:var(--lime);cursor:pointer;border:0;border-radius:0}
+input[type=range]:focus-visible{outline:2px solid var(--blue);outline-offset:4px}
+.dialseg{display:flex;gap:1px;flex-wrap:wrap}
+.dialseg button{font-family:var(--f-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  background:none;border:1px solid var(--line);color:var(--dim2);padding:6px 10px;cursor:pointer}
+.dialseg button.on{color:#141a06;background:var(--bone);border-color:var(--bone)}
+.dialseg button:hover:not(.on){color:var(--bone);border-color:var(--dim2)}
+</style>
+</head>
+<body>
+
+<svg id="svgf" aria-hidden="true"><defs>
+  <!-- Viénot 1999 dichromat matrices, applied in linearRGB as the model
+       requires. These are the same numbers used to derive the ratios
+       quoted in section 01. -->
+  <filter id="f-deuter" color-interpolation-filters="linearRGB">
+    <feColorMatrix type="matrix" values="0.2920 0.7054 -0.0003 0 0
+                                         0.2934 0.7089  0.0000 0 0
+                                        -0.0209 0.0225  1.0000 0 0
+                                         0      0       0      1 0"/>
+  </filter>
+  <filter id="f-protan" color-interpolation-filters="linearRGB">
+    <feColorMatrix type="matrix" values="0.1121 0.8853 -0.0005 0 0
+                                         0.1127 0.8897 -0.0001 0 0
+                                         0.0045 0.0000  1.0019 0 0
+                                         0      0       0      1 0"/>
+  </filter>
+</defs></svg>
+
+<div id="shell">
+  <nav id="rail">
+    <div class="rail-head">
+      <div class="rail-title">calibration <b>03</b></div>
+      <div class="rail-sub">Colour, hero, and system scope</div>
+    </div>
+    <div id="nav"></div>
+    <div class="rail-foot">
+      <div class="bar"><i id="barfill"></i></div>
+      <div class="lbl"><span id="pcount">0 / 0</span><span id="ppct">0%</span></div>
+      <div class="mini">
+        <button id="b-out">Output</button>
+        <button id="b-reset">Reset</button>
+      </div>
+    </div>
+  </nav>
+  <main id="main"><div class="wrap" id="stage"></div></main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* ═══════════════════════════════════════════════════════════
+   SPECIMEN BUILDERS
+   Every colour below is a literal. A specimen must never
+   inherit from the page, or it would show the palette it is
+   arguing about.
+   ═══════════════════════════════════════════════════════════ */
+
+const BONE={t:'#D0CAB8',s:'#E8E2D0',m:'#F0EDE4',d:'#A8A192'};
+
+/* §01 — the rail plus a card, in one palette assignment.
+   p = {struct, data, ordinalNumerals, cool} */
+function railSpec(p, horiz){
+  const ords = p.ordinalNumerals===false;
+  const rows = ords
+    ? [['04','Systems',p.data],['2020','Since',p.data]]
+    : [['01','Section',p.struct],['04','Systems',p.data],['2020','Since',p.data]];
+  return `<div class="sp rl ${horiz?'rlh':''}">
+    <div class="rail">${rows.map(r=>
+      `<span class="ro"><span class="rv" style="color:${r[2]}">${r[0]}</span>
+       <span class="rk">${r[1]}</span></span>`).join('')}</div>
+    <div>
+      <span class="e">Work</span>
+      <h4>Four systems</h4>
+      <p>Each of these is running, not proposed. Where an employer owns the work, the case study is sanitized and says so.</p>
+      <div class="card">
+        <div class="cx"><b style="color:${p.struct}">01</b> Agent systems</div>
+        <div class="ct">The Agent Operating System</div>
+        <div class="pf">
+          <span><b style="color:${p.data}">4</b> agents</span>
+          <span><b style="color:${p.data}">2026</b> adopted</span>
+          <span><b style="color:${BONE.s}">running</b> status</span>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* §02 — hero with a live topolang field.
+   mask1/mask2 = the transparent→opaque ramp of the field mask.
+   over        = how far the display line runs past the mask start. */
+function heroSpec(o){
+  const mode=o.mode||'STRATA', pal=o.palette||'VERDIGRIS';
+  const m1=o.m1==null?62:o.m1, m2=o.m2==null?80:o.m2;
+  const scrim=o.scrim||'none';
+  const cw=o.cellW||9, ch=o.cellH||15, fs=o.fontSize||13;
+  const words='Designing instruments for cognition, creativity, and complex systems.';
+  const line=scrim==='plate'
+    ? words.split(' ').map(w=>`<span>${w}</span>`).join(' ')
+    : words;
+  const cfg=JSON.stringify({mode:mode,palette:pal,cellW:cw,cellH:ch,fontSize:fs,
+    opacity:o.opacity==null?0.78:o.opacity,seed:20260801});
+  return `<div class="sp hr sc-${scrim}">
+    <div class="fieldbox" data-topo='${cfg}'
+      style="-webkit-mask-image:linear-gradient(90deg,transparent 0%,transparent ${m1}%,#000 ${m2}%,#000 100%);
+             mask-image:linear-gradient(90deg,transparent 0%,transparent ${m1}%,#000 ${m2}%,#000 100%)"></div>
+    <div class="in">
+      ${o.label===false?'':`<span class="e">${o.label||'01 / Thesis'}</span>`}
+      <h3 style="max-width:${o.over==null?66:o.over}%">${line}</h3>
+      <div class="sub">I design and operate governed human-AI systems.</div>
+    </div>
+    <div class="cap">Hero field rendered by topolang v1.3.2 · ${mode} character mode · 9/9 conformance.</div>
+  </div>`;
+}
+
+/* §03 — section head variants */
+function headSpec(o){
+  return `<div class="sp hd">
+    ${o.rule?`<div class="rule">${o.mark?'<i></i>':''}</div>`:''}
+    ${o.readout?`<div class="rdo"><span><b>04</b> systems</span><span><b>2020</b> since</span></div>`:''}
+    ${o.eyebrow===false?'':`<span class="e">${o.eyebrow}</span>`}
+    <h4>Four systems</h4>
+    <p>Each of these is running, not proposed. Where an employer owns the work, the case study is sanitized and says so.</p>
+  </div>`;
+}
+
+/* §04 — light mode. t = a full theme spec, both grounds. */
+function lightSpec(t){
+  const card=(T)=>`
+    <span class="e" style="color:${T.muted}">Work</span>
+    <h4 style="color:${T.max}">Four systems</h4>
+    <p style="color:${T.text}">Each of these is running, not proposed — see
+      <a href="#" style="color:${T.link};border-color:${T.link}">the case study</a>.</p>
+    <div class="card" style="border-color:${T.rule}">
+      <div class="cx" style="color:${T.muted}"><b style="color:${T.struct}">01</b> Agent systems</div>
+      <div class="ct" style="color:${T.strong}">The Agent Operating System</div>
+      <div class="pf" style="border-color:${T.ruleSoft};color:${T.muted}">
+        <span><b style="color:${T.data}">4</b> agents</span>
+        <span><b style="color:${T.data}">2026</b> adopted</span>
+      </div>
+    </div>`;
+  return `<div class="sp lt duo">
+    <div style="background:${t.dark.bg}">${card(t.dark)}</div>
+    <div style="background:${t.light.bg}">${card(t.light)}</div>
+  </div>`;
+}
+const DARK_T={bg:'#161614',text:'#D0CAB8',strong:'#E8E2D0',max:'#F0EDE4',muted:'#A8A192',
+  struct:'#44BB44',data:'#AAFF00',link:'#7FA9CE',rule:'#2c2b28',ruleSoft:'#211f1d'};
+
+/* §05 — UI primitives */
+function ctlSpec(variant){
+  return `<div class="sp ui v-${variant}">
+    <div class="fld"><span class="fl">Agent name</span>
+      <input type="text" value="orchestrator-01"></div>
+    <div class="fld"><span class="fl">Context boundary</span>
+      <select><option>explicit — files are truth</option></select>
+      <span class="fh">Determines what the agent may read.</span></div>
+    <div class="fld">
+      <div class="cr"><span class="bx on"></span> Carry provenance on every claim</div>
+      <div class="cr"><span class="bx"></span> Allow unsourced generation</div>
+      <div class="cr"><span class="bx rd on"></span> Deterministic replay</div>
+      <div class="cr"><span class="tg on"><i></i></span> Validation gate before deploy</div>
+    </div>
+  </div>`;
+}
+function tableSpec(v){
+  return `<div class="sp ui t-${v}"><table>
+    <tr><th>Agent</th><th>Status</th><th>Claims</th><th style="text-align:right">Uptime</th></tr>
+    <tr><td>orchestrator</td><td>running</td><td class="n">1,284</td><td class="n">99.4</td></tr>
+    <tr><td>archivist</td><td>running</td><td class="n">862</td><td class="n">99.9</td></tr>
+    <tr><td>validator</td><td>idle</td><td class="n">2,041</td><td class="n">98.1</td></tr>
+    <tr><td>publisher</td><td>running</td><td class="n">431</td><td class="n">99.7</td></tr>
+  </table></div>`;
+}
+
+/* §08 — form + feedback states */
+function errSpec(v){
+  const wrap=(inner)=>`<div class="sp st v-${v}">${inner}</div>`;
+  if(v==='rail') return wrap(`
+    <div class="fld err"><span class="fl">Seed</span>
+      <span class="inw"><input type="text" value="2026-08-0"></span>
+      <span class="em"><i>!</i> Must be 8 digits. Got 9.</span></div>
+    <div class="fld ok"><span class="fl">Contour colour</span>
+      <span class="inw"><input type="text" value="#4FB8AF"></span>
+      <span class="em good"><i>✓</i> 7.60:1 · AAA</span></div>`);
+  return wrap(`
+    <div class="fld err"><span class="fl">Seed</span><input type="text" value="2026-08-0">
+      <span class="em">${v==='icon'?'<i>!</i>':''} Must be 8 digits. Got 9.</span></div>
+    <div class="fld ok"><span class="fl">Contour colour</span><input type="text" value="#4FB8AF">
+      <span class="em good">${v==='icon'?'<i>✓</i>':''} 7.60:1 · AAA</span></div>`);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SECTIONS
+   ═══════════════════════════════════════════════════════════ */
+const SECTIONS=[
+
+{id:'intro',num:'00',nav:'What I measured',title:'What I measured',noCount:true,intro:true,
+ lede:'Before the questions, the findings. The colour problem you felt is real and it measures worse than it looks. Two of the five scope items you listed are cheap; three are large enough that they change what this system <em>is</em>. Section 09 is where you decide that.'},
+
+/* ── 01 · COLOUR ─────────────────────────────────────────── */
+{id:'colour',num:'01',nav:'Colour',title:'The green / lime collision',
+ lede:'Lime <code>#AAFF00</code> is hue 80°. Green <code>#44BB44</code> is hue 120°. In the rail they share face, size, weight, tabular numerals, alignment and label — so hue carries the entire semantic load, and 40° in the yellow-green sector cannot carry it. What reads is not <em>two categories</em>, it is <em>one colour, one of which is dimmed</em>. Use the vision simulator on every specimen below; it is the fastest way to feel why.',
+ vbar:true,
+ qs:[
+  {id:'c-fix',type:'specimen',
+   label:'Which resolution?',
+   help:'Previews are the real rail and the real card, at real size. Flip the simulator to <b>Deuteranopia</b> on each one — the option that survives that is the one that is actually solving the problem rather than moving it.',
+   opts:[
+    {v:'a',k:'A · Keep the palette, delete the ordinal numerals',tag:'cheapest true fix',cost:'free',
+     html:railSpec({struct:'#44BB44',data:'#AAFF00',ordinalNumerals:false}),
+     note:'Green stops appearing as a numeral anywhere. It keeps rules, section marks, contour lines, card indices and active nav — which is what your own doctrine assigns it. The <span class="m">01 / SECTION</span> readout was redundant anyway: the body label already says <span class="m">01 / WORK</span>. <b>Cost:</b> nothing in the token layer. <b>Does not fix:</b> green and lime still coexist on the page, and the CVD collapse is untouched.'},
+    {v:'b',k:'B · Move structure to verdigris teal #4FB8AF',tag:'root-cause fix',cost:'free',
+     html:railSpec({struct:'#4FB8AF',data:'#AAFF00'}),
+     note:'Hue gap goes 40° → 95°. Under deuteranopia it goes <span class="m">0.4° → 179.7°</span>, because green and lime simulate to the <b>same hue</b> and teal does not. Measures <span class="m">7.60:1</span>, AAA. Saturation 0.52 sits inside the authored band with blue and red; green\'s 0.64 always read hot. And the system is <em>named</em> for the blue-green patina on oxidized copper — that colour is already in your palette, marked unassigned. <b>Cost:</b> primitive, semantic layer, topolang palettes, print.css, docs swatch table, and the <span class="m">verdigris.md</span> rationale. <b>Named risk:</b> teal-on-near-black is very well-trodden dev-tool territory; 120° green is more unusual.'},
+    {v:'ab',k:'A + B · Teal structure, and no ordinal numerals',tag:'recommended',cost:'free',
+     html:railSpec({struct:'#4FB8AF',data:'#AAFF00',ordinalNumerals:false}),
+     note:'Fixes the adjacency at the component level <em>and</em> at the palette level, so the two accents are never peers and never near-hues. This is what I would ship. <b>Cost:</b> the union of A and B, which is really just B — A is a deletion.'},
+    {v:'c',k:'C · Demote lime to focus-only; data becomes bone-700',
+     html:railSpec({struct:'#44BB44',data:'#F0EDE4'}),
+     note:'Numbers become the brightest <em>neutral</em> — <span class="m">#F0EDE4</span> at 15.48:1, brighter than lime already is. Salience by luminance and the mono face, not hue. Two chromatic accents on the whole site. Survives CVD perfectly. <b>Cost:</b> you lose the instrument glow. "Live and measured data" stops being a colour category, and the readout rail loses much of its reason to exist as a visual device. On a site whose thesis is instrumentation, that is a real loss.'},
+    {v:'d',k:'D · Cool the lime to #CFFF3D, keep both greens',
+     html:railSpec({struct:'#44BB44',data:'#CFFF3D'}),
+     note:'Closes the saturation gap (1.00 → 0.76) in one line, so the neon stops shouting next to an authored green. <b>But:</b> hue barely moves, 80° → 75°. Still the same family, still <span class="m">0.4°</span> apart under deuteranopia, and at lower chroma lime is no longer maximum salience — just a pale yellow-green. Half a fix that costs you the signature. Included so you can rule it out by eye.'},
+   ]},
+
+  {id:'c-horiz',type:'specimen',
+   label:'Confirm against the ≤860px rail, which is where it is worst.',
+   help:'Under 860px the rail flattens to a horizontal row: the two numerals land on the <b>same baseline, 30px apart</b>, with nothing but hue between them. If your resolution does not hold here it does not hold. Same four options, mobile layout.',
+   opts:[
+    {v:'a',k:'A · no ordinal numerals',html:railSpec({struct:'#44BB44',data:'#AAFF00',ordinalNumerals:false},true)},
+    {v:'ab',k:'A + B · teal, no ordinal numerals',tag:'recommended',html:railSpec({struct:'#4FB8AF',data:'#AAFF00',ordinalNumerals:false},true)},
+    {v:'b',k:'B · teal structure, ordinals kept',html:railSpec({struct:'#4FB8AF',data:'#AAFF00'},true)},
+    {v:'keep',k:'Current — green ordinal beside lime quantity',tag:'the problem',html:railSpec({struct:'#44BB44',data:'#AAFF00'},true),
+     note:'Shown for reference. Do not pick this one unless you have changed your mind about the whole premise.'},
+   ]},
+
+  {id:'c-teal',type:'specimen',
+   label:'If teal wins: which value?',
+   help:'All four clear AAA on <span class="m">#161614</span>. Higher ratio means more presence but less "patina" — past about 8.5:1 it starts to read mint rather than oxidized copper. Structure is high-frequency and low-salience, so I would not go bright.',
+   opts:[
+    {v:'t720',k:'#4DB3AA · 7.20:1',tag:'closest to the original token',
+     html:railSpec({struct:'#4DB3AA',data:'#AAFF00',ordinalNumerals:false}),
+     note:'One step off your existing <span class="m">#4AACA4</span>, which measures 6.67:1 and just misses. Truest to the patina reference. <b>Cost:</b> only 0.20 of headroom above the AAA floor, so any future ground-tone change re-breaks it.'},
+    {v:'t760',k:'#4FB8AF · 7.60:1',tag:'recommended',
+     html:railSpec({struct:'#4FB8AF',data:'#AAFF00',ordinalNumerals:false}),
+     note:'Real headroom, still unmistakably aged copper rather than mint. This is the value used in every other specimen on this page.'},
+    {v:'t807',k:'#58BDB4 · 8.07:1',
+     html:railSpec({struct:'#58BDB4',data:'#AAFF00',ordinalNumerals:false}),
+     note:'More presence. Useful if structure needs to hold up as a hairline on <span class="m">#111110</span> sunken panels as well as on the page ground.'},
+    {v:'t835',k:'#5CC0B7 · 8.35:1',
+     html:railSpec({struct:'#5CC0B7',data:'#AAFF00',ordinalNumerals:false}),
+     note:'The brightest I would allow. Past here the patina reading is gone and it competes with lime for salience, which re-creates the original problem in a different key.'},
+   ]},
+
+  {id:'c-contour',type:'choice',
+   label:'Does the topolang hero contour follow the structure colour?',
+   help:'The field\'s contour is currently <span class="m">#44BB44</span>, chosen because "lime contours read as hazard tape; green reads as terrain." If structure moves to teal and the contour does not, you get a green hero above a teal site — worse than what you have now.',
+   opts:[
+    {v:'follow',t:'Yes — contour tracks structure',d:'One colour means one thing everywhere. The hero becomes an <b>oxidized-copper topographic map</b>, which fits "instruments for cognition" better than phosphor green and visually separates Verdigris from the Phosphor palette it descends from. <b>This is the answer if you pick B.</b>'},
+    {v:'stay',t:'No — the field keeps its own green',d:'Defensible only if you frame the field as a <em>quotation of Phosphor</em> rather than part of the Verdigris palette, and say so in the caption. Riskier: most readers will just see two greens.'},
+    {v:'bone',t:'Contour goes achromatic',d:'Field becomes bone/shadow relief with no accent at all. Removes the question entirely and makes the hero calmer. <b>Cost:</b> the field stops carrying any palette signal, and it is the first thing anyone sees.'},
+   ]},
+
+  {id:'c-green',type:'choice',
+   label:'If structure moves to teal, what happens to #44BB44?',
+   opts:[
+    {v:'pillar',t:'Retires to --vd-pillar-1',d:'Survives for Prismatic Instrument contexts only — multi-pillar or spectrum content where colour coding is the explicit subject. Keeps the Phosphor lineage documented without letting it onto the page.'},
+    {v:'gone',t:'Deleted from the palette',d:'Cleanest. One fewer near-hue to police. <b>Cost:</b> breaks the stated lineage to Phosphor, which is a real part of the Verdigris story.'},
+    {v:'swap',t:'Green and teal swap roles — green becomes pillar-1, teal takes structure, and the pillar ramp is re-derived',d:'Most rigorous, most work: the four pillar colours also need to be checked against each other, and <span class="m">#C4834A</span> orange already collides with lime under deuteranopia.'},
+   ]},
+
+  {id:'c-year',type:'choice',
+   label:'Years — <span class="m">2020 SINCE</span>, <span class="m">2026 ADOPTED</span>. Data or not?',
+   help:'Your rule is ordinals count position and are structure; quantities count amount and are data. A year is a position on a timeline, not an amount — so by your own rule these are on the wrong side. This is not cosmetic: it decides whether the rail has one accent in it or two.',
+   opts:[
+    {v:'data',t:'Leave them lime — a year is a measurement',d:'Simplest, and keeps the rail visually consistent. Requires amending the doctrine to say "numerals that answer <em>how many</em> or <em>when</em>", which is honest enough.'},
+    {v:'neutral',t:'Years become bone-strong, not accented',d:'Lime then appears <b>only</b> on true counts — <span class="m">4 agents</span>, <span class="m">1,284 claims</span>, <span class="m">41/41</span>. Much rarer, so much louder when it does appear. My pick.'},
+    {v:'struct',t:'Years become structure colour',d:'Consistent with "position, not amount" — but it puts the structure colour back into the rail as a numeral, which is the adjacency you are trying to remove. Only viable alongside option B.'},
+   ]},
+
+  {id:'c-cvd',type:'choice',
+   label:'How hard is the CVD finding allowed to bite?',
+   help:'Measured, Viénot 1999: under deuteranopia lime → <span class="m">#EAEB20</span> and green → <span class="m">#A3A44A</span>. Hue gap <b>0.4°</b> — the same hue, two stops of value apart. And lime lands <b>1.27:1</b> from simulated body text, so <em>data stops being distinguishable from prose</em>. WCAG conformance is unaffected (it does not simulate CVD), so your AAA claim stands as measured. The question is whether you want the claim to be narrower and truer.',
+   opts:[
+    {v:'design',t:'Treat CVD separation as a design constraint, and say so in the docs',d:'Every accent pair must hold either a hue gap or a value gap <em>after</em> dichromat simulation. Publish the simulated table next to the measured one. This is the version of the accessibility claim that a specialist would actually respect — and it is a differentiator, because almost nobody does it.'},
+    {v:'note',t:'Document it as a known limitation, change nothing structural',d:'Honest and cheap. Add a paragraph to the accessibility notes stating the hue-pair weakness and why the ratios still hold.'},
+    {v:'skip',t:'Out of scope — measured AAA is the claim, and it holds',d:'Defensible. But you print AAA in the rail and the footer, so someone will check.'},
+   ]},
+
+  {id:'c-note',type:'prose',rows:3,label:'Colour notes.',optional:true,
+   ph:'Anything the specimens made you notice that the options do not cover.'},
+]},
+
+/* ── 02 · HERO ───────────────────────────────────────────── */
+{id:'hero',num:'02',nav:'Hero field',title:'The hero field',
+ lede:'You want the mobile character set on desktop, a wider field, and the display line to lightly overrun it. All three previews below are <b>live topolang</b>, not mockups — same DSL, same seed, same runtime that ships. The third question is the one with teeth: the mask that keeps the field out of the text column is a contrast constraint, so overrunning it needs a real answer, not just a smaller number.',
+ vbar:true,
+ qs:[
+  {id:'h-mode',type:'specimen',
+   label:'Which character mode carries the desktop hero?',
+   help:'Currently STRATA above 860px and SHADE below it. You said the mobile set is better. SHADE has no contour pass at all, so it renders as dithered relief rather than contour lines — which is why it reads calmer.',
+   opts:[
+    {v:'shade',k:'SHADE · dithered relief',tag:'your preference — the mobile set',
+     html:heroSpec({mode:'SHADE',palette:'VERDIGRIS_BAND',m1:52,m2:72,cellW:8,cellH:13,fontSize:12,opacity:.62}),
+     note:'Glyph set <span class="m">· . + # @</span>, no contour pass. Terrain reads as texture instead of line-work, which is quieter and much more legible at the edges. Shown with <span class="m">VERDIGRIS_BAND</span>, the brighter ramp, because without contours the bands have to carry the whole read. <b>Cost:</b> the band ramp tops out at <span class="m">#5f8746</span>, well above the desktop luminance cap — so if this goes desktop-wide the "field is safe under text unconditionally" guarantee needs re-measuring, or the mask has to stay absolute.'},
+    {v:'strata',k:'STRATA · contour lines',tag:'current desktop',
+     html:heroSpec({mode:'STRATA',palette:'VERDIGRIS',m1:62,m2:80}),
+     note:'Glyph set <span class="m">. _ - = ≈ ≡ █</span> plus a contour pass in <span class="m">#44BB44</span>. Because the band colours are luminance-capped for the AAA claim, shading is nearly invisible and the contour lines carry the entire read — it is a contour map, not shaded relief. <b>Cost:</b> the line-work is busy at the mask edge, which is exactly where you want text to cross it.'},
+    {v:'relief',k:'RELIEF · circular glyphs',tag:'the untried third mode',
+     html:heroSpec({mode:'RELIEF',palette:'VERDIGRIS',m1:52,m2:72}),
+     note:'Glyph set <span class="m">. ° o O 0 @ █</span> with a <span class="m">+ - ¦</span> contour pass. Rounder and more instrument-dial than STRATA, busier than SHADE. Worth one look since it already exists in the runtime and has never been on the site.'},
+    {v:'shade-capped',k:'SHADE with the desktop luminance cap',tag:'the safe hybrid',
+     html:heroSpec({mode:'SHADE',palette:'VERDIGRIS',m1:52,m2:72,cellW:8,cellH:13,fontSize:12,opacity:.78}),
+     note:'The character set you prefer, on the <em>capped</em> VERDIGRIS ramp rather than the bright band ramp. Keeps the unconditional contrast guarantee intact. <b>Cost:</b> with no contours and capped bands, there is very little left to see — check whether this reads as "subtle" or as "broken".'},
+   ]},
+
+  {id:'h-dial',type:'dial',
+   label:'Dial the field width and the overrun.',
+   help:'Live. <b>Mask start</b> is where the field begins to appear (lower = wider field, further left). <b>Mask ramp</b> is how long the fade takes. <b>Line width</b> is the display measure as a percentage of the hero — push it past the mask start and the line begins to overrun the field. Watch the last two words.',
+   spec:'hero',
+   ctrls:[
+    {k:'m1',label:'Mask start',min:20,max:75,step:1,def:52,unit:'%'},
+    {k:'m2',label:'Mask ramp end',min:30,max:100,step:1,def:72,unit:'%'},
+    {k:'over',label:'Line width',min:50,max:105,step:1,def:78,unit:'%'},
+    {k:'opacity',label:'Field opacity',min:20,max:100,step:2,def:62,unit:'%'},
+   ],
+   segs:[
+    {k:'mode',label:'Mode',opts:['SHADE','STRATA','RELIEF'],def:'SHADE'},
+    {k:'palette',label:'Ramp',opts:['VERDIGRIS_BAND','VERDIGRIS'],def:'VERDIGRIS_BAND'},
+    {k:'scrim',label:'Overrun treatment',opts:['none','shadow','plate','dim'],def:'none'},
+   ]},
+
+  {id:'h-scrim',type:'specimen',
+   label:'How does text stay AAA where it crosses the field?',
+   help:'This is the constraint you are pushing against. Bone on the lime contour is <b>1.33:1</b>; on the green contour <b>1.52:1</b>. The mask exists so contrast is always measured against flat <span class="m">#161614</span> — the CSS comment calls it "a contrast constraint, not a stylistic one." Overrun without one of these is a real AAA break, not a technicality.',
+   opts:[
+    {v:'shadow',k:'Soft ground halo behind the glyphs',tag:'recommended',
+     html:heroSpec({mode:'SHADE',palette:'VERDIGRIS_BAND',m1:44,m2:64,over:92,scrim:'shadow',cellW:8,cellH:13,fontSize:12,opacity:.62}),
+     note:'Layered <span class="m">text-shadow</span> in the ground colour pushes the field back a few pixels around every glyph. The letterform keeps its full 15.48:1 against ground while the field still visibly passes behind the line. <b>Cost:</b> it is a halo — at large sizes on a busy field it can read as a sticker. Needs the field opacity kept low, which the dial above lets you check.'},
+    {v:'plate',k:'Opaque word plates',
+     html:heroSpec({mode:'SHADE',palette:'VERDIGRIS_BAND',m1:44,m2:64,over:92,scrim:'plate',cellW:8,cellH:13,fontSize:12,opacity:.62}),
+     note:'Each word sits on a solid ground rectangle. Contrast is exactly the flat-ground case, so the AAA claim is untouched and provable. <b>Cost:</b> hard-edged blocks behind the display line — a strong, deliberate, editorial look that either fits Signal Lab or fights it. Look at the ragged right edge before deciding.'},
+    {v:'dim',k:'Field opacity drops under the text column',
+     html:heroSpec({mode:'SHADE',palette:'VERDIGRIS_BAND',m1:44,m2:64,over:92,scrim:'dim',cellW:8,cellH:13,fontSize:12,opacity:.62}),
+     note:'A second, softer mask instead of a hard cut — the field is present but faint where text crosses. Reads most naturally of the four. <b>Cost:</b> alpha only ever <em>reduces</em> effective contrast impact, so this is arguable but not provable at a fixed number; you would be claiming AAA against a surface that still changes every frame. Weakest position to defend in the accessibility notes.'},
+    {v:'none',k:'No treatment — accept the overlap',
+     html:heroSpec({mode:'SHADE',palette:'VERDIGRIS_BAND',m1:44,m2:64,over:92,scrim:'none',cellW:8,cellH:13,fontSize:12,opacity:.62}),
+     note:'Shown so you can judge how bad it actually is with SHADE at low opacity — with no contour pass this is far less violent than it would be under STRATA. <b>But:</b> it breaks the stated guarantee, and the guarantee is a load-bearing part of your positioning. If you want this, the honest move is to soften the <em>claim</em> in the docs rather than leave it contradicted by the home page.'},
+   ]},
+
+  {id:'h-cell',type:'choice',
+   label:'Cell density for the desktop field.',
+   help:'Currently <span class="m">cellW 9 / cellH 15 / font 13</span> — cellH is deliberately half the 30px baseline. Widening the field means more cells, and SHADE at desktop scale can look coarse.',
+   opts:[
+    {v:'keep',t:'Keep 9 / 15 / 13 — stay on the baseline',d:'The half-baseline cell height is a real piece of rigour and it is cheap to keep. Coarser texture, more visible dither.'},
+    {v:'fine',t:'Finer: 7 / 12 / 11 — off the baseline grid',d:'Noticeably more refined at desktop width, and SHADE benefits most. <b>Cost:</b> breaks the "every vertical measurement is a multiple or half of 30px" claim for the field specifically. Would need a documented exemption, like the decorative-rule exemption you already have.'},
+    {v:'fine-half',t:'Finer but still half-baseline: 7 / 15 / 11',d:'Narrower cells, baseline-locked rows. Keeps the rigour, gains most of the refinement, and the slight cell anisotropy is invisible in a dither. <b>Probably the right answer.</b>'},
+   ]},
+
+  {id:'h-mobile',type:'choice',
+   label:'If SHADE goes desktop-wide, what happens below 860px?',
+   opts:[
+    {v:'same',t:'One mode everywhere — the breakpoint switch goes away',d:'Simpler runtime, one thing to reason about, and the caption stops needing to name a mode that changes. Loses the "same field, different character mode" demonstration, which is currently a nice piece of evidence in the caption.'},
+    {v:'invert',t:'Invert it — SHADE on desktop, STRATA in the mobile band',d:'Keeps the two-mode demonstration and gives the narrow band the line-work, where its own grid row means no text ever sits over it. <b>Check:</b> STRATA on a 39×11 grid is what the auto-range calibration comment says collapses; verify before committing.'},
+    {v:'keep',t:'Keep the current split, just widen the desktop field',d:'Smallest change. Answer this one if the mode question above lands on STRATA.'},
+   ]},
+
+  {id:'h-note',type:'prose',rows:3,label:'Hero notes.',optional:true,
+   ph:'Numbers off the dial, or anything the overrun treatments made you reconsider.'},
+]},
+
+/* ── 03 · NUMBERING ──────────────────────────────────────── */
+{id:'nums',num:'03',nav:'Numbering',title:'Ordinals and labels',
+ lede:'You want the <span class="m">01</span> gone from above the hero and the sections, and <span class="m">THESIS</span> gone from the hero. Both are right — but the ordinal is currently doing three jobs (orientation, structure-colour presence, and instrument texture), so deleting it has knock-on effects. These previews show what is left.',
+ qs:[
+  {id:'n-head',type:'specimen',
+   label:'What replaces <span class="m">01 / WORK</span> above a section?',
+   opts:[
+    {v:'bare',k:'Bare label — WORK',tag:'recommended',
+     html:headSpec({eyebrow:'Work',rule:true,mark:true}),
+     note:'The ordinal was redundant with the rail readout and with the nav. Removing it leaves the label doing exactly one job. The green segment on the section rule still marks position, so orientation survives without a numeral. <b>Cost:</b> none that I can find.'},
+    {v:'norule',k:'Bare label, no accent segment on the rule',
+     html:headSpec({eyebrow:'Work',rule:true,mark:false}),
+     note:'Quieter still. Removes the last piece of structure-colour presence from the section boundary. <b>Cost:</b> the rule becomes generic — every dark site has a 1px <span class="m">#2c2b28</span> line. The segment is cheap character and it is one of the few places structure colour earns its keep.'},
+    {v:'readout',k:'Label replaced by a measurement strip',
+     html:headSpec({eyebrow:false,rule:true,mark:true,readout:true}),
+     note:'Instead of naming the section, state what is in it. Most instrument-like option, and it gives the numerals a home that is unambiguously data. <b>Cost:</b> you lose the section <em>name</em> above the heading, so the h2 has to carry all the orientation. Fine for Work; poor for Field Notes.'},
+    {v:'none',k:'Nothing — heading only',
+     html:headSpec({eyebrow:false,rule:true,mark:true}),
+     note:'Most editorial, least instrumented. <b>Cost:</b> the mono eyebrow is a significant part of the Signal Lab register; without it the sections read like a normal essay site. Also removes the only uppercase mono element above the fold in each section.'},
+   ]},
+
+  {id:'n-hero',type:'specimen',
+   label:'And above the hero, where <span class="m">01 / THESIS</span> currently sits?',
+   help:'You called THESIS unnecessary and I agree — it labels the obvious. The question is whether anything belongs in that slot at all.',
+   opts:[
+    {v:'none',k:'Nothing — the line starts the page',tag:'recommended',
+     html:heroSpec({mode:'SHADE',palette:'VERDIGRIS_BAND',m1:48,m2:68,over:82,label:false,cellW:8,cellH:13,fontSize:12,opacity:.62}),
+     note:'The display line is the strongest thing you have; anything above it is a throat-clear. The caption below already carries the technical register, so nothing is lost. <b>Cost:</b> none.'},
+    {v:'name',k:'Your name, as a mono eyebrow',
+     html:heroSpec({mode:'SHADE',palette:'VERDIGRIS_BAND',m1:48,m2:68,over:82,label:'David Reyburn — product designer, human-AI systems',cellW:8,cellH:13,fontSize:12,opacity:.62}),
+     note:'Answers "who is this" before "what do they think", which is the actual job of a portfolio hero. <b>Cost:</b> duplicates the nav mark two inches above it.'},
+    {v:'status',k:'A live status line',
+     html:heroSpec({mode:'SHADE',palette:'VERDIGRIS_BAND',m1:48,m2:68,over:82,label:'4 agents running · Columbus, Ohio · 2026',cellW:8,cellH:13,fontSize:12,opacity:.62}),
+     note:'Most on-thesis: the instrument reports its own state before it says anything. Puts real numerals in the slot, which gives data colour a job above the fold. <b>Cost:</b> it must actually be live, or it is a decorative lie — and that is precisely the failure mode your own doctrine is about.'},
+   ]},
+
+  {id:'n-rail',type:'choice',
+   label:'The rail\'s <span class="m">01 SECTION</span> readout.',
+   help:'This is the same decision as colour option A, asked from the other side. Answer it here even if you already picked A.',
+   opts:[
+    {v:'kill',t:'Delete it — the rail carries measurements only',d:'The rail then contains nothing but true readings, which is the strongest version of the rail concept. Also removes the green/lime adjacency at its source.'},
+    {v:'keep-neutral',t:'Keep it, but render it as a muted label rather than an accented numeral',d:'Orientation survives, the colour collision does not. <span class="m">SECTION 01</span> in bone-400 mono.'},
+    {v:'keep',t:'Keep it as-is',d:'Only coherent if you rejected every colour option except C or D.'},
+   ]},
+
+  {id:'n-card',type:'choice',
+   label:'Card indices <span class="m">01–04</span> on the four system cards.',
+   help:'These are the other place structure colour appears as a numeral. They are 330px and a hairline rule away from the lime proof figures, so the collision is much weaker — but it is the same collision.',
+   opts:[
+    {v:'keep',t:'Keep them — they are the main thing giving structure colour presence',d:'Your CSS comment says exactly this: "This is what gives green presence: it appears on every card and every section." Cards are also genuinely ordered, so an ordinal is honest here.'},
+    {v:'muted',t:'Keep the numeral, drop the accent — bone-400 instead',d:'Structure colour then lives only on non-text marks: rules, segments, contours, borders. Cleanest possible reading of "high frequency, low salience". <b>Cost:</b> structure colour nearly disappears as a visible accent.'},
+    {v:'kill',t:'Delete the indices, keep only the kicker',d:'<span class="m">AGENT SYSTEMS</span> alone. Cards are in a grid, not a list, so the numbering is arguably false ordering anyway — on a two-column grid, is 03 after 02 or below it?'},
+   ]},
+
+  {id:'n-note',type:'prose',rows:2,label:'Numbering notes.',optional:true},
+]},
+
+/* ── 04 · LIGHT MODE ─────────────────────────────────────── */
+{id:'light',num:'04',nav:'Light mode',title:'Multi-theme and light mode',
+ lede:'I measured this before writing options, and the finding changes the question. <b>Every current accent fails on a bone ground:</b> lime 1.05:1, green 2.13:1, teal 2.04:1, blue 2.12:1. Light mode is therefore not an inversion of the ramp — it needs a second, independently authored accent set. And to clear AAA on paper those accents have to go so dark that saturation rises while lightness falls: they stop being glows and become inks.',
+ vbar:true,
+ qs:[
+  {id:'l-do',type:'specimen',
+   label:'Is there a light theme at all?',
+   help:'Each preview shows the same card in dark, then the proposed light counterpart, side by side. Judge whether the light half still looks like <em>this</em> system.',
+   opts:[
+    {v:'ink',k:'Yes — dark is phosphor, light is printer\'s ink',tag:'recommended if you build one',
+     html:lightSpec({dark:DARK_T,light:{bg:'#F0EDE4',text:'#2C2A26',strong:'#1E1D1B',max:'#161614',
+       muted:'#57534B',struct:'#0A5450',data:'#454F00',link:'#22506F',rule:'#C9C3B4',ruleSoft:'#DAD5C8'}}),
+     note:'Accents re-derived for paper: patina <span class="m">#0A5450</span> 7.48:1, citron <span class="m">#454F00</span> 7.56:1, slate <span class="m">#22506F</span> 7.34:1 — all AAA on <span class="m">#F0EDE4</span>. The metaphor changes honestly with the medium: <b>emitted light on dark, absorbed pigment on paper.</b> Same hue families, inverted physics. This is the version that has a rationale rather than just a switch.'},
+    {v:'flip',k:'Yes — mechanical inversion, accents kept',
+     html:lightSpec({dark:DARK_T,light:{bg:'#F0EDE4',text:'#2C2A26',strong:'#1E1D1B',max:'#161614',
+       muted:'#57534B',struct:'#44BB44',data:'#AAFF00',link:'#7FA9CE',rule:'#C9C3B4',ruleSoft:'#DAD5C8'}}),
+     note:'Shown so the failure is visible rather than theoretical. The lime is <b>1.05:1</b> — very nearly invisible. Included as evidence that "add light mode" is not a small task, not as a real option.'},
+    {v:'paper',k:'Not a light mode — a paper mode, print only',
+     html:lightSpec({dark:DARK_T,light:{bg:'#FAF8F2',text:'#161614',strong:'#161614',max:'#000000',
+       muted:'#4A463F',struct:'#161614',data:'#161614',link:'#161614',rule:'#B8B2A4',ruleSoft:'#D6D1C4'}}),
+     note:'You already ship <span class="m">print.css</span>. Extend that thinking: paper is achromatic, all accents collapse to ink, colour is treated as a property of the <em>screen</em> rather than of the system. <b>Cost:</b> does not answer the "flexible light/dark primitives" requirement — but it is a coherent, defensible position rather than a gap.'},
+    {v:'no',k:'No — dark-only stays, and the docs argue for it',
+     html:lightSpec({dark:DARK_T,light:{bg:'#161614',text:'#D0CAB8',strong:'#E8E2D0',max:'#F0EDE4',
+       muted:'#A8A192',struct:'#4FB8AF',data:'#AAFF00',link:'#7FA9CE',rule:'#2c2b28',ruleSoft:'#211f1d'}}),
+     note:'Both halves dark, because that is the proposal. <b>The honest argument:</b> a design system with one deeply-authored theme and a documented reason beats one with two shallow themes. <b>The honest counter:</b> "dark by design" is a constraint you chose, and a reviewer evaluating you against enterprise systems will read it as a capability gap unless the docs pre-empt that read explicitly. Section 09 decides which audience wins.'},
+   ]},
+
+  {id:'l-mech',type:'choice',
+   label:'If there is a light theme: how is it selected?',
+   opts:[
+    {v:'both',t:'prefers-color-scheme by default, plus a manual override that wins',d:'<span class="m">@media (prefers-color-scheme: light)</span> sets the default; a <span class="m">data-theme</span> attribute on the root overrides in both directions. Respects the OS, still lets a reader choose. The override must win over the media query in <em>both</em> directions or the toggle feels broken.'},
+    {v:'media',t:'prefers-color-scheme only, no toggle',d:'Zero UI, zero state, nothing to persist. <b>Cost:</b> a reader who wants the other one cannot have it, and you lose an obvious place to demonstrate the token architecture working.'},
+    {v:'manual',t:'Manual toggle only, dark default',d:'Ignores the OS signal, which is the one accessibility-relevant input you actually get for free. I would not.'},
+   ]},
+
+  {id:'l-doctrine',type:'choice',
+   label:'Light mode inverts your salience doctrine. How is that restated?',
+   help:'"Data is maximum salience at 14.68:1" only means anything on dark — on paper the data colour must be the <em>darkest</em> thing, not the brightest. The three-tier model needs re-wording to survive both.',
+   opts:[
+    {v:'distance',t:'Restate all three tiers as distance from ground, not brightness',d:'"Data sits furthest from the ground; structure sits closest." Medium-agnostic, survives both themes, and is a genuinely better formulation of what you already meant. Requires editing the doctrine comment and the docs.'},
+    {v:'pertheme',t:'Two parallel doctrines, one per theme',d:'Explicit and easy to verify per-theme. <b>Cost:</b> two things to keep in sync, and the system stops having a single story.'},
+    {v:'defer',t:'Defer — decide when the light ramp is actually built',d:'Reasonable if light mode is sequenced late. Note it as an open question in the docs rather than leaving it silently contradictory.'},
+   ]},
+
+  {id:'l-field',type:'choice',
+   label:'What does the topolang field do in light mode?',
+   help:'Its band ramp is nine values from <span class="m">#181816</span> to <span class="m">#3a352e</span> — all near-black. On paper it would be nine indistinguishable dark smudges.',
+   opts:[
+    {v:'ramp',t:'Author a light band ramp — nine values descending from the paper ground',d:'The field becomes ink-on-paper relief, like a printed contour map. Fits the printer\'s-ink metaphor exactly. Real work: the ramp needs the same luminance-cap discipline in reverse.'},
+    {v:'hide',t:'Field is dark-mode only; light mode gets a still frame or nothing',d:'Cheapest. <b>Cost:</b> the hero is the site\'s signature and light-mode visitors would never see it.'},
+    {v:'invert',t:'Invert the existing ramp arithmetically',d:'One line. Will almost certainly look wrong — the ramp was hand-tuned against a warm near-black, and inverting it does not preserve that tuning. Worth trying once before rejecting.'},
+   ]},
+
+  {id:'l-note',type:'prose',rows:3,label:'Theme notes.',optional:true},
+]},
+
+/* ── 05 · PRIMITIVES ─────────────────────────────────────── */
+{id:'prims',num:'05',nav:'Primitives',title:'Interactive UI primitives',
+ lede:'The gap is real: there are no form controls, no overlays, no complex table. But "standard enterprise systems have these" is a reason to build them <em>if</em> someone is going to consume them — see section 09. What follows settles the <b>register</b> first, because once a text input exists every other control inherits its geometry, and that decision is expensive to reverse.',
+ vbar:true,
+ qs:[
+  {id:'p-geo',type:'specimen',
+   label:'What does a Verdigris form control look like?',
+   help:'All three use the same tokens and the same 30px rhythm. Focus ring is the existing <span class="m">3px lime, 2px offset</span> in each. Click into a field to see it.',
+   opts:[
+    {v:'box',k:'Hairline box — inherits the card',tag:'most consistent',
+     html:ctlSpec('box'),
+     note:'Same <span class="m">1px #2c2b28</span> border and <span class="m">2px</span> radius as <span class="m">vd-system-card</span>, on the sunken surface. The system already reads as hairline boxes, so controls stop looking like a bolt-on. <b>Cost:</b> the safest and least distinctive option — it is what most dark systems do.'},
+    {v:'line',k:'Underline only — terminal field',tag:'most in-register',
+     html:ctlSpec('line'),
+     note:'No box: a single rule under the value, which is what a terminal prompt or a paper form actually looks like. Strongest fit for the instrument metaphor and it echoes the hairline-rule language you already use structurally. <b>Cost:</b> hit targets get ambiguous, empty fields are nearly invisible, and grouped fields need explicit spacing work to stay readable. Also harder to make obviously-disabled.'},
+    {v:'well',k:'Sunken well — recessed input',
+     html:ctlSpec('well'),
+     note:'Darker than the page with an inset top highlight, so inputs read as physically recessed. Most "hardware panel" of the three. <b>Cost:</b> introduces a shadow/bevel vocabulary the system does not currently have anywhere, and <span class="m">--vd-radius:2px</span> exists specifically because the calibration decided against skeuomorphic depth.'},
+   ]},
+
+  {id:'p-table',type:'specimen',
+   label:'Data table density.',
+   help:'The existing <span class="m">.vd-table</span> is minimal and has no dense variant. Numerics are already right-aligned tabular lime here.',
+   opts:[
+    {v:'hair',k:'Hairline rows',tag:'current, extended',
+     html:tableSpec('hair'),
+     note:'Row rules only, no verticals, no fill. Consistent with everything else in the system. <b>Cost:</b> at 12+ columns the eye loses the row; needs a hover row-highlight to stay usable, which the system has no token for yet.'},
+    {v:'zebra',k:'Zebra on the sunken surface',
+     html:tableSpec('zebra'),
+     note:'Alternate rows at <span class="m">#111110</span>. Genuinely helps wide tables and costs no new tokens. <b>Cost:</b> banding is visual noise at small row counts, and it fights the flat-ground-plus-grain treatment.'},
+    {v:'grid',k:'Full grid — ruled both axes',
+     html:tableSpec('grid'),
+     note:'Most instrument-like and best for dense numeric comparison, which is what your content actually is. <b>Cost:</b> the most visually heavy thing in the system by a wide margin; it will dominate any page it lands on.'},
+   ]},
+
+  {id:'p-set',type:'multi',
+   label:'Which primitives are actually in scope? Select all that make the first tier.',
+   help:'Be ruthless. Each one is documentation, a11y behaviour, focus management, keyboard support, and tests — not just CSS. My read: the first five earn their place because your own content needs them; the rest are speculative until someone consumes the system.',
+   opts:[
+    {v:'input',t:'Text input, textarea, select',d:'Needed by anything with a form. <b>Foundation for everything else in this list.</b>'},
+    {v:'choice',t:'Checkbox, radio, toggle',d:'Cheap once the input geometry is settled. All three are in the preview above.'},
+    {v:'table',t:'Complex data table — sort, dense mode, sticky header',d:'Your content is genuinely tabular (contrast ratios, effect coverage, conformance). Highest real utility of anything here.'},
+    {v:'toast',t:'Toast / inline notification',d:'Needed by any form that succeeds or fails. Small surface, well-understood a11y (<span class="m">role="status"</span>, polite live region).'},
+    {v:'tooltip',t:'Tooltip / popover',d:'Your docs are full of measured values that want an explanation on hover. <b>Warning:</b> tooltips are the single hardest primitive to make accessible — touch, keyboard, and screen-reader behaviour all differ.'},
+    {v:'modal',t:'Modal dialog',d:'Native <span class="m">&lt;dialog&gt;</span> does most of the work now: focus trap, backdrop, escape. Cheaper than it used to be. Does your site need one at all?'},
+    {v:'menu',t:'Dropdown menu',d:'Full ARIA menu semantics and arrow-key navigation. Expensive, and a nav with four items does not need it.'},
+    {v:'tabs',t:'Tabs',d:'Well-specified pattern, moderate cost. Useful for case studies with sanitized/full views.'},
+    {v:'accordion',t:'Accordion / disclosure',d:'Cheapest real primitive here — <span class="m">&lt;details&gt;</span> plus tokens. Good for the "withheld under employer IP" pattern you already have.'},
+    {v:'pager',t:'Pagination / breadcrumb',d:'Only if Field Notes grows past one page. Speculative today.'},
+   ]},
+
+  {id:'p-overlay',type:'specimen',
+   label:'Overlay strategy for the ones that float.',
+   help:'Modal, dropdown and tooltip all need a layer system, an escape hatch, and focus management. This preview is a single stage showing all four floating pieces at once, in the current token language.',
+   opts:[
+    {v:'native',k:'Platform primitives — <dialog> + popover attribute',tag:'recommended',
+     html:`<div class="sp ui"><div class="ovl">
+       <div class="dd"><div class="sel">STRATA</div><div>RELIEF</div><div>SHADE</div></div>
+       <div class="tip">7.60:1 · AAA</div>
+       <div class="scrim"></div>
+       <div class="modal"><h5>Discard changes?</h5>
+         <p>The seed has been edited. Leaving now loses the frame.</p>
+         <div class="mact"><span class="b">Cancel</span><span class="b p">Discard</span></div></div>
+       <div class="tst">✓ Palette saved <span class="x">✕</span></div>
+     </div></div>`,
+     note:'<span class="m">&lt;dialog&gt;</span> gives focus trap, backdrop, escape and top-layer for free. The <span class="m">popover</span> attribute gives light-dismiss and anchoring for menus and tooltips. Zero dependencies, which matches the zero-dependency discipline you already claim elsewhere. <b>Cost:</b> <span class="m">popover</span> and CSS anchor positioning are recent — you need a documented baseline and a fallback story.'},
+    {v:'custom',k:'Hand-rolled layer manager',
+     html:`<div class="sp ui"><div class="ovl">
+       <div class="dd"><div class="sel">STRATA</div><div>RELIEF</div><div>SHADE</div></div>
+       <div class="tip">7.60:1 · AAA</div>
+       <div class="scrim"></div>
+       <div class="modal"><h5>Discard changes?</h5>
+         <p>The seed has been edited. Leaving now loses the frame.</p>
+         <div class="mact"><span class="b">Cancel</span><span class="b p">Discard</span></div></div>
+     </div></div>`,
+     note:'Full control over stacking, animation and nesting; works everywhere. <b>Cost:</b> you are re-implementing focus trapping and inert-background handling, which is where nearly every hand-rolled modal fails its audit. Given that accessibility is your positioning, shipping a subtly-wrong focus trap is the worst possible bug to own.'},
+    {v:'none',k:'No floating primitives — everything is in flow',
+     html:`<div class="sp ui"><div class="fld"><span class="fl">Confirm</span>
+       <div style="border-left:2px solid #C4834A;padding-left:14px">
+         <div style="font-family:var(--f-tech);font-size:16px;color:#F0EDE4">Discard changes?</div>
+         <div style="font-family:Georgia,serif;font-size:13px;line-height:22px;color:#A8A192;margin-top:6px">The seed has been edited. Leaving now loses the frame.</div>
+         <div class="mact" style="justify-content:flex-start;margin-top:13px"><span class="b">Cancel</span><span class="b p">Discard</span></div>
+       </div></div></div>`,
+     note:'Confirmations, errors and disclosures all resolve inline. Genuinely the most accessible option, and it is philosophically consistent with "an interface that hides its own decision boundaries has not removed them" — an inline confirmation <em>is</em> a visible decision boundary. <b>Cost:</b> the system then cannot serve any consumer who needs a modal, which weakens the enterprise-readiness claim you are trying to answer.'},
+   ]},
+
+  {id:'p-note',type:'prose',rows:3,label:'Primitive notes.',optional:true},
+]},
+
+/* ── 06 · ADAPTERS ───────────────────────────────────────── */
+{id:'fw',num:'06',nav:'Adapters',title:'Framework adapters',
+ lede:'Custom elements already work in React 19, Vue and Svelte without wrappers — React 19 fixed the prop-and-event problem that made wrappers necessary. So the honest question is not "React or not", it is <b>what is the authoring layer, and who is the consumer</b>. Previews are real usage code.',
+ qs:[
+  {id:'f-strat',type:'specimen',
+   label:'Adapter strategy.',
+   opts:[
+    {v:'cem',k:'Publish a Custom Elements Manifest, no wrappers',tag:'recommended',cost:'free',
+     html:`<div class="sp cd"><span class="c">// custom-elements.json generated from JSDoc — one artifact,</span>
+<span class="c">// consumed by every editor, every framework, and by agents.</span>
+
+<span class="c">// React 19 — works today, no wrapper</span>
+<span class="k">&lt;vd-system-card</span>
+  <span class="t">index</span>=<span class="s">"01"</span>
+  <span class="t">kicker</span>=<span class="s">"Agent systems"</span>
+  <span class="t">proof</span>=<span class="s">"agents:4|status:running"</span><span class="k">&gt;</span>
+  A governed multi-agent organization.
+<span class="k">&lt;/vd-system-card&gt;</span>
+
+<span class="c">// Vue, Svelte, Astro, plain HTML — identical</span></div>`,
+     note:'One manifest gives you editor autocomplete, generated docs, type definitions, and a machine-readable component contract. <b>And it is on-thesis:</b> a CEM is exactly the "same structure a screen reader walks is the structure an agent parses" argument applied to your own components. <b>Cost:</b> consumers on React 18 or earlier need <span class="m">ref</span> plumbing for non-string props. Document the baseline and move on.'},
+    {v:'gen',k:'Generate thin wrappers per framework from the manifest',cost:'free',
+     html:`<div class="sp cd"><span class="c">// scripts/gen-wrappers.mjs reads custom-elements.json</span>
+<span class="k">import</span> { SystemCard } <span class="k">from</span> <span class="s">'@verdigris/react'</span>;
+
+&lt;<span class="t">SystemCard</span>
+  <span class="t">index</span>=<span class="s">"01"</span>
+  <span class="t">proof</span>={{ agents: <span class="n">4</span>, status: <span class="s">'running'</span> }}
+  <span class="t">onSelect</span>={handleSelect}
+/&gt;
+
+<span class="c">// three packages, one generator, one source of truth</span></div>`,
+     note:'Idiomatic per framework — real props, real event handlers, real types. <b>Cost:</b> three published packages, three release channels, three sets of peer-dependency ranges, and a generator to maintain. This is the correct answer for a system with external consumers and overkill for one without.'},
+    {v:'ports',k:'Hand-written native components per framework',cost:'over',
+     html:`<div class="sp cd"><span class="c">// packages/react/SystemCard.tsx      — hand-written</span>
+<span class="c">// packages/vue/SystemCard.vue        — hand-written</span>
+<span class="c">// packages/svelte/SystemCard.svelte  — hand-written</span>
+
+<span class="c">// 3x the surface. 3x the bugs. 3x the a11y audits.</span>
+<span class="c">// Behaviour drifts between them within two releases.</span></div>`,
+     note:'Best possible ergonomics in each framework. <b>Cost:</b> triples the maintained surface and guarantees behavioural drift, which is fatal to the AAA claim — you would have to audit accessibility three times per component, forever. I would not do this at any scale you are plausibly operating at.'},
+    {v:'none',k:'Nothing — web components are the deliverable',cost:'free',
+     html:`<div class="sp cd"><span class="c">// index.html — the only integration story</span>
+<span class="k">&lt;script</span> <span class="t">src</span>=<span class="s">"verdigris/verdigris.js"</span> <span class="t">defer</span><span class="k">&gt;&lt;/script&gt;</span>
+<span class="k">&lt;link</span> <span class="t">rel</span>=<span class="s">"stylesheet"</span> <span class="t">href</span>=<span class="s">"verdigris/verdigris.css"</span><span class="k">&gt;</span>
+
+<span class="k">&lt;vd-system-card</span> <span class="t">index</span>=<span class="s">"01"</span><span class="k">&gt;</span>…<span class="k">&lt;/vd-system-card&gt;</span>
+
+<span class="c">// zero build, zero dependencies, zero adapters</span></div>`,
+     note:'Zero-dependency, zero-build, and platform-native — a defensible position, and the one most consistent with the rest of your work. <b>Cost:</b> it is also indistinguishable from "I did not get to it" unless the docs make the argument explicitly. A CEM is cheap enough that it converts this from a gap into a stance.'},
+   ]},
+
+  {id:'f-auth',type:'choice',
+   label:'Does the authoring layer stay web components?',
+   help:'The real fork. If web components stay canonical, adapters are output. If a framework becomes canonical, the web components become the output — and the zero-dependency claim goes with it.',
+   opts:[
+    {v:'wc',t:'Web components stay canonical, forever',d:'Platform-native, no framework churn, and it is the only choice consistent with "infrastructure I own." Constrains you to what custom elements do well — which, for a content site and a token system, is nearly everything.'},
+    {v:'lit',t:'Move to Lit as the authoring layer, still shipping custom elements',d:'Reactive properties, scoped styles, less hand-rolled lifecycle code. <b>Cost:</b> a runtime dependency — roughly 6KB, but it ends the zero-dependency claim, which is currently load-bearing in how you describe the work.'},
+    {v:'react',t:'React becomes canonical; custom elements are generated output',d:'Most employable-looking, least consistent with the rest of your positioning. Also inverts the dependency direction of everything else you have built.'},
+   ]},
+
+  {id:'f-pub',type:'choice',
+   label:'Distribution.',
+   opts:[
+    {v:'sub',t:'One package, subpath exports',d:'<span class="m">@verdigris/core</span>, <span class="m">/react</span>, <span class="m">/tokens</span>. One version number, one changelog, one release. Simplest thing that supports adapters later.'},
+    {v:'multi',t:'Separate packages per target',d:'Independent versioning. Standard for large systems and clear overhead at this size.'},
+    {v:'copy',t:'Not a package — a documented source drop, copy the files in',d:'Zero infrastructure, and honest for a system with one consumer. <b>Cost:</b> no upgrade path, and "npm install" is the first thing an evaluator tries.'},
+   ]},
+
+  {id:'f-note',type:'prose',rows:2,label:'Adapter notes.',optional:true},
+]},
+
+/* ── 07 · TOKENS ─────────────────────────────────────────── */
+{id:'tok',num:'07',nav:'Tokens',title:'Tokens and design tooling',
+ lede:'Your tokens are already tiered correctly — primitives, semantic, component, with a stated rule never to skip a tier. That is the hard part and it is done. What is missing is a machine-readable form and a design-tool round trip. The trap is letting a pipeline invert your source of truth: <b>the measured contrast comments in the CSS are documentation that no design tool can hold</b>, and they are part of what makes the system credible.',
+ qs:[
+  {id:'t-src',type:'specimen',
+   label:'Where do tokens actually live?',
+   opts:[
+    {v:'css',k:'CSS custom properties stay canonical; DTCG JSON is generated from them',tag:'recommended',cost:'free',
+     html:`<div class="sp cd"><span class="c">/* verdigris.css — SOURCE. Comments are load-bearing. */</span>
+<span class="k">--vd-teal-400</span>: <span class="s">#4FB8AF</span>;  <span class="c">/* </span><span class="n">7.60</span><span class="c">:1 AAA · structure */</span>
+
+<span class="c">// build/tokens.json — GENERATED (DTCG)</span>
+{ <span class="s">"color"</span>: { <span class="s">"teal"</span>: { <span class="s">"400"</span>: {
+    <span class="s">"$type"</span>: <span class="s">"color"</span>,
+    <span class="s">"$value"</span>: <span class="s">"#4FB8AF"</span>,
+    <span class="s">"$description"</span>: <span class="s">"7.60:1 AAA · structure"</span>,
+    <span class="s">"$extensions"</span>: { <span class="s">"com.verdigris.contrast"</span>: <span class="n">7.60</span> }
+}}}</div>`,
+     note:'The stylesheet you already hand-tune stays the truth, and a small parser lifts values plus the measured ratio into DTCG for Figma, Penpot and Style Dictionary. Nothing about your authoring changes. <b>Cost:</b> a parser to write and keep working, and the comment format becomes a contract — it has to stay machine-readable.'},
+    {v:'json',k:'DTCG JSON canonical; Style Dictionary emits the CSS',cost:'free',
+     html:`<div class="sp cd"><span class="c">// tokens/color.json — SOURCE</span>
+{ <span class="s">"teal"</span>: { <span class="s">"400"</span>: { <span class="s">"$value"</span>: <span class="s">"#4FB8AF"</span>,
+  <span class="s">"$description"</span>: <span class="s">"7.60:1 AAA · structure"</span> }}}
+
+<span class="c">/* verdigris.css — GENERATED. Do not edit. */</span>
+<span class="k">--vd-teal-400</span>: <span class="s">#4FB8AF</span>;
+
+<span class="c">/* The 90-line usage-rule comment block has nowhere</span>
+<span class="c">   to live. It becomes prose in a separate doc. */</span></div>`,
+     note:'The conventional answer, and it makes multi-platform output trivial. <b>Cost, and it is the real one:</b> your CSS is not a token dump — it carries the salience doctrine, the padding-shorthand warning, the contrast-constraint rationale. Generated files cannot hold that, so it gets separated from the values it explains, and it will drift. Read the top 145 lines of <span class="m">verdigris.css</span> before choosing this.'},
+    {v:'figma',k:'Figma variables canonical, code generated',cost:'over',
+     html:`<div class="sp cd"><span class="c">// Figma variables → REST API → tokens.json → CSS</span>
+
+<span class="c">// Source of truth now lives in a hosted SaaS file.</span>
+<span class="c">// No git history. No code review on a colour change.</span>
+<span class="c">// Contrast ratios are not computed, not enforced,</span>
+<span class="c">// and not visible at the point of edit.</span></div>`,
+     note:'Right for a large org with a dedicated design-systems team and many designers. <b>Wrong here on your own terms:</b> it moves the source of truth off infrastructure you own, out of version control, and away from the place the AAA numbers are computed and enforced.'},
+   ]},
+
+  {id:'t-name',type:'choice',
+   label:'Token naming.',
+   opts:[
+    {v:'keep',t:'Keep <span class="m">--vd-ink-000</span> / <span class="m">--vd-bone-500</span> / <span class="m">--vd-teal-400</span>',d:'The names are authored — "ink" and "bone" carry the concept in a way "neutral-900" never will. That is character, and character is the point of the whole exercise. Map to dotted paths only at the generated boundary.'},
+    {v:'dtcg',t:'Move to DTCG dotted paths — <span class="m">color.ink.000</span>',d:'Tool-friendly and conventional. <b>Cost:</b> loses the authorial voice in the layer where you are most visibly the author, and forces a rename across every file.'},
+    {v:'alias',t:'Keep authored names, publish conventional aliases alongside',d:'Both audiences served. <b>Cost:</b> two names per token is a documentation burden and an invitation to use the wrong one.'},
+   ]},
+
+  {id:'t-tool',type:'choice',
+   label:'Design tool kit — Figma, Penpot, or neither?',
+   help:'Worth naming: <b>Penpot is open-source and self-hostable</b>, which lines up with "my own infrastructure" far better than Figma does. It is also a smaller signal on a résumé, because most teams evaluating you use Figma.',
+   opts:[
+    {v:'figma',t:'Figma kit',d:'What almost every hiring team and collaborator actually uses. Highest practical signal. <b>Cost:</b> hosted, proprietary, and mildly in tension with the rest of your positioning.'},
+    {v:'penpot',t:'Penpot kit, self-hosted',d:'Consistent with the thesis, and itself a small proof point — you host your own design tool. <b>Cost:</b> fewer people can open it, so it demonstrates less to the audience that matters most.'},
+    {v:'both',t:'Both, generated from the same token export',d:'Only sane if the export is automated, which question one above decides. Otherwise it is two kits to keep in sync by hand.'},
+    {v:'neither',t:'Neither — the docs site <em>is</em> the kit',d:'You already have <span class="m">docs/index.html</span> with live swatches and measured ratios. Argue that a live, measured, interactive reference beats a static design file. <b>Cost:</b> a designer cannot assemble a mockup from it, and that is the actual use case a UI kit serves.'},
+   ]},
+
+  {id:'t-sync',type:'choice',
+   label:'Sync direction.',
+   opts:[
+    {v:'one',t:'One-way, code → design',d:'Code is truth; the design tool is a mirror that can be regenerated and never edited. Simple, safe, no merge conflicts. <b>Recommended</b> if code stays canonical.'},
+    {v:'bi',t:'Bidirectional',d:'Designers can propose token changes from the tool. <b>Cost:</b> conflict resolution on a colour ramp is genuinely unpleasant, and it needs a review gate to stop an un-measured value landing in the palette.'},
+    {v:'manual',t:'No sync — the kit is a periodic snapshot, versioned and dated',d:'Honest about what it is. Perfectly adequate for a one-person system, as long as the snapshot says which version it reflects.'},
+   ]},
+
+  {id:'t-note',type:'prose',rows:2,label:'Token notes.',optional:true},
+]},
+
+/* ── 08 · STATES ─────────────────────────────────────────── */
+{id:'states',num:'08',nav:'States',title:'Validation and feedback states',
+ lede:'You have <span class="m">--vd-danger</span> and an error border token and nothing else. This is the cheapest of the five scope items and the one with the most character available: a system built around a measurement rail has an obvious, unusual answer for where validation messages go, and an obvious answer for what a loading state looks like.',
+ vbar:true,
+ qs:[
+  {id:'s-err',type:'specimen',
+   label:'Where does an inline error live?',
+   help:'Both fields are shown together in each preview — one failing, one passing — because a validation system has to make <em>success</em> legible too, and most only handle failure.',
+   opts:[
+    {v:'rail',k:'In the rail, beside the field',tag:'the on-brand answer',
+     html:errSpec('rail'),
+     note:'The message sits in a margin column with an accent rule, exactly like the readout rail on the home page. <b>Why it fits:</b> the rail is already the place where the system annotates its own content, so validation is just another reading. It also never reflows the form when a message appears or clears, which is a genuine usability win. <b>Cost:</b> needs a wide container — below roughly 700px it has to collapse to the stacked variant, so you maintain two layouts.'},
+    {v:'icon',k:'Below the field, with a status glyph',tag:'conventional',
+     html:errSpec('icon'),
+     note:'Glyph plus text below the input, red border on the field. Universally understood, works at any width. The glyph means the state does not rely on colour alone, which your AAA posture requires anyway. <b>Cost:</b> unremarkable — correct and invisible.'},
+    {v:'text',k:'Below the field, text only',
+     html:errSpec('text'),
+     note:'Cleanest typographically. <b>Cost:</b> without a glyph, error and success are distinguished by colour and wording alone — the exact single-channel dependency this whole calibration is about. Would need the wording to always carry the state explicitly.'},
+   ]},
+
+  {id:'s-load',type:'specimen',
+   label:'What does loading look like?',
+   opts:[
+    {v:'topo',k:'A topolang field, at low opacity, in the content shape',tag:'unmistakably yours',
+     html:`<div class="sp st">
+       <div class="empfield" data-topo='{"mode":"SHADE","palette":"VERDIGRIS","cellW":7,"cellH":12,"fontSize":11,"opacity":0.5,"seed":20260801}'></div>
+       <div class="mt">Loading · field drifting until content resolves</div></div>`,
+     note:'The runtime is already loaded, already deterministic, and already respects <span class="m">prefers-reduced-motion</span> by freezing to a seeded frame — which is exactly the behaviour a loading indicator needs. Nothing else in any design system looks like this. <b>Cost:</b> it is decoration that draws the eye, and a skeleton is supposed to suggest the <em>shape</em> of what is coming. Use it for whole-region loads, not for text blocks.'},
+    {v:'skel',k:'Shimmer skeleton',tag:'conventional',
+     html:`<div class="sp st"><div class="sk"></div><div class="sk w88"></div>
+       <div class="sk w70"></div><div class="sk w45"></div>
+       <div class="mt">Loading</div></div>`,
+     note:'Communicates the shape of incoming content, which is its actual job. <b>Cost:</b> the sweeping gradient is the single most template-looking element in modern UI, and it will be the only animated gradient anywhere in your system.'},
+    {v:'quiet',k:'Static blocks, no animation',
+     html:`<div class="sp st"><div class="skq"></div><div class="skq" style="width:88%"></div>
+       <div class="skq" style="width:70%"></div><div class="skq" style="width:45%"></div>
+       <div class="mt">Loading</div></div>`,
+     note:'Same shape information, no motion. Honest, calm, and never needs a reduced-motion variant. <b>Cost:</b> ambiguous — a static grey block can read as an error or as empty content rather than as pending.'},
+    {v:'rule',k:'A single sweeping rule in the structure colour',
+     html:`<div class="sp st"><div class="rulel"><i></i></div>
+       <div class="mt">Loading · determinate rule, indeterminate sweep</div>
+       <div class="rulel" style="margin-top:16px"><i></i></div></div>`,
+     note:'Uses the hairline rule you already have everywhere as the loading primitive. Minimal, in-register, and trivially convertible to a determinate progress bar. <b>Cost:</b> carries no shape information at all, so the layout still jumps when content lands.'},
+   ]},
+
+  {id:'s-empty',type:'specimen',
+   label:'Empty states.',
+   opts:[
+    {v:'zero',k:'The instrument reads zero',tag:'recommended',
+     html:`<div class="sp st"><div class="emp left">
+       <div class="zr left"><div><b>0</b>results</div><div><b>0</b>matched</div><div><b>1,284</b>searched</div></div>
+       <h5>No claims match this filter.</h5>
+       <p>The corpus is intact — 1,284 claims were searched. Widen the date range or clear the agent filter.</p>
+     </div></div>`,
+     note:'A real instrument does not go blank when there is nothing to report; it reads zero, and it tells you what it <em>did</em> measure. That distinction — nothing found versus nothing searched — is genuine information, and almost every empty state throws it away. Fits your thesis precisely. <b>Cost:</b> requires the calling code to actually know the denominator.'},
+    {v:'plain',k:'Plain text, centred',
+     html:`<div class="sp st"><div class="emp">
+       <h5>No claims match this filter.</h5>
+       <p>Widen the date range or clear the agent filter.</p>
+     </div></div>`,
+     note:'Restrained and adequate. <b>Cost:</b> contributes nothing, and empty states are one of the few places a system\'s voice is genuinely visible to a user.'},
+    {v:'field',k:'Topolang field plus text',
+     html:`<div class="sp st"><div class="emp">
+       <div class="empfield" data-topo='{"mode":"SHADE","palette":"VERDIGRIS","cellW":7,"cellH":12,"fontSize":11,"opacity":0.4,"seed":20260815}'></div>
+       <h5>No claims match this filter.</h5>
+       <p>Widen the date range or clear the agent filter.</p>
+     </div></div>`,
+     note:'Visually the richest, and reuses the signature. <b>Cost:</b> if the field is also the loading state, empty and loading become hard to tell apart — which is the one distinction an empty state absolutely must make.'},
+   ]},
+
+  {id:'s-when',type:'choice',
+   label:'Validation timing.',
+   opts:[
+    {v:'blur',t:'Validate on blur, re-validate on input once errored',d:'The pattern with the best evidence behind it: no nagging while typing, immediate feedback once the field has been left, and errors clear as soon as they are fixed. <b>Recommended.</b>'},
+    {v:'submit',t:'On submit only',d:'Least interruptive, most predictable, and trivially accessible. <b>Cost:</b> the user finds out about field one\'s problem after filling field six.'},
+    {v:'live',t:'Live, on every keystroke',d:'Fastest feedback. <b>Cost:</b> shows an error on a half-typed value, which is both annoying and — with a live region — genuinely hostile to screen-reader users.'},
+   ]},
+
+  {id:'s-a11y',type:'choice',
+   label:'How are state changes announced?',
+   help:'The part most systems get wrong, and the part you would be judged hardest on given the positioning.',
+   opts:[
+    {v:'full',t:'Full: aria-describedby on errors, aria-invalid, a polite live region for toasts, and an assertive one reserved for submission failure',d:'The correct answer, and worth documenting as a pattern rather than just implementing. <b>Cost:</b> real testing work — this needs an actual screen reader, not an audit tool.'},
+    {v:'basic',t:'Basic: aria-invalid and aria-describedby, no live regions',d:'Covers inline field validation properly. Toasts would then need to not carry critical information, which is a reasonable constraint to adopt deliberately.'},
+    {v:'defer',t:'Defer until the primitives are chosen in section 05',d:'Sequencing, not avoidance. Fine — but write it down as an open item.'},
+   ]},
+
+  {id:'s-note',type:'prose',rows:2,label:'State notes.',optional:true},
+]},
+
+/* ── 09 · SCOPE ──────────────────────────────────────────── */
+{id:'scope',num:'09',nav:'Scope',title:'What this system is for',
+ lede:'This is the section that decides the other eight. The five gaps you listed are real measured against a general-purpose enterprise design system — and Verdigris is not one, which may be its strength. Light mode plus fifteen primitives plus three framework adapters plus a token pipeline plus a Figma kit is <b>six to twelve months of part-time work</b>, and none of it makes the home page better. Answer this honestly and some of the earlier sections resolve themselves.',
+ qs:[
+  {id:'sc-for',type:'choice',
+   label:'Who is Verdigris actually for?',
+   help:'Your own consultation report says the deliverable is "concept, rationale, and complete token tables, in a distinctive authorial voice" — that is a portfolio artifact, not a product. If that is still true, three of the five gaps are non-goals rather than debt.',
+   opts:[
+    {v:'artifact',t:'A portfolio artifact — evidence of taste and rigour',d:'Then depth beats breadth every time. One deeply-authored theme with measured ratios and a published CVD analysis is worth more than fifteen shallow components. <b>Implies:</b> dark-only is fine if argued; primitives only as your own content needs them; a CEM instead of adapters; no Figma kit.'},
+    {v:'product',t:'A real system with external consumers',d:'Then the gaps are genuine debt and need sequencing. <b>Implies:</b> light mode, versioned releases, adapters, a published kit, and a support burden — plus every future decision constrained by backwards compatibility.'},
+    {v:'both',t:'Portfolio first, built so it could become a product',d:'Most likely true, and the trap: "could become" quietly becomes "must support", and you pay product costs for artifact benefits. If you pick this, name explicitly which of the five items you are <b>not</b> doing.'},
+   ]},
+
+  {id:'sc-in',type:'multi',
+   label:'Which of the five listed gaps are in scope at all?',
+   help:'Unchecked does not mean forgotten — it means <b>documented as a deliberate non-goal</b>, which is a stronger position than an unacknowledged gap. A "Non-goals" page is one of the clearest signals of design maturity a system can have.',
+   opts:[
+    {v:'light',t:'Light / multi-theme',d:'Largest single item. Needs a second accent ramp (§04 proved the current one fails on paper), a light band ramp for the field, a re-stated salience doctrine, and a doubling of every contrast measurement. <b>Estimate: 3–5 weeks.</b>'},
+    {v:'prims',t:'Interactive UI primitives',d:'Scales with the count you chose in §05. Five primitives is tractable; fifteen is not. <b>Estimate: 1 week per primitive done properly, including a11y and docs.</b>'},
+    {v:'fw',t:'Framework adapters',d:'A CEM is about two days. Generated wrappers for three frameworks is <b>3–4 weeks</b> plus ongoing release work.'},
+    {v:'tok',t:'Design-tool kit and token pipeline',d:'A DTCG export is 2–3 days. A maintained Figma kit is <b>2 weeks</b> plus permanent upkeep.'},
+    {v:'states',t:'Form validation and feedback states',d:'Cheapest and highest character-per-hour of the five. <b>Estimate: 1 week</b>, and §08 has most of the decisions already made.'},
+   ]},
+
+  {id:'sc-seq',type:'choice',
+   label:'Sequencing.',
+   opts:[
+    {v:'site',t:'Site first — colour, hero, numbering. Then reassess.',d:'Sections 01–03 are days of work, they make the thing people actually see better, and they resolve a live contradiction in the published doctrine. Everything in 04–08 is invisible to a visitor. <b>Recommended.</b>'},
+    {v:'depth',t:'Site first, then states and a CEM — the two cheap credibility wins',d:'Adds roughly two weeks and closes two of the five gaps properly, which is a better story than five gaps closed shallowly.'},
+    {v:'breadth',t:'Go wide — start light mode and primitives now',d:'Only if you answered "product" above, or if a specific opportunity is asking for it.'},
+   ]},
+
+  {id:'sc-nong',type:'choice',
+   label:'Do the docs get a Non-goals page?',
+   opts:[
+    {v:'yes',t:'Yes — every excluded item, with the reason',d:'Converts "missing" into "decided", and it is the single cheapest credibility win available on this whole page. Dark-only, no adapters, no Figma kit — each with two sentences of reasoning. Half a day.'},
+    {v:'inline',t:'Note non-goals inline, in the relevant docs section',d:'Less discoverable, better contextualised. Works if the docs have good navigation.'},
+    {v:'no',t:'No — leave the scope implicit',d:'Not recommended. Implicit scope reads as oversight, and you have good reasons for every one of these.'},
+   ]},
+
+  {id:'sc-note',type:'prose',rows:4,label:'Anything else. Constraints, deadlines, an audience I have guessed wrong about.',optional:true,
+   ph:'If there is a specific reader for this system — a hiring panel, a client, a conference talk — say so. It changes almost every recommendation above.'},
+]},
+
+{id:'out',num:'—',nav:'Output',title:'Output',noCount:true,output:true,
+ lede:'Copy or download, hand it back, and the build starts with sections 01 to 03.'},
+];
+
+/* ═══════════════════════════════════════════════════════════
+   ENGINE
+   ═══════════════════════════════════════════════════════════ */
+const KEY='verdigris-calibration-03';
+let A={}, cur=0, storageOK=true, vsim='none';
+const fields=[];
+
+function load(){ try{const r=localStorage.getItem(KEY); if(r)A=JSON.parse(r)||{};}catch(e){A={};} }
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(A)); if(!storageOK){storageOK=true;flag();}}
+  catch(e){ if(storageOK){storageOK=false;flag();} } }
+function flag(){
+  let el=document.getElementById('nosave');
+  if(storageOK){ if(el)el.remove(); return; }
+  if(el) return;
+  el=document.createElement('div'); el.id='nosave';
+  el.style.cssText='position:fixed;top:0;left:0;right:0;z-index:200;background:var(--red);color:#1a0c0c;'+
+    'font-family:var(--f-mono);font-size:11.5px;padding:9px 16px;text-align:center';
+  el.textContent='AUTOSAVE UNAVAILABLE — serve over http://localhost, or export from Output before closing.';
+  document.body.appendChild(el);
+}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');
+  clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('on'),1700);}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const strip=s=>String(s).replace(/<[^>]+>/g,'');
+
+function allQs(){return SECTIONS.filter(s=>s.qs).flatMap(s=>s.qs.map(q=>({s,q})));}
+function answered(q){const v=A[q.id];
+  if(v===undefined||v===null)return false;
+  if(typeof v==='string')return v.trim()!=='';
+  if(Array.isArray(v))return v.length>0;
+  if(typeof v==='object')return Object.keys(v).length>0;
+  return true;}
+const req=q=>!q.optional;
+function secStats(s){ if(!s.qs)return null; const r=s.qs.filter(req);
+  return {done:r.filter(answered).length,total:r.length}; }
+
+/* ── topolang mounting ────────────────────────────────────────
+   render() replaces innerHTML wholesale, so every canvas is
+   destroyed on navigation. Fields must be stopped first or the
+   rAF loops leak and keep drawing into detached canvases. */
+function killFields(){
+  while(fields.length){ try{fields.pop().stop();}catch(e){} }
+}
+function mountFields(){
+  if(!window.topolang) return;
+  const T=window.topolang;
+  document.querySelectorAll('[data-topo]').forEach(el=>{
+    let cfg={}; try{cfg=JSON.parse(el.getAttribute('data-topo'));}catch(e){return;}
+    const cv=document.createElement('canvas');
+    cv.setAttribute('aria-hidden','true');
+    el.insertBefore(cv,el.firstChild);
+    const f=new T.Field(cv,{
+      palette:T.palettes[cfg.palette]||T.palettes.VERDIGRIS,
+      mode:T.modes[cfg.mode]||T.modes.STRATA,
+      cellW:cfg.cellW||9, cellH:cfg.cellH||15, fontSize:cfg.fontSize||13,
+      opacity:cfg.opacity==null?0.78:cfg.opacity,
+      seed:cfg.seed||20260801
+    });
+    fields.push(f);
+    f.start();
+  });
+}
+
+/* ── question renderers ──────────────────────────────────── */
+function qHTML(q,i){
+  const id=q.id; let body='';
+  if(q.type==='prose')
+    body=`<textarea data-q="${id}" rows="${q.rows||3}" placeholder="${esc(q.ph||'')}">${esc(A[id]||'')}</textarea>`;
+  else if(q.type==='choice'){
+    const v=A[id];
+    body=`<div class="opts">`+q.opts.map(o=>
+      `<label class="opt ${v===o.v?'on':''}" data-opt="${id}" data-v="${o.v}"><span class="box"></span>
+       <span class="txt"><span class="t">${o.t}</span>${o.d?`<span class="d">${o.d}</span>`:''}</span></label>`).join('')+`</div>`;
+  }
+  else if(q.type==='multi'){
+    const v=Array.isArray(A[id])?A[id]:[];
+    body=`<div class="opts">`+q.opts.map(o=>
+      `<label class="opt multi ${v.indexOf(o.v)>-1?'on':''}" data-multi="${id}" data-v="${o.v}"><span class="box"></span>
+       <span class="txt"><span class="t">${o.t}</span>${o.d?`<span class="d">${o.d}</span>`:''}</span>
+       ${v.indexOf(o.v)>-1?`<span class="pill">${v.indexOf(o.v)+1}</span>`:''}</label>`).join('')+`</div>`;
+  }
+  else if(q.type==='specimen'){
+    const v=A[id];
+    body=`<div class="spgrid">`+q.opts.map(o=>
+      `<div class="spwrap ${v===o.v?'on':''}">
+        <div class="sphead" data-opt="${id}" data-v="${o.v}"><span class="box"></span>
+          <span class="k">${o.k}</span>
+          ${o.cost?`<span class="cost ${o.cost}">${o.cost==='free'?'FREE':o.cost==='paid'?'PAID':'HIGH COST'}</span>`:''}
+          ${o.tag?`<span class="tag">${o.tag}</span>`:''}</div>
+        <div class="spstage pad0">${o.html}</div>
+        ${o.note?`<div class="spnote">${o.note}</div>`:''}
+      </div>`).join('')+`</div>`;
+  }
+  else if(q.type==='dial'){
+    const st=dialState(q);
+    body=`<div class="dial" data-dial="${id}">
+      <div class="dialstage spstage pad0" id="dst-${id}">${dialSpec(q,st)}</div>
+      <div class="dialctl">
+        ${(q.segs||[]).map(s=>`<div class="dialrow">
+          <label>${s.label}</label>
+          <div class="dialseg" data-seg="${s.k}">${s.opts.map(o=>
+            `<button data-v="${o}" class="${st[s.k]===o?'on':''}">${o.toLowerCase()}</button>`).join('')}</div>
+          <output></output></div>`).join('')}
+        ${q.ctrls.map(c=>`<div class="dialrow">
+          <label>${c.label}</label>
+          <input type="range" data-c="${c.k}" min="${c.min}" max="${c.max}" step="${c.step}" value="${st[c.k]}">
+          <output>${st[c.k]}${c.unit||''}</output></div>`).join('')}
+      </div></div>`;
+  }
+  return `<div class="q" id="q-${id}">
+    <div class="q-top"><span class="q-id">${q.optional?'○':String(i).padStart(2,'0')}</span>
+    <p class="q-label">${q.label}</p></div>
+    ${q.help?`<div class="q-help">${q.help}</div>`:''}
+    <div class="q-body">${body}</div></div>`;
+}
+
+function dialState(q){
+  const st={};
+  (q.ctrls||[]).forEach(c=>st[c.k]=c.def);
+  (q.segs||[]).forEach(s=>st[s.k]=s.def);
+  const saved=A[q.id];
+  if(saved&&typeof saved==='object')Object.keys(saved).forEach(k=>{if(k in st)st[k]=saved[k];});
+  return st;
+}
+function dialSpec(q,st){
+  if(q.spec==='hero')
+    return heroSpec({mode:st.mode,palette:st.palette,m1:st.m1,m2:st.m2,over:st.over,
+      scrim:st.scrim,opacity:(st.opacity||62)/100,cellW:8,cellH:13,fontSize:12,label:false});
+  return '';
+}
+
+/* ── intro ───────────────────────────────────────────────── */
+function introHTML(){return `
+  <div class="lbl" style="margin-bottom:14px">Measured, not asserted</div>
+  <div class="warn bad"><b>The collision measures worse than it looks.</b> Under deuteranopia
+    (Viénot 1999) lime simulates to <code>#EAEB20</code> and green to <code>#A3A44A</code> —
+    a hue gap of <b>0.4°</b>. They become the <em>same hue</em>, two stops of value apart.
+    That is why the rail reads as "one colour, one of which is dimmed" rather than as two
+    categories: for a deuteranopic reader it literally is.</div>
+
+  <table class="px">
+    <tr><th>Token</th><th>Hex</th><th>On ground</th><th>Hue</th><th>Sat</th><th>Deuter sim</th></tr>
+    <tr><td class="sw"><span style="background:#AAFF00"></span>data · lime</td><td class="n">#AAFF00</td><td class="n ok">14.68:1</td><td class="n">80°</td><td class="n over">1.00</td><td class="n">#EAEB20 · 60.3°</td></tr>
+    <tr><td class="sw"><span style="background:#44BB44"></span>structure · green</td><td class="n">#44BB44</td><td class="n ok">7.28:1</td><td class="n">120°</td><td class="n">0.64</td><td class="n">#A3A44A · 60.7°</td></tr>
+    <tr><td class="sw"><span style="background:#4FB8AF"></span>teal, adjusted</td><td class="n">#4FB8AF</td><td class="n ok">7.60:1</td><td class="n">175°</td><td class="n">0.52</td><td class="n ok">#A2A2B1 · 240.0°</td></tr>
+    <tr><td class="sw"><span style="background:#7FA9CE"></span>link · blue</td><td class="n">#7FA9CE</td><td class="n ok">7.31:1</td><td class="n">208°</td><td class="n">0.38</td><td class="n">#9E9ECF · 240.0°</td></tr>
+    <tr><td class="sw"><span style="background:#D0CAB8"></span>body · bone-500</td><td class="n">#D0CAB8</td><td class="n ok">11.06:1</td><td class="n">45°</td><td class="n">0.12</td><td class="n">#CCCCB8 · 60.0°</td></tr>
+  </table>
+  <div style="font-size:12.5px;color:var(--dim2);line-height:1.6;margin-bottom:8px">
+    Simulated values are for design guidance only — WCAG conformance is measured on rendered
+    colour and does not simulate CVD, so the published AAA claim is unaffected either way.
+  </div>
+
+  <div class="lbl" style="margin:26px 0 14px">Four findings that shape the questions</div>
+  <dl class="kv">
+    <dt>Saturation, not hue</dt>
+    <dd>Lime is the <b>only</b> fully-saturated value in the palette (1.00). Blue is 0.38, bone 0.12,
+      red 0.39, teal 0.57, green 0.64. <code>verdigris.md</code> says the palette is "muted but not
+      flat… without any single one feeling like a warning signal" — lime breaks its own doctrine,
+      and that mismatch is doing more damage than the 40° hue gap.</dd>
+    <dt>An import artifact</dt>
+    <dd>In the terminal palette, green and lime coexist across <b>15</b> token roles, separated by
+      syntax and dozens of glyphs. Ported to a three-accent web context, the two closest hues got
+      forced into direct adjacency inside a 132px rail. Your CSS already knows: <em>"Never place
+      them adjacent without a value or space gap."</em></dd>
+    <dt>Data vs prose</dt>
+    <dd>Simulated, lime sits <b>1.27:1</b> from body text and at the same hue. So the more serious
+      casualty is not green — it is that <em>data stops being distinguishable from prose</em>.</dd>
+    <dt>The name</dt>
+    <dd>Verdigris is the blue-green patina on oxidized copper. That colour is already in your
+      palette — <code>#4AACA4</code>, marked <em>"unassigned, just short of AAA"</em> — orphaned
+      because links were reassigned to blue for contrast headroom. The system's namesake is
+      sitting unused while a leaf green does the structural work.</dd>
+  </dl>
+
+  <div class="lbl" style="margin:26px 0 12px">The five scope items, measured</div>
+  <table class="px">
+    <tr><th>Item</th><th>Real blocker</th><th>Estimate</th></tr>
+    <tr><td>Light / multi-theme</td><td>Not an inversion. <b>Every</b> accent fails on bone: lime 1.05:1, green 2.13:1, blue 2.12:1. Needs a second authored ramp.</td><td class="n over">3–5 wk</td></tr>
+    <tr><td>UI primitives</td><td>Register must be settled first; then ~1 week each done properly, with a11y and docs.</td><td class="n over">5–15 wk</td></tr>
+    <tr><td>Framework adapters</td><td>React 19 needs no wrapper. A Custom Elements Manifest gets 80% of the value.</td><td class="n mid">2 d – 4 wk</td></tr>
+    <tr><td>Design tool / tokens</td><td>DTCG export is easy. The risk is inverting your source of truth away from the measured CSS.</td><td class="n mid">3 d – 2 wk</td></tr>
+    <tr><td>Form &amp; feedback states</td><td>Cheapest, and the rail gives you an unusually good answer for where errors go.</td><td class="n ok">1 wk</td></tr>
+  </table>
+
+  <div class="warn"><b>Worth saying once.</b> Those five gaps are real measured against a
+    general-purpose enterprise design system. Verdigris is not one — it is a signature system for
+    one site, and its constraint is arguably the point. Closing all five is six to twelve months
+    part-time, and none of it improves the page a visitor sees. <b>Section 09</b> is where you
+    decide whether they are debt or deliberate non-goals; answer it before 04 to 08 if you want
+    those to go faster.</div>
+
+  <div class="lbl" style="margin:26px 0 12px">How to use this page</div>
+  <div style="font-size:14.5px;line-height:1.7;color:var(--bone);max-width:66ch">
+    <p style="margin:0 0 12px">Sections 01, 02 and 08 carry a <b>vision simulator</b> at the top.
+    It applies real Viénot dichromat matrices to every specimen on the page. The colour section is
+    close to unarguable once you flip it — use it.</p>
+    <p style="margin:0 0 12px">Section 02 question 02 is a <b>live dial</b>: sliders drive a real
+    topolang field, so you can find the field width and overrun you actually want rather than
+    picking from three guesses. Read the numbers off it and note them in the prose box.</p>
+    <p style="margin:0">Everything autosaves. Arrow keys move between sections.</p>
+  </div>`;
+}
+
+/* ── output ──────────────────────────────────────────────── */
+function brief(){
+  const L=[];
+  L.push('# Verdigris — Calibration 03: Colour, Hero, Scope');
+  L.push('');
+  SECTIONS.filter(s=>s.qs).forEach(s=>{
+    const any=s.qs.some(answered);
+    if(!any)return;
+    L.push(''); L.push('## '+s.num+' · '+s.title);
+    s.qs.forEach(q=>{
+      if(!answered(q))return;
+      const v=A[q.id], lab=strip(q.label);
+      L.push(''); L.push('**'+lab+'**'); L.push('');
+      if(q.type==='specimen'||q.type==='choice'){
+        const o=q.opts.find(x=>x.v===v);
+        L.push('→ '+(o?strip(o.k||o.t):v));
+      } else if(q.type==='multi'){
+        v.forEach((x,i)=>{const o=q.opts.find(y=>y.v===x);
+          L.push((i+1)+'. '+(o?strip(o.t):x));});
+      } else if(q.type==='dial'){
+        Object.keys(v).forEach(k=>{
+          const c=(q.ctrls||[]).find(x=>x.k===k);
+          L.push('- '+k+': '+v[k]+(c&&c.unit?c.unit:''));});
+      } else String(v).trim().split('\n').forEach(l=>L.push('> '+l));
+    });
+  });
+  L.push(''); L.push('---'); L.push('');
+  L.push('## Measurements carried in');
+  L.push('');
+  L.push('- lime `#AAFF00` 14.68:1, hue 80°, sat 1.00 — the only fully-saturated token');
+  L.push('- green `#44BB44` 7.28:1, hue 120°, sat 0.64');
+  L.push('- Deuteranopia (Viénot): lime → `#EAEB20`, green → `#A3A44A`, hue gap **0.4°**');
+  L.push('- Simulated lime sits 1.27:1 from simulated body text — data stops reading as data');
+  L.push('- Teal candidates, AAA on `#161614`: `#4DB3AA` 7.20 · `#4FB8AF` 7.60 · `#58BDB4` 8.07 · `#5CC0B7` 8.35');
+  L.push('- Light-mode blocker: on `#F0EDE4` every current accent fails — lime 1.05:1, green 2.13:1, teal 2.04:1, blue 2.12:1');
+  L.push('- AAA light candidates on `#F0EDE4`: patina `#0A5450` 7.48 · citron `#454F00` 7.56 · slate `#22506F` 7.34 · oxide `#8A1F1F` 7.81');
+  L.push('- Hero mask is a contrast constraint: bone on lime contour 1.33:1, on green contour 1.52:1');
+  return L.join('\n');
+}
+
+function outputHTML(){
+  const r=allQs().filter(x=>req(x.q)), done=r.filter(x=>answered(x.q)).length;
+  const gaps=r.filter(x=>!answered(x.q));
+  return `<div style="display:flex;gap:26px;margin:18px 0 26px">
+    <div><div style="font-family:var(--f-mono);font-size:26px;color:var(--white)">${done}/${r.length}</div><div class="lbl">Answered</div></div>
+    <div><div style="font-family:var(--f-mono);font-size:26px;color:var(--white)">${Math.round(done/r.length*100)}%</div><div class="lbl">Complete</div></div>
+  </div>
+  ${gaps.length?`<div class="warn"><b>${gaps.length} unanswered.</b> ${gaps.map(g=>g.s.num+' · '+strip(g.q.label).slice(0,64)).join('<br>')}</div>`
+   :`<div class="warn ok"><b>Complete.</b> Copy or download, then hand it back.</div>`}
+  <div class="outbox" id="outbox"></div>
+  <div style="display:flex;gap:9px;margin-top:14px">
+    <button class="btn pri" id="b-copy">Copy</button>
+    <button class="btn" id="b-dl">Download</button></div>`;
+}
+
+function vbarHTML(){
+  return `<div class="vbar">
+    <span class="lbl">Vision</span>
+    ${[['none','Normal'],['deuter','Deuteranopia'],['protan','Protanopia'],['gray','Greyscale']]
+      .map(v=>`<button data-vsim="${v[0]}" class="${vsim===v[0]?'on':''}">${v[1]}</button>`).join('')}
+    <span class="hint">Viénot 1999 matrices, applied to every specimen below</span>
+  </div>`;
+}
+
+function render(){
+  killFields();
+  const s=SECTIONS[cur], st=document.getElementById('stage');
+  let h=`<div class="sec-head"><div class="sec-num">${s.num==='—'?'OUTPUT':'SECTION '+s.num}</div>
+    <h1 class="sec-title">${s.title}</h1>${s.lede?`<p class="sec-lede">${s.lede}</p>`:''}</div>`;
+  if(s.vbar)h+=vbarHTML();
+  if(s.intro)h+=introHTML();
+  else if(s.output)h+=outputHTML();
+  else{let n=0;h+=s.qs.map(q=>{if(!q.optional)n++;return qHTML(q,n);}).join('');}
+  h+=`<div class="secnav"><button class="btn" id="b-prev" ${cur===0?'disabled':''}>← Back</button>
+    <div class="spacer"></div>
+    ${cur<SECTIONS.length-1?`<button class="btn pri" id="b-next">${cur===0?'Begin':'Next'} →</button>`:''}</div>`;
+  st.innerHTML=h;
+  window.scrollTo({top:0,behavior:'instant'});
+  if(s.output){const b=document.getElementById('outbox'); if(b)b.textContent=brief();}
+  bind(); renderNav(); mountFields();
+}
+
+function renderNav(){
+  document.getElementById('nav').innerHTML=SECTIONS.map((s,i)=>{
+    const st=secStats(s), done=st&&st.total>0&&st.done===st.total;
+    return `<button class="nav-item ${i===cur?'on':''} ${done?'done':''}" data-go="${i}">
+      <span class="n">${s.num==='—'?'··':s.num}</span><span>${s.nav}</span>
+      ${st?`<span class="ct">${st.done}/${st.total}</span>`:''}</button>`;}).join('');
+  const r=allQs().filter(x=>req(x.q)), done=r.filter(x=>answered(x.q)).length;
+  const pct=Math.round(done/r.length*100);
+  document.getElementById('barfill').style.width=pct+'%';
+  document.getElementById('pcount').textContent=done+' / '+r.length;
+  document.getElementById('ppct').textContent=pct+'%';
+}
+
+function set(k,v){A[k]=v;save();renderNav();}
+
+function bind(){
+  const st=document.getElementById('stage');
+
+  st.querySelectorAll('textarea[data-q]').forEach(el=>
+    el.addEventListener('input',()=>set(el.dataset.q,el.value)));
+
+  /* single-select: choice + specimen */
+  st.querySelectorAll('[data-opt]').forEach(el=>el.addEventListener('click',()=>{
+    const k=el.dataset.opt,v=el.dataset.v;
+    set(k,A[k]===v?undefined:v);
+    const q=allQs().find(x=>x.q.id===k).q;
+    if(q.type==='specimen')
+      st.querySelectorAll('[data-opt="'+k+'"]').forEach(h=>h.parentElement.classList.toggle('on',h.dataset.v===A[k]));
+    else
+      st.querySelectorAll('[data-opt="'+k+'"]').forEach(h=>h.classList.toggle('on',h.dataset.v===A[k]));
+  }));
+
+  /* multi-select: click order is preserved and shown as a priority pill */
+  st.querySelectorAll('[data-multi]').forEach(el=>el.addEventListener('click',()=>{
+    const k=el.dataset.multi,v=el.dataset.v;
+    const cur=Array.isArray(A[k])?A[k].slice():[];
+    const i=cur.indexOf(v);
+    if(i>-1)cur.splice(i,1); else cur.push(v);
+    set(k,cur);
+    const q=allQs().find(x=>x.q.id===k).q;
+    let n=0;
+    st.querySelectorAll('[data-multi="'+k+'"]').forEach(h=>{
+      const on=cur.indexOf(h.dataset.v)>-1;
+      h.classList.toggle('on',on);
+      let pill=h.querySelector('.pill');
+      if(on){ if(!pill){pill=document.createElement('span');pill.className='pill';h.appendChild(pill);}
+        pill.textContent=cur.indexOf(h.dataset.v)+1; }
+      else if(pill) pill.remove();
+    });
+  }));
+
+  /* dial: sliders and segmented controls drive one live specimen */
+  st.querySelectorAll('[data-dial]').forEach(box=>{
+    const id=box.dataset.dial;
+    const q=allQs().find(x=>x.q.id===id).q;
+    const push=()=>{
+      const stt=dialState(q);
+      box.querySelectorAll('input[data-c]').forEach(r=>stt[r.dataset.c]=+r.value);
+      box.querySelectorAll('.dialseg').forEach(g=>{
+        const on=g.querySelector('button.on'); if(on)stt[g.dataset.seg]=on.dataset.v;});
+      set(id,stt);
+      killFields();
+      document.getElementById('dst-'+id).innerHTML=dialSpec(q,stt);
+      mountFields();
+    };
+    box.querySelectorAll('input[data-c]').forEach(r=>{
+      r.addEventListener('input',()=>{
+        const c=q.ctrls.find(x=>x.k===r.dataset.c);
+        r.parentElement.querySelector('output').textContent=r.value+(c.unit||'');
+      });
+      r.addEventListener('change',push);
+    });
+    box.querySelectorAll('.dialseg button').forEach(b=>b.addEventListener('click',()=>{
+      b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on'); push();
+    }));
+  });
+
+  /* vision simulator */
+  st.querySelectorAll('[data-vsim]').forEach(b=>b.addEventListener('click',()=>{
+    vsim=b.dataset.vsim;
+    document.body.classList.remove('sim-deuter','sim-protan','sim-gray');
+    if(vsim!=='none')document.body.classList.add('sim-'+vsim);
+    st.querySelectorAll('[data-vsim]').forEach(x=>x.classList.toggle('on',x.dataset.vsim===vsim));
+  }));
+
+  const p=document.getElementById('b-prev'),n=document.getElementById('b-next');
+  if(p)p.addEventListener('click',()=>{if(cur>0){cur--;render();}});
+  if(n)n.addEventListener('click',()=>{if(cur<SECTIONS.length-1){cur++;render();}});
+  const c=document.getElementById('b-copy');
+  if(c)c.addEventListener('click',()=>navigator.clipboard.writeText(brief())
+    .then(()=>toast('Copied'),()=>toast('Copy blocked, select manually')));
+  const d=document.getElementById('b-dl');
+  if(d)d.addEventListener('click',()=>{
+    const b=new Blob([brief()],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(b);
+    a.download='verdigris-brief-03.md';a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Saved');});
+}
+
+document.getElementById('nav').addEventListener('click',e=>{
+  const b=e.target.closest('[data-go]'); if(!b)return; cur=+b.dataset.go; render();});
+document.getElementById('b-out').addEventListener('click',()=>{cur=SECTIONS.length-1;render();});
+const rs=document.getElementById('b-reset'); let armed=false;
+rs.addEventListener('click',()=>{
+  if(!armed){armed=true;rs.textContent='Erase all?';rs.style.color='var(--red)';rs.style.borderColor='var(--red)';
+    clearTimeout(rs._t);rs._t=setTimeout(()=>{armed=false;rs.textContent='Reset';rs.style.color='';rs.style.borderColor='';},3500);return;}
+  armed=false;rs.textContent='Reset';rs.style.color='';rs.style.borderColor='';
+  A={};save();cur=0;render();toast('Erased');});
+document.addEventListener('keydown',e=>{
+  if(e.target.matches('textarea,input,select'))return;
+  if(e.key==='ArrowRight'&&cur<SECTIONS.length-1){cur++;render();}
+  if(e.key==='ArrowLeft'&&cur>0){cur--;render();}});
+
+load(); render();
+</script>
+</body>
+</html>

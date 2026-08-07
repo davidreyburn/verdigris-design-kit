@@ -1,0 +1,1294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verdigris · Calibration 04 — Resolutions</title>
+<script src="verdigris/topolang.js"></script>
+<style>
+/* ══════════════════════════════════════════════════════════
+   CHROME — carried from Calibration 02/03 unchanged, so this
+   reads as the next pass. Deliberately not using --vd-*
+   tokens: this page argues about those tokens.
+   ══════════════════════════════════════════════════════════ */
+:root{
+  --bg:#161614; --bg-dim:#111110; --bg-hi:#1e1d1b; --bg-sel:#2c2b28;
+  --dim:#524e48; --dim2:#8B8478; --bone:#D0CAB8; --bone-b:#E8E2D0; --white:#F0EDE4;
+  --blue:#7FA9CE; --lime:#AAFF00; --green:#44BB44; --teal:#4FB8AF;
+  --orange:#C4834A; --red:#CC5555;
+  --line:#2c2b28; --line-soft:#211f1d;
+  --f-sans:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+  --f-tech:Bahnschrift,"DIN Alternate","Segoe UI",sans-serif;
+  --f-mono:"Cascadia Mono","Cascadia Code",Consolas,ui-monospace,monospace;
+  --ease:cubic-bezier(.2,.6,.2,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--bone);font-family:var(--f-sans);font-size:15px;line-height:1.6;
+  -webkit-font-smoothing:antialiased}
+::selection{background:var(--bg-sel);color:var(--white)}
+.lbl{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim2)}
+
+#shell{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh}
+#rail{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--bg-dim);
+  border-right:1px solid var(--line);padding:20px 0 24px;display:flex;flex-direction:column}
+#rail::-webkit-scrollbar{width:7px}#rail::-webkit-scrollbar-thumb{background:var(--bg-sel)}
+.rail-head{padding:0 18px 16px;border-bottom:1px solid var(--line-soft);margin-bottom:10px}
+.rail-title{font-family:var(--f-mono);font-size:12.5px;color:var(--bone-b);letter-spacing:.05em}
+.rail-title b{color:var(--lime);font-weight:400}
+.rail-sub{font-size:11px;color:var(--dim2);margin-top:5px;line-height:1.45}
+.nav-item{display:flex;gap:10px;align-items:baseline;width:100%;text-align:left;padding:7px 18px;
+  background:none;border:0;cursor:pointer;color:var(--dim2);font-family:var(--f-sans);font-size:13.5px;
+  border-left:2px solid transparent;transition:color .15s,background .15s}
+.nav-item:hover{color:var(--bone);background:#00000030}
+.nav-item.on{color:var(--bone-b);border-left-color:var(--blue);background:#00000040}
+.nav-item .n{font-family:var(--f-mono);font-size:10.5px;color:var(--dim2);min-width:16px}
+.nav-item.on .n{color:var(--blue)}
+.nav-item .ct{margin-left:auto;font-family:var(--f-mono);font-size:10px;color:var(--dim2)}
+.nav-item.done .ct{color:var(--lime)}
+.rail-foot{margin-top:auto;padding:14px 18px 0;border-top:1px solid var(--line-soft)}
+.bar{height:3px;background:var(--bg-sel);overflow:hidden;margin-bottom:7px}
+.bar i{display:block;height:100%;background:var(--lime);width:0;transition:width .4s var(--ease)}
+.rail-foot .lbl{display:flex;justify-content:space-between}
+.mini{margin-top:11px;display:flex;gap:6px;flex-wrap:wrap}
+.mini button{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+  background:none;border:1px solid var(--line);color:var(--dim2);padding:4px 7px;cursor:pointer}
+.mini button:hover{color:var(--bone);border-color:var(--dim2)}
+
+#main{padding:0 0 110px;min-width:0}
+.wrap{max-width:900px;margin:0 auto;padding:0 40px}
+
+.sec-head{padding:58px 0 26px;margin-bottom:32px;position:relative;border-bottom:1px solid var(--line)}
+.sec-head::after{content:"";position:absolute;left:0;bottom:-1px;width:56px;height:1px;background:var(--lime)}
+.sec-num{font-family:var(--f-mono);font-size:11px;color:var(--lime);letter-spacing:.18em;margin-bottom:11px;
+  display:flex;align-items:center;gap:9px}
+.sec-num::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,#aaff0038,transparent)}
+.sec-title{font-family:var(--f-tech);font-size:38px;line-height:1.05;font-weight:400;color:var(--white);margin:0 0 13px}
+.sec-lede{font-size:15.5px;color:var(--bone);max-width:66ch;line-height:1.65;margin:0}
+.sec-lede em{color:var(--bone-b);font-style:italic}
+.sec-lede code,.q-help code,.spnote code,.warn code,.kv code{font-family:var(--f-mono);font-size:12.5px;
+  color:var(--orange);background:#0000004d;padding:1px 4px}
+
+.q{padding:28px 0;border-bottom:1px solid var(--line-soft)}
+.q:last-of-type{border-bottom:0}
+.q-top{display:flex;gap:12px;align-items:baseline;margin-bottom:5px}
+.q-id{font-family:var(--f-mono);font-size:10px;color:var(--dim2);padding-top:3px;min-width:30px}
+.q-label{font-size:17px;color:var(--bone-b);line-height:1.45;font-weight:500;margin:0}
+.q-help{font-size:13.5px;color:var(--dim2);line-height:1.6;margin:6px 0 0 42px;max-width:70ch}
+.q-help b{color:var(--bone);font-weight:500}
+.q-body{margin:16px 0 0 42px}
+@media(max-width:820px){.q-help,.q-body{margin-left:0}}
+
+textarea{width:100%;background:var(--bg-dim);border:1px solid var(--line);color:var(--bone-b);
+  font-family:var(--f-sans);font-size:14.5px;line-height:1.6;padding:11px 13px;resize:vertical}
+textarea:focus{outline:2px solid var(--blue);outline-offset:-1px;border-color:var(--blue)}
+textarea::placeholder{color:#6B665E}
+
+.opts{display:flex;flex-direction:column;gap:1px}
+.opt{display:flex;gap:12px;padding:12px 14px;background:var(--bg-dim);border:1px solid var(--line-soft);
+  cursor:pointer;transition:all .12s;align-items:flex-start}
+.opt:hover{border-color:var(--dim2);background:var(--bg-hi)}
+.opt.on{border-color:var(--blue);background:#7fa9ce0f}
+.opt .box{width:14px;height:14px;border:1px solid var(--dim2);flex-shrink:0;margin-top:4px;position:relative;border-radius:50%}
+.opt.multi .box{border-radius:0}
+.opt.on .box{border-color:var(--blue)}
+.opt.on .box::after{content:"";position:absolute;inset:3px;background:var(--blue);border-radius:50%}
+.opt.multi.on .box::after{border-radius:0;inset:2px}
+.opt .txt{min-width:0;display:block}
+.opt .t{display:block;font-size:14.5px;color:var(--bone-b);line-height:1.45}
+.opt .d{display:block;font-size:12.5px;color:var(--dim2);line-height:1.55;margin-top:3px}
+.opt .d code{font-family:var(--f-mono);color:var(--orange);font-size:11.5px}
+.opt .d b{color:var(--bone);font-weight:500}
+.opt .pill{margin-left:auto;flex-shrink:0;font-family:var(--f-mono);font-size:9px;letter-spacing:.07em;
+  padding:2px 6px;border:1px solid var(--line);color:var(--dim2);align-self:flex-start;margin-top:3px}
+
+.spgrid{display:grid;gap:14px;grid-template-columns:1fr}
+.spwrap{border:1px solid var(--line);background:var(--bg-dim);transition:border-color .15s}
+.spwrap:hover{border-color:var(--dim2)}
+.spwrap.on{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue)}
+.sphead{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid var(--line);
+  cursor:pointer;user-select:none;flex-wrap:wrap}
+.sphead .box{width:13px;height:13px;border:1px solid var(--dim2);border-radius:50%;position:relative;flex-shrink:0}
+.spwrap.on .sphead .box{border-color:var(--blue)}
+.spwrap.on .sphead .box::after{content:"";position:absolute;inset:3px;background:var(--blue);border-radius:50%}
+.sphead .k{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.07em;color:var(--bone)}
+.spwrap.on .sphead .k{color:var(--bone-b)}
+.sphead .cost{font-family:var(--f-mono);font-size:10px;letter-spacing:.05em;padding:2px 7px;border:1px solid}
+.cost.free{color:var(--lime);border-color:#aaff0040}
+.cost.paid{color:var(--orange);border-color:#c4834a55}
+.cost.over{color:var(--red);border-color:#cc555555}
+.sphead .tag{margin-left:auto;font-family:var(--f-mono);font-size:9.5px;color:var(--dim2);letter-spacing:.05em}
+.spnote{font-size:12.5px;color:var(--dim2);padding:10px 12px 12px;line-height:1.55;border-top:1px solid var(--line-soft)}
+.spnote b{color:var(--bone);font-weight:500}
+.spnote .m{font-family:var(--f-mono);color:var(--bone)}
+.spstage{padding:0;overflow:hidden}
+
+.secnav{display:flex;gap:10px;margin-top:42px;padding-top:24px;border-top:1px solid var(--line)}
+.btn{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;background:none;
+  border:1px solid var(--line);color:var(--bone);padding:11px 20px;cursor:pointer;transition:all .14s}
+.btn:hover{border-color:var(--dim2);background:var(--bg-hi)}
+.btn.pri{border-color:var(--blue);color:var(--blue)}
+.btn.pri:hover{background:var(--blue);color:#0d1620}
+.btn:disabled{opacity:.3;cursor:default}
+.spacer{flex:1}
+
+.warn{border-left:2px solid var(--orange);padding:2px 0 2px 16px;margin:24px 0;font-size:14px;
+  color:var(--bone);line-height:1.65}
+.warn b{color:var(--orange);font-weight:500}
+.warn.ok{border-color:var(--lime)}.warn.ok b{color:var(--lime)}
+.warn.bad{border-color:var(--red)}.warn.bad b{color:var(--red)}
+.warn.forced{border-color:var(--teal)}.warn.forced b{color:var(--teal)}
+.kv{display:grid;grid-template-columns:170px 1fr;gap:9px 18px;font-size:14px;margin:22px 0}
+.kv dt{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--dim2);padding-top:3px}
+.kv dd{margin:0;color:var(--bone)}
+.kv dd b{color:var(--lime);font-weight:500;font-family:var(--f-mono)}
+.kv dd.set{color:var(--dim2)}
+.kv dd.set b{color:var(--bone-b)}
+
+table.px{width:100%;border-collapse:collapse;font-size:13px;margin:18px 0}
+table.px th{font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim2);
+  text-align:left;padding:0 12px 8px 0;font-weight:400;border-bottom:1px solid var(--line)}
+table.px td{padding:8px 12px 8px 0;border-bottom:1px solid var(--line-soft);color:var(--bone);vertical-align:top}
+table.px td.n{font-family:var(--f-mono);white-space:nowrap}
+table.px td.n.over{color:var(--red)}
+table.px td.n.ok{color:var(--lime)}
+table.px td.n.mid{color:var(--orange)}
+table.px td.sw span{display:inline-block;width:11px;height:11px;margin-right:6px;vertical-align:-1px;border:1px solid #ffffff20}
+table.px tr.hi td{background:#aaff000a}
+
+.outbox{background:var(--bg-dim);border:1px solid var(--line);padding:16px;font-family:var(--f-mono);
+  font-size:11.5px;line-height:1.65;color:var(--bone);white-space:pre-wrap;max-height:440px;overflow:auto}
+.outbox::-webkit-scrollbar{width:8px}.outbox::-webkit-scrollbar-thumb{background:var(--bg-sel)}
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,90px);background:var(--lime);color:#141a06;
+  font-family:var(--f-mono);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;padding:11px 22px;
+  transition:transform .3s var(--ease);z-index:99}
+.toast.on{transform:translate(-50%,0)}
+@media(max-width:900px){#shell{grid-template-columns:1fr}
+  #rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+  .wrap{padding:0 20px}.sec-title{font-size:30px}}
+
+/* ── vision simulation ─────────────────────────────────────── */
+.vbar{position:sticky;top:0;z-index:40;display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+  background:#0e0e0d;border:1px solid var(--line);padding:9px 12px;margin:0 0 22px}
+.vbar button{font-family:var(--f-mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+  background:none;border:1px solid var(--line);color:var(--dim2);padding:5px 9px;cursor:pointer;transition:all .12s}
+.vbar button:hover{color:var(--bone);border-color:var(--dim2)}
+.vbar button.on{color:#141a06;background:var(--lime);border-color:var(--lime)}
+.vbar .hint{font-size:11.5px;color:var(--dim2);margin-left:auto}
+body.sim-deuter .spstage,body.sim-deuter .swrow,body.sim-deuter .meterstage{filter:url(#f-deuter)}
+body.sim-protan .spstage,body.sim-protan .swrow,body.sim-protan .meterstage{filter:url(#f-protan)}
+body.sim-gray   .spstage,body.sim-gray   .swrow,body.sim-gray   .meterstage{filter:grayscale(1)}
+#svgf{position:absolute;width:0;height:0;overflow:hidden}
+
+/* ── the forced-choice axis diagram ───────────────────────── */
+.axis{border:1px solid var(--line);background:var(--bg-dim);padding:20px 22px;margin:20px 0}
+.axisbar{position:relative;height:34px;margin:26px 0 8px;
+  background:linear-gradient(90deg,#EAEB20 0%,#EAEB20 40%,#8a8a8a 50%,#9E9ECF 60%,#9E9ECF 100%)}
+.axisbar i{position:absolute;top:-9px;bottom:-9px;width:2px;background:var(--white)}
+.axisbar i::after{content:attr(data-l);position:absolute;top:-19px;left:50%;transform:translateX(-50%);
+  font-family:var(--f-mono);font-size:9.5px;letter-spacing:.06em;color:var(--white);white-space:nowrap}
+.axisends{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:10px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--dim2)}
+.axiscap{font-size:12.5px;color:var(--dim2);line-height:1.6;margin-top:14px}
+
+/* ── swatch strip ─────────────────────────────────────────── */
+.swrow{display:grid;gap:1px;background:var(--line-soft);border:1px solid var(--line);margin:16px 0}
+.swrow>div{background:#131211;padding:11px 13px;display:flex;gap:11px;align-items:center}
+.swrow .chip{width:30px;height:30px;flex-shrink:0;border:1px solid #ffffff18}
+.swrow .nm{font-family:var(--f-mono);font-size:11.5px;color:var(--bone-b)}
+.swrow .mt{font-family:var(--f-mono);font-size:10px;color:var(--dim2);display:block;margin-top:2px;letter-spacing:.04em}
+.swrow .rt{margin-left:auto;font-family:var(--f-mono);font-size:11px;color:var(--lime);white-space:nowrap}
+.swrow .rt.bad{color:var(--red)}
+.swrow .rt.mid{color:var(--orange)}
+
+/* ══════════════════════════════════════════════════════════
+   SPECIMENS
+   ══════════════════════════════════════════════════════════ */
+.sp{background:#161614;color:#D0CAB8;font-size:14px;font-family:var(--f-sans)}
+
+/* §01 — the two collision sites, side by side */
+.col2{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#2c2b28}
+.col2>div{background:#161614;padding:20px}
+.col2 .ttl{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:#8B8478;margin-bottom:16px;display:block}
+/* card: index vs proof — both mono tabular numerals */
+.cardsp{border:1px solid #2c2b28;border-radius:2px;padding:16px}
+.cardsp .cx{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  color:#A8A192;display:flex;gap:15px;align-items:baseline}
+.cardsp .cx b{font-weight:500;font-variant-numeric:tabular-nums}
+.cardsp .ct{font-family:var(--f-tech);font-size:17px;font-weight:500;color:#E8E2D0;margin:10px 0 0}
+.cardsp .pf{margin-top:13px;padding-top:11px;border-top:1px solid #211f1d;font-family:var(--f-mono);
+  font-size:12px;color:#A8A192;display:flex;gap:20px;flex-wrap:wrap}
+.cardsp .pf b{font-weight:500;font-variant-numeric:tabular-nums}
+/* nav: active vs hover underline — the collision B introduces */
+.navsp{display:flex;gap:26px;padding:12px 0;border-bottom:1px solid #2c2b28}
+.navsp a{position:relative;font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:#A8A192;text-decoration:none;padding-bottom:7px;cursor:pointer}
+.navsp a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:transparent}
+.navsp a:hover{color:#F0EDE4}
+.navsp a:hover::after{background:var(--sp-link)}
+.navsp a.cur{color:#F0EDE4}
+.navsp a.cur::after{background:var(--sp-struct)}
+/* underline differentiation variants */
+.navsp.v-thick a.cur::after{height:2px;bottom:-1px}
+.navsp.v-double a.cur::after{height:1px}
+.navsp.v-double a.cur{box-shadow:inset 0 -4px 0 -3px var(--sp-struct)}
+.navsp.v-tick a.cur::after{left:auto;width:9px}
+.navhint{font-family:var(--f-mono);font-size:10.5px;color:#8B8478;margin-top:14px;letter-spacing:.04em}
+
+/* §02 — hero field */
+.hr{position:relative;overflow:hidden;min-height:250px;padding:28px 0 24px;background:#161614}
+.hr .fieldbox{position:absolute;inset:0;z-index:0;pointer-events:none}
+.hr canvas{position:absolute;inset:0;width:100%;height:100%}
+.hr .in{position:relative;z-index:1;padding:0 24px}
+.hr h3{font-family:var(--f-tech);font-weight:500;color:#F0EDE4;margin:0;
+  font-size:34px;line-height:37px;letter-spacing:-.02em}
+.hr .sub{font-family:Georgia,serif;font-size:13.5px;line-height:25px;color:#A8A192;margin:16px 0 0;max-width:38ch}
+.hr .cap{position:relative;z-index:1;margin:22px 24px 0;padding-left:14px;border-left:1px solid #2c2b28;
+  font-family:var(--f-mono);font-size:10.5px;line-height:15px;color:#8B8478;letter-spacing:.06em}
+.hr .band{position:relative;height:78px;margin-top:18px;overflow:hidden;border-top:1px solid #211f1d}
+.hr .band canvas{position:absolute;inset:0;width:100%;height:100%}
+.hr .bandlbl{position:absolute;left:24px;bottom:6px;z-index:2;font-family:var(--f-mono);font-size:9.5px;
+  letter-spacing:.12em;text-transform:uppercase;color:#8B8478}
+
+/* §03 — the live contrast meter */
+.meter{border:1px solid var(--line);background:var(--bg-dim)}
+.meterstage{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+.meterctl{padding:14px 16px}
+.meterrow{display:grid;grid-template-columns:150px 1fr 62px;gap:13px;align-items:center;margin-bottom:14px}
+.meterrow label{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim2)}
+.meterrow output{font-family:var(--f-mono);font-size:12px;color:var(--lime);text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:3px;background:var(--bg-sel);outline:0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;background:var(--lime);
+  cursor:pointer;border:0;border-radius:0}
+input[type=range]::-moz-range-thumb{width:13px;height:13px;background:var(--lime);cursor:pointer;border:0;border-radius:0}
+input[type=range]:focus-visible{outline:2px solid var(--blue);outline-offset:4px}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line-soft);
+  border:1px solid var(--line)}
+.readout>div{background:#0e0e0d;padding:11px 13px}
+.readout .rk{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim2)}
+.readout .rv{font-family:var(--f-mono);font-size:19px;font-weight:500;margin-top:5px;font-variant-numeric:tabular-nums}
+.readout .rv.pass{color:var(--lime)}
+.readout .rv.fail{color:var(--red)}
+.readout .rn{font-family:var(--f-mono);font-size:9.5px;color:var(--dim2);display:block;margin-top:3px}
+.chipbox{display:flex;gap:9px;align-items:center;margin-top:12px;font-family:var(--f-mono);font-size:10.5px;
+  color:var(--dim2);letter-spacing:.05em}
+.chipbox i{width:26px;height:16px;display:block;border:1px solid #ffffff20}
+
+/* §04 — the rule table, generated per option */
+.ruletbl{padding:16px 18px;background:#131211}
+.ruletbl table{width:100%;border-collapse:collapse;font-size:12px}
+.ruletbl th{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;
+  color:#8B8478;text-align:left;padding:0 12px 7px 0;font-weight:400;border-bottom:1px solid #2c2b28}
+.ruletbl td{padding:7px 12px 7px 0;border-bottom:1px solid #211f1d;color:#D0CAB8;vertical-align:top;
+  font-family:var(--f-mono);font-size:11.5px}
+.ruletbl td.v{white-space:nowrap}
+.ruletbl td.p{color:#44BB44}
+.ruletbl td.f{color:#CC5555}
+.ruletbl td.c{color:#8B8478;font-family:var(--f-sans);font-size:12px}
+.ruletbl .cap{font-family:var(--f-mono);font-size:10px;color:#8B8478;margin-top:12px;letter-spacing:.05em;line-height:1.6}
+
+/* §05 — light mode, full chrome */
+.lt{font-family:var(--f-sans)}
+.lt .pg{padding:22px 24px}
+.lt .nv{display:flex;gap:22px;padding:11px 24px;border-bottom:1px solid;font-family:var(--f-mono);
+  font-size:11px;letter-spacing:.13em;text-transform:uppercase}
+.lt .e{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:block}
+.lt h4{font-family:var(--f-tech);font-size:26px;font-weight:400;margin:11px 0 0;line-height:1.12}
+.lt p{font-family:Georgia,serif;font-size:14px;line-height:25px;margin:12px 0 0;max-width:48ch}
+.lt .rail{display:flex;gap:26px;padding:0 0 13px;border-bottom:1px solid;margin-bottom:18px;
+  font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.lt .rail b{display:block;font-size:17px;font-weight:500;font-variant-numeric:tabular-nums;margin-bottom:5px;
+  letter-spacing:0}
+.lt .card{border:1px solid;border-radius:2px;padding:15px;margin-top:16px}
+.lt .cx{font-family:var(--f-mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+  display:flex;gap:13px;align-items:baseline}
+.lt .ct{font-family:var(--f-tech);font-size:16px;font-weight:500;margin:8px 0 0}
+.lt .pf{margin-top:12px;padding-top:10px;border-top:1px solid;font-family:var(--f-mono);font-size:11px;
+  display:flex;gap:20px;flex-wrap:wrap}
+.lt .pf b{font-variant-numeric:tabular-nums;font-weight:500}
+.lt a{text-decoration:none;border-bottom:1px solid}
+.lt .fr{display:inline-block;margin-top:16px;padding:7px 13px;font-family:var(--f-mono);font-size:11px;
+  letter-spacing:.1em;text-transform:uppercase;border:1px solid}
+.lt .grain{position:relative}
+.lt .grain::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* §06 — forms assembled */
+.fm{padding:20px 22px;background:#161614}
+.fm .fld{margin-bottom:17px}
+.fm .fl{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:#A8A192;margin-bottom:8px}
+.fm .fl s{text-decoration:none;color:#AAFF00;margin-left:5px}
+.fm .fl u{text-decoration:none;color:#8B8478;margin-left:6px;letter-spacing:.06em;text-transform:none;font-size:10.5px}
+.fm input,.fm select,.fm textarea{width:100%;font-family:var(--f-mono);font-size:14px;color:#E8E2D0;
+  padding:9px 11px;background:#111110;border:1px solid #2c2b28;border-radius:2px}
+.fm input::placeholder{color:#6B665E}
+.fm input:focus{outline:3px solid #AAFF00;outline-offset:2px;border-color:#3a3835}
+.fm .err input{border-color:#CC5555}
+.fm .ok input{border-color:#44BB44}
+.fm .dis input,.fm input[disabled]{color:#6B665E;background:#0e0e0d;border-color:#211f1d}
+.fm .em{display:flex;gap:7px;align-items:flex-start;margin-top:8px;font-family:var(--f-mono);font-size:11.5px;
+  line-height:16px;color:#E68C8C}
+.fm .em.good{color:#44BB44}
+.fm .em i{font-style:normal;flex-shrink:0}
+.fm .act{display:flex;gap:9px;margin-top:22px;padding-top:18px;border-top:1px solid #211f1d;align-items:center}
+.fm .b{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  padding:9px 16px;border:1px solid #2c2b28;color:#D0CAB8;background:none}
+.fm .b.p{border-color:#7FA9CE;color:#7FA9CE}
+.fm .cnt{margin-left:auto;font-family:var(--f-mono);font-size:10.5px;color:#8B8478;letter-spacing:.06em}
+.fm .grp{border:0;margin:0 0 17px;padding:0}
+.fm .grp legend{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:#A8A192;padding:0;margin-bottom:9px}
+.fm .cr{display:flex;gap:10px;align-items:center;font-family:var(--f-mono);font-size:13px;color:#D0CAB8;
+  margin-bottom:9px}
+.fm .bx{width:15px;height:15px;border:1px solid #8B8478;flex-shrink:0;position:relative;background:#111110}
+.fm .bx.rd{border-radius:50%}
+.fm .bx.on{border-color:#AAFF00}
+.fm .bx.on::after{content:"";position:absolute;inset:3px;background:#AAFF00}
+.fm .bx.rd.on::after{border-radius:50%}
+
+/* §07 — the demonstration surface options */
+.dm{padding:20px 22px;background:#161614}
+.dm .ttl{font-family:var(--f-tech);font-size:18px;font-weight:500;color:#F0EDE4;margin:0 0 4px}
+.dm .sub{font-family:Georgia,serif;font-size:13px;line-height:22px;color:#A8A192;margin:0 0 16px;max-width:52ch}
+.dm .strip{display:flex;gap:1px;background:#2c2b28;border:1px solid #2c2b28;margin-bottom:14px}
+.dm .strip div{background:#111110;padding:10px 13px;flex:1;font-family:var(--f-mono);font-size:10px;
+  letter-spacing:.11em;text-transform:uppercase;color:#8B8478}
+.dm .strip b{display:block;color:#AAFF00;font-size:15px;font-weight:500;margin-bottom:4px;letter-spacing:0;
+  font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+
+<svg id="svgf" aria-hidden="true"><defs>
+  <filter id="f-deuter" color-interpolation-filters="linearRGB">
+    <feColorMatrix type="matrix" values="0.2920 0.7054 -0.0003 0 0
+                                         0.2934 0.7089  0.0000 0 0
+                                        -0.0209 0.0225  1.0000 0 0
+                                         0      0       0      1 0"/>
+  </filter>
+  <filter id="f-protan" color-interpolation-filters="linearRGB">
+    <feColorMatrix type="matrix" values="0.1121 0.8853 -0.0005 0 0
+                                         0.1127 0.8897 -0.0001 0 0
+                                         0.0045 0.0000  1.0019 0 0
+                                         0      0       0      1 0"/>
+  </filter>
+</defs></svg>
+
+<div id="shell">
+  <nav id="rail">
+    <div class="rail-head">
+      <div class="rail-title">calibration <b>04</b></div>
+      <div class="rail-sub">Resolutions · forced choices and light mode</div>
+    </div>
+    <div id="nav"></div>
+    <div class="rail-foot">
+      <div class="bar"><i id="barfill"></i></div>
+      <div class="lbl"><span id="pcount">0 / 0</span><span id="ppct">0%</span></div>
+      <div class="mini">
+        <button id="b-out">Output</button>
+        <button id="b-reset">Reset</button>
+      </div>
+    </div>
+  </nav>
+  <main id="main"><div class="wrap" id="stage"></div></main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* ═══════════════════════════════════════════════════════════
+   COLOUR MATH — the same arithmetic used to derive every
+   number quoted on this page, running live so the meters in
+   §03 are computed and not transcribed.
+   ═══════════════════════════════════════════════════════════ */
+function lin(c){c/=255;return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);}
+function enc(c){c=Math.max(0,Math.min(1,c));
+  return Math.round((c<=0.0031308?12.92*c:1.055*Math.pow(c,1/2.4)-0.055)*255);}
+function rgb(h){h=h.replace('#','');
+  return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+function hex(a){return '#'+a.map(v=>('0'+Math.round(v).toString(16)).slice(-2)).join('').toUpperCase();}
+function lum(h){const c=rgb(h);return 0.2126*lin(c[0])+0.7152*lin(c[1])+0.0722*lin(c[2]);}
+function ratio(a,b){const x=lum(a),y=lum(b);return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05);}
+function composite(fg,bg,a){const f=rgb(fg),g=rgb(bg);
+  return hex([0,1,2].map(i=>a*f[i]+(1-a)*g[i]));}
+const DEUTER=[[0.2920,0.7054,-0.0003],[0.2934,0.7089,0.0000],[-0.0209,0.0225,1.0000]];
+const PROTAN=[[0.1121,0.8853,-0.0005],[0.1127,0.8897,-0.0001],[0.0045,0.0000,1.0019]];
+function sim(h,M){const c=rgb(h).map(lin);
+  return hex([0,1,2].map(i=>enc(M[i][0]*c[0]+M[i][1]*c[1]+M[i][2]*c[2])));}
+function hue(h){const c=rgb(h).map(v=>v/255);
+  const mx=Math.max.apply(null,c),mn=Math.min.apply(null,c),d=mx-mn;
+  if(!d)return 0;
+  let x; if(mx===c[0])x=60*(((c[1]-c[2])/d)%6);
+  else if(mx===c[1])x=60*(((c[2]-c[0])/d)+2); else x=60*(((c[0]-c[1])/d)+4);
+  return (x+360)%360;}
+function hgap(a,b){const d=Math.abs(hue(a)-hue(b));return Math.min(d,360-d);}
+
+const G='#161614', PAPER='#F0EDE4';
+const TOK={lime:'#AAFF00',green:'#44BB44',teal:'#4FB8AF',blue:'#7FA9CE',
+  bone5:'#D0CAB8',bone7:'#F0EDE4',bone4:'#A8A192'};
+const BAND_TOP='#5F8746';   // brightest VERDIGRIS_BAND value
+const CAP_TOP ='#3A352E';   // brightest capped VERDIGRIS value
+
+/* ═══════════════════════════════════════════════════════════
+   SPECIMEN BUILDERS
+   ═══════════════════════════════════════════════════════════ */
+
+/* §01 — the two collision sites in one stage.
+   Left: card index vs proof figures, both mono tabular numerals.
+   Right: nav active vs hover underline, both 1px rules. */
+function collideSpec(struct, link, navVariant){
+  return `<div class="sp col2" style="--sp-struct:${struct};--sp-link:${link}">
+    <div>
+      <span class="ttl">Collision A · card index vs proof figures</span>
+      <div class="cardsp">
+        <div class="cx"><b style="color:${struct}">01</b> Agent systems</div>
+        <div class="ct">The Agent Operating System</div>
+        <div class="pf">
+          <span><b style="color:${TOK.lime}">4</b> agents</span>
+          <span><b style="color:${TOK.lime}">2026</b> adopted</span>
+        </div>
+      </div>
+      <div class="navhint">same face · same size · same tabular numerals</div>
+    </div>
+    <div>
+      <span class="ttl">Collision B · nav active vs hover underline</span>
+      <nav class="navsp ${navVariant?'v-'+navVariant:''}">
+        <a class="cur">Work</a><a>Field Notes</a><a>About</a><a>System</a>
+      </nav>
+      <div class="navhint">hover the other items · both rules are 1px</div>
+    </div>
+  </div>`;
+}
+
+/* §02 — hero, with an optional mobile band underneath so the
+   two-mode question can be judged in one view. */
+function heroSpec(o){
+  const cfg=JSON.stringify({mode:o.mode||'SHADE',palette:o.palette||'VERDIGRIS_BAND',
+    cellW:o.cellW||9,cellH:o.cellH||15,fontSize:o.fontSize||13,
+    opacity:o.opacity==null?0.62:o.opacity,seed:20260801});
+  const band=o.band?`<div class="band">
+      <div class="fieldbox" data-topo='${JSON.stringify({mode:o.band,palette:'VERDIGRIS_BAND',
+        cellW:7,cellH:12,fontSize:11,opacity:0.8,seed:20260801})}'></div>
+      <span class="bandlbl">≤860px band · ${o.band}</span></div>`:'';
+  return `<div class="sp hr">
+    <div class="fieldbox" data-topo='${cfg}'
+      style="-webkit-mask-image:linear-gradient(90deg,transparent 0%,transparent 30%,#000 72%,#000 100%);
+             mask-image:linear-gradient(90deg,transparent 0%,transparent 30%,#000 72%,#000 100%)"></div>
+    <div class="in">
+      <h3 style="max-width:58%">Designing instruments for cognition, creativity, and complex systems.</h3>
+      <div class="sub">I design and operate governed human-AI systems.</div>
+    </div>
+    <div class="cap">${o.cap||'topolang v1.3.2 · '+(o.mode||'SHADE')+' · 9/9 conformance'}</div>
+    ${band}
+  </div>`;
+}
+
+/* §04 — the published pair table each candidate rule produces. */
+const PAIRS=[
+  {a:'green',b:'lime',  ka:'structure',kb:'data',      ctx:'card index vs proof figures',adj:false,ch:'size + position'},
+  {a:'teal', b:'lime',  ka:'structure',kb:'data',      ctx:'card index vs proof figures',adj:false,ch:'size + position'},
+  {a:'teal', b:'blue',  ka:'structure',kb:'link',      ctx:'nav active vs hover rule',   adj:true, ch:'rule thickness'},
+  {a:'green',b:'blue',  ka:'structure',kb:'link',      ctx:'nav active vs hover rule',   adj:true, ch:'rule thickness'},
+  {a:'lime', b:'bone5', ka:'data',     kb:'body text', ctx:'numerals inside prose',      adj:true, ch:'mono face + tabular figures'},
+  {a:'lime', b:'blue',  ka:'data',     kb:'link',      ctx:'readout beside a link',      adj:false,ch:'—'},
+];
+function ruleTable(rule, struct){
+  const rows=PAIRS.filter(p=>{
+    if(p.a==='green'&&struct!=='green')return false;
+    if(p.a==='teal'&&struct!=='teal')return false;
+    return true;
+  }).map(p=>{
+    const A=TOK[p.a],B=TOK[p.b];
+    const d=[sim(A,DEUTER),sim(B,DEUTER)], pr=[sim(A,PROTAN),sim(B,PROTAN)];
+    const dh=hgap(d[0],d[1]), dv=ratio(d[0],d[1]);
+    const ph=hgap(pr[0],pr[1]), pv=ratio(pr[0],pr[1]);
+    const colourOK=(dh>=20||dv>=3)&&(ph>=20||pv>=3);
+    let verdict,cls,carry;
+    if(rule==='absolute'){
+      verdict=colourOK?'PASS':'FAIL'; cls=colourOK?'p':'f';
+      carry=colourOK?'colour alone':'<b style="color:#CC5555">must change or be dropped</b>';
+    } else if(rule==='adjacency'){
+      const applies=p.adj;
+      verdict=!applies?'n/a':(colourOK?'PASS':'FAIL'); cls=!applies?'c':(colourOK?'p':'f');
+      carry=!applies?'rule does not reach this pair':(colourOK?'colour alone':'<b style="color:#CC5555">must change</b>');
+    } else { /* channel */
+      verdict=colourOK?'PASS':'PASS*'; cls='p';
+      carry=colourOK?'colour alone':p.ch;
+    }
+    return `<tr><td>${p.ka} ↔ ${p.kb}</td>
+      <td class="v">${dh.toFixed(1)}° / ${dv.toFixed(2)}:1</td>
+      <td class="v">${ph.toFixed(1)}° / ${pv.toFixed(2)}:1</td>
+      <td class="${cls}">${verdict}</td>
+      <td class="c">${carry}</td></tr>`;
+  }).join('');
+  return `<div class="sp ruletbl"><table>
+    <tr><th>pair</th><th>deuter</th><th>protan</th><th>verdict</th><th>what carries it</th></tr>
+    ${rows}</table>
+    <div class="cap">hue gap / value gap after simulation · threshold 20° or 3:1${
+      rule==='channel'?'<br>PASS* = colour fails, a non-colour channel carries the distinction':''}</div></div>`;
+}
+
+/* §05 — light mode, full page chrome */
+function ltSpec(t,opt){
+  opt=opt||{};
+  return `<div class="sp lt ${opt.grain?'grain':''}" style="background:${t.bg}">
+    <div class="nv" style="border-color:${t.rule};color:${t.muted}">
+      <span style="color:${t.max}">David Reyburn</span>
+      <span style="margin-left:auto">Work</span><span>Field Notes</span><span>About</span></div>
+    <div class="pg">
+      <div class="rail" style="border-color:${t.rule};color:${t.muted}">
+        <span><b style="color:${t.data}">04</b> systems</span>
+        <span><b style="color:${t.data}">2020</b> since</span>
+        <span><b style="color:${t.data}">AAA</b> contrast</span></div>
+      <span class="e" style="color:${t.muted}">Work</span>
+      <h4 style="color:${t.max}">Four systems</h4>
+      <p style="color:${t.text}">Each of these is running, not proposed — see
+        <a href="#" style="color:${t.link};border-color:${t.link}">the case study</a>.</p>
+      <div class="card" style="border-color:${t.rule}">
+        <div class="cx" style="color:${t.muted}"><b style="color:${t.struct}">01</b> Agent systems</div>
+        <div class="ct" style="color:${t.strong}">The Agent Operating System</div>
+        <div class="pf" style="border-color:${t.ruleSoft};color:${t.muted}">
+          <span><b style="color:${t.data}">4</b> agents</span>
+          <span><b style="color:${t.data}">2026</b> adopted</span></div>
+      </div>
+      <span class="fr" style="border-color:${t.rule};color:${t.strong};
+        outline:3px solid ${opt.focus||t.data};outline-offset:2px">focused control</span>
+    </div>
+  </div>`;
+}
+const LT_BASE={text:'#2C2A26',strong:'#1E1D1B',max:'#161614',muted:'#57534B',
+  struct:'#0A5450',data:'#454F00',link:'#22506F',rule:'#C9C3B4',ruleSoft:'#DAD5C8'};
+function paper(bg,extra){return Object.assign({},LT_BASE,{bg:bg},extra||{});}
+
+/* §06 — a form assembled, all states at once */
+function formSpec(v){
+  const req=v==='star'?'<s>*</s>':(v==='word'?'<u>required</u>':'');
+  const opt=v==='word'?'<u>optional</u>':'';
+  return `<div class="sp fm">
+    <div class="fld"><span class="fl">Your name ${req}</span>
+      <input type="text" value="D. Reyburn"></div>
+    <div class="fld err"><span class="fl">Email ${req}</span>
+      <input type="text" value="reyburn.david@">
+      <span class="em"><i>!</i> Needs a domain after the @.</span></div>
+    <div class="fld ok"><span class="fl">Seed ${req}</span>
+      <input type="text" value="20260801">
+      <span class="em good"><i>✓</i> Valid 8-digit seed.</span></div>
+    <div class="fld"><span class="fl">Note ${opt}</span>
+      <input type="text" placeholder="Anything else"></div>
+    <div class="fld dis"><span class="fl">Contour colour <u>set by theme</u></span>
+      <input type="text" value="#4FB8AF" disabled></div>
+    <fieldset class="grp"><legend>Deliver as</legend>
+      <div class="cr"><span class="bx rd on"></span> Plain text</div>
+      <div class="cr"><span class="bx rd"></span> Signed transcript</div></fieldset>
+    <div class="act"><span class="b p">Send</span><span class="b">Cancel</span>
+      <span class="cnt">1 field needs attention</span></div>
+  </div>`;
+}
+
+/* §07 — where validation actually gets demonstrated */
+function demoSpec(kind){
+  if(kind==='tool') return `<div class="sp dm">
+    <div class="ttl">Palette inspector · docs/tools</div>
+    <div class="sub">Paste a hex, get measured ratios against every ground in the
+      system plus dichromat simulation. Every field validates, so the form states
+      are load-bearing rather than illustrated.</div>
+    <div class="strip"><div><b>7.60</b>on ink</div><div><b>2.04</b>on paper</div>
+      <div><b>179.7°</b>deuter gap</div><div><b>AAA</b>verdict</div></div>
+    <div class="fm" style="padding:0"><div class="fld ok"><span class="fl">Hex</span>
+      <input type="text" value="#4FB8AF"><span class="em good"><i>✓</i> AAA on ink · fails on paper</span></div></div>
+  </div>`;
+  if(kind==='contact') return `<div class="sp dm">
+    <div class="ttl">Contact · a real form on the real site</div>
+    <div class="sub">One form, three fields, actually wired. The states are proven
+      in production rather than in a specimen, and a visitor can reach you.</div>
+    <div class="fm" style="padding:0">
+      <div class="fld"><span class="fl">Email</span><input type="text" value="you@example.com"></div>
+      <div class="act" style="margin-top:14px"><span class="b p">Send</span></div></div>
+  </div>`;
+  return `<div class="sp dm">
+    <div class="ttl">Specimen gallery · docs only</div>
+    <div class="sub">Every state rendered side by side as documentation. Nothing is
+      wired to anything; the page demonstrates rather than does.</div>
+    <div class="strip"><div><b>4</b>states</div><div><b>0</b>wired</div>
+      <div><b>1</b>page</div><div><b>—</b>upkeep</div></div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SECTIONS
+   ═══════════════════════════════════════════════════════════ */
+const SECTIONS=[
+
+{id:'intro',num:'00',nav:'Where we are',title:'Where we are',noCount:true,intro:true,
+ lede:'Twenty-nine decisions from Calibration 03 are settled and I am not re-asking them. This page closes the four that contradicted each other, plus the light-mode and validation values that were never asked because those items were out of scope until you put them in. One finding changed the shape of the colour question: <em>it is no longer a preference</em>.'},
+
+/* ── 01 · COLOUR, FORCED ─────────────────────────────────── */
+{id:'colour',num:'01',nav:'Colour',title:'Pick a side',
+ lede:'I swept every hue from 115° to 185° at AAA on <code>#161614</code>, looking for a structure colour far from lime <em>and</em> far from blue after dichromat simulation. There is none. Deuteranopia collapses the wheel to a single yellow–blue axis, and the flip happens between <b>160° and 165°</b>. Below it you land on lime; above it you land on blue. So structure cannot avoid both — it can only choose which collision it accepts, and then separate that pair by something other than colour.',
+ vbar:true,
+ qs:[
+  {id:'x-side',type:'specimen',
+   label:'Which collision do you accept?',
+   help:'Both stages are live. <b>Hover the nav items on the right</b> to see the hover rule against the active rule. Then flip the simulator to Deuteranopia and judge which pair you can still tell apart — and which one a non-colour channel could rescue more cheaply.',
+   opts:[
+    {v:'teal',k:'Teal structure #4FB8AF — accept the nav collision',tag:'recommended',cost:'free',
+     html:collideSpec('#4FB8AF','#7FA9CE'),
+     note:'Structure and data separate cleanly: <span class="m">179.7°</span> under deuteranopia. Structure and link collapse to <span class="m">0.0°</span> — but that pair collides in exactly one place, the nav underline, and it is separable by <b>rule thickness in one line of CSS</b>. Everywhere else structure is a mark and link is prose, so form already distinguishes them. <b>Cost:</b> primitive, semantic layer, print.css, docs swatches, <span class="m">verdigris.md</span>, plus the nav fix in the next question.'},
+    {v:'green',k:'Green structure #44BB44 — accept the numeral collision',cost:'free',
+     html:collideSpec('#44BB44','#7FA9CE'),
+     note:'Structure and link separate cleanly: <span class="m">179.3°</span>. Structure and data collapse to <span class="m">0.4°</span> at a value gap of 2.06:1 — and that pair collides as <b>two mono tabular numerals inside the same card</b>. Same face, same size, same figure style. Separating them needs size, weight or position changes to the card itself, which is more invasive than a nav rule. <b>Upside:</b> zero token churn, and the Phosphor lineage survives intact.'},
+    {v:'bone',k:'Neither — structure goes achromatic',
+     html:collideSpec('#A8A192','#7FA9CE'),
+     note:'Structure becomes <span class="m">#A8A192</span> bone-400, 7.06:1. Every pair passes trivially because structure carries no hue at all, and the CVD table becomes uninteresting in the best way. <b>Cost:</b> the site drops to two chromatic accents, the section-rule segment and card indices stop being a colour signal, and "high frequency, low salience" becomes "invisible". Included because it is the only option that makes the absolute rule satisfiable.'},
+   ]},
+
+  {id:'x-nav',type:'specimen',
+   label:'If teal: how does the active nav rule differ from the hover rule?',
+   help:'The one place structure and link genuinely touch. <b>Hover the unselected items</b> in each, then simulate deuteranopia — the winner is whichever still reads as two different states with the colour information gone.',
+   opts:[
+    {v:'thick',k:'Active rule is 2px, hover rule is 1px',tag:'recommended',
+     html:collideSpec('#4FB8AF','#7FA9CE','thick'),
+     note:'One declaration. Weight is the oldest state signal in typography and it survives every vision condition, greyscale printing, and low-quality displays. <b>Cost:</b> none I can find.'},
+    {v:'tick',k:'Active is a short tick, hover is a full rule',
+     html:collideSpec('#4FB8AF','#7FA9CE','tick'),
+     note:'Length rather than weight, echoing the 60px segment on your section rules — so the nav marker and the section marker become the same device at two scales. <b>Cost:</b> a 9px tick under a word is subtle, and it reads as a bullet rather than as "you are here" until you learn it.'},
+    {v:'double',k:'Active is a double rule, hover is single',
+     html:collideSpec('#4FB8AF','#7FA9CE','double'),
+     note:'Unmistakable and slightly editorial. <b>Cost:</b> needs 4px of vertical room under every nav item, and it is the heaviest of the three in a nav that is otherwise very quiet.'},
+   ]},
+
+  {id:'x-contour',type:'choice',
+   label:'You voted to keep the hero contour green. Does that survive this decision?',
+   help:'Two things collide here. First: SHADE runs <b>no contour pass at all</b> (<span class="m">cfn: null</span>), so if SHADE carries the hero the contour colour is never drawn. Second: if structure goes teal, a green contour is the only green left on the site.',
+   opts:[
+    {v:'moot',t:'Let it go — SHADE means no contour is drawn anyway',d:'The decision resolves itself by deletion. Green leaves the site entirely, the palette holds three accents, and the caption stops claiming a contour that is not rendered. Cleanest outcome, and it costs nothing because you already chose SHADE.'},
+    {v:'keep',t:'Keep green, and keep a contour pass so it is actually visible',d:'Requires the SHADE-with-contour variant in §02. Green then survives as a deliberate quotation of Phosphor in exactly one place, which is a defensible and rather good story — <em>if</em> the caption says so.'},
+    {v:'follow',t:'Contour follows structure — teal terrain',d:'Only meaningful alongside a contour pass. Makes the hero an oxidized-copper contour map and keeps the palette to three accents with no exceptions to explain.'},
+   ]},
+
+  {id:'x-note',type:'prose',rows:3,label:'Colour notes.',optional:true,
+   ph:'If neither collision feels acceptable, say which pair matters most in your own reading of the page.'},
+]},
+
+/* ── 02 · HERO ───────────────────────────────────────────── */
+{id:'hero',num:'02',nav:'Hero',title:'One mode or two',
+ lede:'You put SHADE on desktop and then chose "keep the current split" — but the current split <em>is</em> STRATA desktop, so there is nothing left to keep. Each option below renders the desktop field and, where relevant, the ≤860px band underneath it, both live, so you can judge the pair rather than imagine it.',
+ vbar:true,
+ qs:[
+  {id:'h-split',type:'specimen',
+   label:'What runs below 860px?',
+   opts:[
+    {v:'one',k:'SHADE everywhere — the breakpoint switch goes away',tag:'simplest',
+     html:heroSpec({mode:'SHADE',band:'SHADE',cap:'topolang v1.3.2 · SHADE · one mode at every width'}),
+     note:'One mode, one thing to reason about, and the caption stops naming something that changes under the reader. <b>Consequence:</b> no contour pass runs anywhere, so the green contour leaves the site — which is the <span class="m">moot</span> answer to the previous question. <b>Cost:</b> you lose the "same field, different character mode" demonstration, which was real evidence in the caption.'},
+    {v:'invert',k:'SHADE desktop, STRATA in the mobile band',tag:'keeps the two-mode proof',
+     html:heroSpec({mode:'SHADE',band:'STRATA',cap:'topolang v1.3.2 · SHADE desktop · STRATA band'}),
+     note:'Keeps the demonstration and puts the line-work where no text ever sits over it. The green contour survives, but <b>only below 860px</b> — check the band above and decide whether that is a feature or a colour that appears out of nowhere on phones. <b>Verify before shipping:</b> the auto-range comment in <span class="m">topolang.js</span> says a 39×11 grid sees a much narrower slice of noise space, which is the case that collapses.'},
+    {v:'shadec',k:'SHADE with a contour pass, everywhere',tag:'live prototype',
+     html:heroSpec({mode:'SHADE_C',band:'SHADE_C',cap:'topolang · SHADE + cfn ["#","=","‖","#"] · non-spec variant'}),
+     note:'This is a real running variant, not a mockup: the dithered fill you chose, with a contour pass added so structure colour appears in the field. Judge whether the contour reads as terrain or as noise on top of dither. <b>Cost, and it is the real one:</b> SHADE is defined in the spec with <span class="m">cfn: null</span>. Adding one makes this a local mode, so the <b>9/9 conformance claim needs re-running</b> and the caption needs to say the mode is an extension.'},
+   ]},
+
+  {id:'h-note',type:'prose',rows:2,label:'Hero notes.',optional:true},
+]},
+
+/* ── 03 · THE OVERRUN CAP ────────────────────────────────── */
+{id:'cap',num:'03',nav:'Overrun cap',title:'Making the overrun provable',
+ lede:'You chose the opacity-drop treatment, and I flagged it as the hardest to defend. That was a soft answer — it is provable, it just needs a number. The meter below composites the brightest <code>VERDIGRIS_BAND</code> value over the ground at whatever opacity you set and measures the hero line and body text against that worst case, live. Find the value you want to write into the docs.',
+ vbar:true,
+ qs:[
+  {id:'c-alpha',type:'meter',
+   label:'What is the field opacity cap under the text column?',
+   help:'Everything outside the text column stays at your dialled 62%. This number applies only where text crosses the field. The readout is computed from the same WCAG arithmetic as every other figure in this project — drag it and watch the verdict flip.',
+   ctrl:{k:'alpha',min:8,max:100,step:2,def:30,unit:'%'}},
+
+  {id:'c-which',type:'choice',
+   label:'Which text has to clear AAA over the field?',
+   help:'The hero display line is bone-700. The sub-line under it is bone-400 muted, and it sits at 38ch so it may not reach the field at all. The stricter you set this, the lower the opacity cap goes.',
+   opts:[
+    {v:'both',t:'Both the display line and body text — cap at 0.30',d:'Worst case <span class="m">7.56:1</span> for bone-500 and <span class="m">10.57:1</span> for bone-700. Nothing on the page can ever be over the field and below AAA, whatever the layout does later. The claim stays unconditional, which is what it currently is.'},
+    {v:'hero',t:'Only the display line, since nothing else reaches — cap at 0.50',d:'Worst case <span class="m">7.77:1</span> for bone-700, and body text is kept out of the field by the mask geometry instead. Field stays twice as visible. <b>Cost:</b> the guarantee becomes conditional on a layout fact, so any future change to the hero measure can silently break it.'},
+    {v:'muted',t:'Also the muted sub-line at bone-400 — cap lower still',d:'Most conservative. bone-400 is 7.06:1 on flat ground, so it has almost no headroom and the cap lands near 0.10 — where the field is barely present. Tells you whether the sub-line should simply be excluded from the field region by design.'},
+   ]},
+
+  {id:'c-note',type:'prose',rows:2,label:'Cap notes. Write the number you settled on.',optional:true,
+   ph:'e.g. 0.30 under the text column, 0.62 elsewhere.'},
+]},
+
+/* ── 04 · THE CVD RULE ───────────────────────────────────── */
+{id:'rule',num:'04',nav:'CVD rule',title:'Wording the constraint',
+ lede:'You adopted CVD separation as a design constraint. Measured across the whole palette, the absolute form of that rule fails pairs that have nothing to do with green and lime — including <b>lime against body text</b>, which no palette choice fixes. Rather than argue wording, each option below renders <em>the table that rule would publish</em>, computed live from your §01 choice. Judge the rule by its output.',
+ vbar:true,
+ qs:[
+  {id:'r-form',type:'specimen',
+   label:'Which rule goes in the accessibility notes?',
+   help:'Tables are generated from the structure colour you picked in §01 — go back and change it and these change too. Thresholds are 20° of hue or 3:1 of value after simulation.',
+   opts:[
+    {v:'channel',k:'Colour separation, or a named non-colour channel',tag:'recommended',
+     html:'',dyn:'channel',
+     note:'Every pair passes, but the ones that fail on colour must name what carries them instead — mono face, tabular figures, rule thickness, position. <b>This is already true of your system</b>, which is why it reads correctly today. It is also the strongest publishable claim: it says you measured, found the limits of colour, and covered them deliberately.'},
+    {v:'adjacency',k:'Only pairs that can appear adjacent must separate',
+     html:'',dyn:'adjacency',
+     note:'Narrower and easier to check. <b>Cost:</b> it declines to say anything about non-adjacent pairs, so <span class="m">n/a</span> appears in your own published table — and it excuses the lime-vs-body-text case by definition rather than by argument.'},
+    {v:'absolute',k:'Every accent pair must separate after simulation, no exceptions',
+     html:'',dyn:'absolute',
+     note:'The version you selected in Calibration 03. Look at how much of the table turns red. Following it honestly means at most one chromatic accent on the blue side and the rest achromatic — which is the achromatic-structure option in §01, applied system-wide.'},
+   ]},
+
+  {id:'r-pub',type:'choice',
+   label:'Does the simulated table get published next to the measured one?',
+   opts:[
+    {v:'yes',t:'Yes — both tables, side by side, in the accessibility notes',d:'Measured ratios prove conformance; simulated ratios prove you looked past conformance. Publishing the failures with their carrying channel is more convincing than publishing only passes, and nobody else does it.'},
+    {v:'summary',t:'A summary paragraph, with the full table in an appendix',d:'Keeps the main notes readable. The detail is still there for anyone who checks.'},
+    {v:'no',t:'No — keep the notes to measured conformance',d:'Simpler and entirely defensible, since CVD simulation is not part of WCAG. <b>Cost:</b> you did the work and would be hiding the most distinctive part of it.'},
+   ]},
+
+  {id:'r-note',type:'prose',rows:2,label:'Rule notes.',optional:true},
+]},
+
+/* ── 05 · LIGHT MODE ─────────────────────────────────────── */
+{id:'light',num:'05',nav:'Light mode',title:'Light mode, specified',
+ lede:'In scope now, so these are the values Calibration 03 never asked for. The accent set is settled — patina <code>#0A5450</code> 7.48:1, citron <code>#454F00</code> 7.56:1, slate <code>#22506F</code> 7.34:1, all AAA on bone. What is open is the ground, the focus ring, the grain, and how far down the field ramp can go before text over it stops being safe.',
+ vbar:true,
+ qs:[
+  {id:'l-paper',type:'specimen',
+   label:'Which paper ground?',
+   help:'Full page chrome, so you can see the nav rule, the readout rail, the card and a focused control together. Ink body text is <span class="m">#2C2A26</span> in each.',
+   opts:[
+    {v:'bone',k:'#F0EDE4 — the existing bone-700',tag:'already in the palette',
+     html:ltSpec(paper('#F0EDE4')),
+     note:'Costs no new primitive: light mode reuses the top of the bone ramp as its ground, which is a genuinely tidy piece of token economy. Ink measures <span class="m">12.23:1</span>. Warmest and closest to actual paper.'},
+    {v:'warm',k:'#F5F3EC — one step brighter',
+     html:ltSpec(paper('#F5F3EC')),
+     note:'Ink at <span class="m">12.90:1</span>, accents gain about 0.4 of headroom each. Slightly cleaner without going clinical. <b>Cost:</b> a new primitive that exists only as the light ground.'},
+    {v:'bright',k:'#FAF8F2 — near-white',
+     html:ltSpec(paper('#FAF8F2')),
+     note:'Most headroom: ink <span class="m">13.49:1</span>, patina 8.75:1, citron 8.34:1. <b>Cost:</b> loses the vellum quality that makes the dark theme\'s bone palette feel authored. At this value the warmth is barely present.'},
+   ]},
+
+  {id:'l-focus',type:'specimen',
+   label:'The focus ring, which cannot stay lime.',
+   help:'Lime measures <b>1.05:1</b> on bone — it would be an invisible focus indicator, which is a straightforward WCAG failure rather than an aesthetic problem. Each preview shows a focused control at the bottom of the card.',
+   opts:[
+    {v:'citron',k:'Citron #454F00 — the light data colour',tag:'recommended',
+     html:ltSpec(paper('#F0EDE4'),{focus:'#454F00'}),
+     note:'<span class="m">7.56:1</span>. Keeps the rule "the focus ring is the data colour" true in both themes, so the doctrine needs no exception. Reads as a dark olive rule, clearly deliberate.'},
+    {v:'ink',k:'Ink #161614 — maximum contrast',
+     html:ltSpec(paper('#F0EDE4'),{focus:'#161614'}),
+     note:'<span class="m">15.48:1</span>, the most visible option available and impossible to miss. <b>Cost:</b> the focus ring stops being a colour signal and becomes a black box; it also looks identical to a border, which is the one thing a focus ring should not do.'},
+    {v:'patina',k:'Patina #0A5450 — the light structure colour',
+     html:ltSpec(paper('#F0EDE4'),{focus:'#0A5450'}),
+     note:'<span class="m">7.48:1</span> and visually the calmest. <b>Cost:</b> breaks the "focus is data" pairing, and structure colour is used on borders and rules — so a focus ring in the same colour as a border is ambiguous at a glance.'},
+   ]},
+
+  {id:'l-grain',type:'specimen',
+   label:'Does the 5% grain survive on paper?',
+   opts:[
+    {v:'keep',k:'Keep it — same 5% turbulence overlay',
+     html:ltSpec(paper('#F0EDE4'),{grain:true}),
+     note:'Consistency of treatment across themes, and on a warm ground it reads as paper tooth rather than as screen noise. <b>Cost:</b> dark grain on a light ground lowers effective contrast slightly everywhere; at 5% it is well inside tolerance but it is not free.'},
+    {v:'drop',k:'Drop it — flat paper',
+     html:ltSpec(paper('#F0EDE4')),
+     note:'Cleanest, and arguably more honest: grain on a dark ground simulates a phosphor surface, which has no paper equivalent. <b>Cost:</b> the two themes stop sharing a surface treatment, so light mode feels like a different system rather than the same one lit differently.'},
+   ]},
+
+  {id:'l-ramp',type:'choice',
+   label:'How far can the light field ramp go?',
+   help:'Mirroring the dark ramp\'s luminance cap, in reverse: descending nine bands from the paper ground toward patina. Measured with ink <span class="m">#2C2A26</span> over each band — band 3 <span class="m">#AEC1BA</span> is 7.60:1, band 4 <span class="m">#9EB6AF</span> drops to 6.66:1.',
+   opts:[
+    {v:'cap',t:'Cap at band 3 — the field is safe under text unconditionally',d:'Worst case <span class="m">7.60:1</span>. Preserves the guarantee the dark ramp already makes, and the docs can state one rule for both themes. <b>Cost:</b> a narrow nine-band range compressed into little tonal room, so the light field will be subtle — the same tradeoff the dark ramp already accepts.'},
+    {v:'full',t:'Full range to band 8, and rely on the mask',d:'Field reaches <span class="m">#5C8B85</span>, far more visible and more like an actual printed contour map. <b>Cost:</b> the unconditional claim becomes mask-dependent in light mode but not in dark, so the two themes make different promises.'},
+    {v:'match',t:'Match whatever the overrun cap in §03 decides, applied per theme',d:'One rule, derived rather than chosen: the ramp may go as bright as the composite still clearing your §03 threshold. Most rigorous and self-consistent; needs the §03 number first.'},
+   ]},
+
+  {id:'l-toggle',type:'choice',
+   label:'Where does the theme toggle live?',
+   help:'You chose <span class="m">prefers-color-scheme</span> with a manual override that wins. That override needs a control.',
+   opts:[
+    {v:'nav',t:'In the nav, as a fifth item',d:'Discoverable, conventional. <b>Cost:</b> your nav has exactly four items and that balance is part of why it reads calm; a toggle is not a section, so it needs different treatment to avoid lying about the structure.'},
+    {v:'footer',t:'In the footer, beside the "dark by design" signature',d:'Quiet, and there is a certain wit in putting the light switch next to the line that says dark by design — which will need rewording either way. <b>Cost:</b> most readers will never find it.'},
+    {v:'rail',t:'In the readout rail, as a state readout',d:'Most on-thesis: the rail reports system state, and the active theme <em>is</em> system state. It would read <span class="m">DARK / THEME</span> and be clickable. <b>Cost:</b> the rail has so far contained only measurements, never controls — this makes it interactive for the first time.'},
+   ]},
+
+  {id:'l-note',type:'prose',rows:3,label:'Light mode notes.',optional:true},
+]},
+
+/* ── 06 · VALIDATION ─────────────────────────────────────── */
+{id:'forms',num:'06',nav:'Validation',title:'Validation, specified',
+ lede:'Settled already: errors below the field with a glyph, validate on blur then re-validate on input, full ARIA announcement, hairline-box controls. What is open is everything a real form needs that a two-field specimen never shows — required marking, disabled state, fieldset grouping, and the submit affordance. The previews are one assembled form with every state visible at once.',
+ vbar:true,
+ qs:[
+  {id:'f-req',type:'specimen',
+   label:'How are required and optional fields marked?',
+   help:'A glyph-only asterisk is the conventional choice and also the one that most often ships without an accessible name. Look at how each reads down the left edge of a real form.',
+   opts:[
+    {v:'word',k:'Mark the exceptions in words',tag:'recommended',
+     html:formSpec('word'),
+     note:'Most fields are required, so mark the <em>optional</em> ones and say <span class="m">required</span> in words where it matters. No glyph to explain, nothing to announce twice, and it survives translation. Reads as a considered form rather than a database schema. <b>Cost:</b> more horizontal room in the label.'},
+    {v:'star',k:'Asterisk on required fields',
+     html:formSpec('star'),
+     note:'Universally recognised and compact. <b>Cost:</b> needs a legend explaining it, needs <span class="m">aria-hidden</span> on the glyph plus <span class="m">aria-required</span> on the input, and the asterisk lands in the data colour — putting lime on something that is not a number, which breaks your own rule.'},
+    {v:'none',k:'Mark nothing; let validation teach',
+     html:formSpec('none'),
+     note:'Cleanest label column. <b>Cost:</b> the user finds out a field was required by failing to submit, which is precisely the "hidden decision boundary" your doctrine argues against.'},
+   ]},
+
+  {id:'f-where',type:'specimen',
+   label:'Where does validation actually get demonstrated? <b>index.html has no form.</b>',
+   help:'This is the one thing about putting validation in scope that has no answer yet. Nothing on the site collects input, so the states have nowhere to live unless you give them somewhere.',
+   opts:[
+    {v:'tool',k:'Build a real tool in the docs that needs validation',tag:'recommended',
+     html:demoSpec('tool'),
+     note:'A palette inspector: paste a hex, get measured ratios against every ground plus dichromat simulation. It validates real input, so the form states are <b>load-bearing rather than illustrated</b> — and it doubles as the interactive proof of the accessibility work you have already done. Highest value per hour on this whole page. <b>Cost:</b> it is a small app, so roughly two days on top of the states themselves.'},
+    {v:'contact',k:'Add a real contact form to the site',
+     html:demoSpec('contact'),
+     note:'Proves the states in production and gives a visitor a way to reach you, which the site currently lacks. <b>Cost:</b> needs a backend or a third-party endpoint, spam handling, and a privacy line — the first server-side dependency in an otherwise static, self-owned site.'},
+    {v:'gallery',k:'A specimen gallery in the docs, nothing wired',
+     html:demoSpec('gallery'),
+     note:'Cheapest and entirely normal for a design system. <b>Cost:</b> unwired specimens drift from reality, and you would be documenting states that nothing in your own work exercises.'},
+   ]},
+
+  {id:'f-note',type:'prose',rows:2,label:'Validation notes.',optional:true},
+]},
+
+/* ── 07 · SCOPE ──────────────────────────────────────────── */
+{id:'scope',num:'07',nav:'Scope',title:'Confirming the order',
+ lede:'Your message said light mode and form validation, defer the rest, get on with the site. The form said all five in scope and "go wide". I am treating the message as authoritative — this section is where you confirm that and set the order.',
+ qs:[
+  {id:'s-conf',type:'choice',
+   label:'Confirm: message over form?',
+   help:'Note that form validation drags a minimum of §05 with it — text input, textarea, select, and toast are prerequisites, not extras. Checkbox, radio and toggle are nearly free once the box geometry exists. Dropdown menu is the expensive one and nothing on your site needs it.',
+   opts:[
+    {v:'msg',t:'Message wins — light mode and validation only',d:'Sections 01–04 land on the site first, then light mode, then validation with the controls it requires. Adapters, the token pipeline, the Figma kit and the dropdown menu are deferred, with your Calibration 03 answers recorded as decided-but-not-built. Plus the Non-goals page.'},
+    {v:'cem',t:'Message plus the Custom Elements Manifest',d:'Two extra days. It is the cheapest deferred item, it converts "no framework support" from a gap into a stance, and it is the same machine-legibility argument your Field Notes essay already makes. My pick if you want one more thing.'},
+    {v:'form',t:'Form wins — go wide, all five',d:'Light mode and primitives now, adapters and pipeline after. Six to twelve months part-time.'},
+   ]},
+
+  {id:'s-order',type:'choice',
+   label:'Order of the first three pieces of work.',
+   opts:[
+    {v:'site',t:'Site changes → light mode → validation',d:'Colour, hero, ordinals ship in days and fix what a visitor sees. Light mode next because it touches every token and you want that churn done in one pass. Validation last, since nothing needs it yet.'},
+    {v:'tokens',t:'Colour and token layer → light mode in the same pass → site → validation',d:'Do all token surgery at once: the teal move and the light ramp touch the same three files, so one edit, one re-measure, one docs update. <b>Cost:</b> nothing visible ships for a week or two.'},
+    {v:'quick',t:'Ordinals and hero first, colour deferred to the light-mode pass',d:'Fastest visible improvement — deleting the ordinal readout and widening the hero needs no token changes at all. Colour then gets decided once, alongside the light palette that has to pair with it.'},
+   ]},
+
+  {id:'s-note',type:'prose',rows:3,label:'Anything else.',optional:true,
+   ph:'Deadlines, a specific reader for this, or anything in the last three rounds you want to revisit.'},
+]},
+
+{id:'out',num:'—',nav:'Output',title:'Output',noCount:true,output:true,
+ lede:'Copy or download and hand it back. I will start with whatever §07 puts first.'},
+];
+
+/* ═══════════════════════════════════════════════════════════
+   ENGINE
+   ═══════════════════════════════════════════════════════════ */
+const KEY='verdigris-calibration-04';
+let A={}, cur=0, storageOK=true, vsim='none';
+const fields=[];
+
+function load(){ try{const r=localStorage.getItem(KEY); if(r)A=JSON.parse(r)||{};}catch(e){A={};} }
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(A)); if(!storageOK){storageOK=true;flag();}}
+  catch(e){ if(storageOK){storageOK=false;flag();} } }
+function flag(){
+  let el=document.getElementById('nosave');
+  if(storageOK){ if(el)el.remove(); return; }
+  if(el) return;
+  el=document.createElement('div'); el.id='nosave';
+  el.style.cssText='position:fixed;top:0;left:0;right:0;z-index:200;background:var(--red);color:#1a0c0c;'+
+    'font-family:var(--f-mono);font-size:11.5px;padding:9px 16px;text-align:center';
+  el.textContent='AUTOSAVE UNAVAILABLE — serve over http://localhost, or export from Output before closing.';
+  document.body.appendChild(el);
+}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');
+  clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('on'),1700);}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const strip=s=>String(s).replace(/<[^>]+>/g,'');
+
+function allQs(){return SECTIONS.filter(s=>s.qs).flatMap(s=>s.qs.map(q=>({s,q})));}
+function answered(q){const v=A[q.id];
+  if(v===undefined||v===null)return false;
+  if(typeof v==='string')return v.trim()!=='';
+  if(Array.isArray(v))return v.length>0;
+  if(typeof v==='object')return Object.keys(v).length>0;
+  return true;}
+const req=q=>!q.optional;
+function secStats(s){ if(!s.qs)return null; const r=s.qs.filter(req);
+  return {done:r.filter(answered).length,total:r.length}; }
+
+/* ── topolang mounting ────────────────────────────────────────
+   SHADE_C is a local extension, not a spec mode: the SHADE fill
+   set with a contour pass bolted on, so §02 option 3 is a real
+   running variant rather than a description of one. */
+function modeFor(name){
+  const T=window.topolang;
+  if(name==='SHADE_C') return {name:'SHADE+',
+    fill:[' ',' ','.','.','+','+','#','@'], cfn:['#','=','‖','#']};
+  return T.modes[name]||T.modes.STRATA;
+}
+function killFields(){ while(fields.length){ try{fields.pop().stop();}catch(e){} } }
+function mountFields(){
+  if(!window.topolang) return;
+  const T=window.topolang;
+  document.querySelectorAll('[data-topo]').forEach(el=>{
+    if(el.querySelector('canvas')) return;
+    let cfg={}; try{cfg=JSON.parse(el.getAttribute('data-topo'));}catch(e){return;}
+    const cv=document.createElement('canvas');
+    cv.setAttribute('aria-hidden','true');
+    el.insertBefore(cv,el.firstChild);
+    const f=new T.Field(cv,{
+      palette:T.palettes[cfg.palette]||T.palettes.VERDIGRIS,
+      mode:modeFor(cfg.mode),
+      cellW:cfg.cellW||9, cellH:cfg.cellH||15, fontSize:cfg.fontSize||13,
+      opacity:cfg.opacity==null?0.78:cfg.opacity,
+      seed:cfg.seed||20260801
+    });
+    fields.push(f); f.start();
+  });
+}
+
+/* ── the live contrast meter ─────────────────────────────── */
+function meterHTML(q){
+  const a=(typeof A[q.id]==='number'?A[q.id]:q.ctrl.def);
+  return `<div class="meter" data-meter="${q.id}">
+    <div class="meterstage" id="mst-${q.id}">${meterStage(a)}</div>
+    <div class="meterctl">
+      <div class="meterrow"><label>${q.ctrl.k==='alpha'?'Field opacity':'Value'}</label>
+        <input type="range" min="${q.ctrl.min}" max="${q.ctrl.max}" step="${q.ctrl.step}" value="${a}">
+        <output>${a}${q.ctrl.unit||''}</output></div>
+      <div class="readout" id="mro-${q.id}">${meterReadout(a)}</div>
+      <div class="chipbox"><i style="background:${BAND_TOP}"></i> brightest band
+        <i style="background:${composite(BAND_TOP,G,a/100)};margin-left:10px"></i> composited at ${a}%</div>
+    </div></div>`;
+}
+function meterStage(a){
+  const c=composite(BAND_TOP,G,a/100);
+  return `<div class="sp" style="padding:22px 24px;background:${G}">
+    <div style="background:${c};padding:16px 18px;border-radius:2px">
+      <div style="font-family:var(--f-tech);font-size:26px;font-weight:500;color:${TOK.bone7};
+        line-height:30px;letter-spacing:-.02em">Designing instruments for cognition.</div>
+      <div style="font-family:Georgia,serif;font-size:13.5px;line-height:24px;color:${TOK.bone5};margin-top:10px">
+        I design and operate governed human-AI systems.</div>
+      <div style="font-family:var(--f-mono);font-size:11px;color:${TOK.bone4};margin-top:10px;letter-spacing:.06em">
+        muted caption at bone-400</div>
+    </div>
+    <div style="font-family:var(--f-mono);font-size:10px;color:#8B8478;margin-top:11px;letter-spacing:.06em">
+      worst-case composite ${c} — the brightest cell the field can produce at this opacity</div>
+  </div>`;
+}
+function meterReadout(a){
+  const c=composite(BAND_TOP,G,a/100);
+  const rows=[['bone-700','hero display line',TOK.bone7],
+              ['bone-500','body text',TOK.bone5],
+              ['bone-400','muted caption',TOK.bone4]];
+  return rows.map(r=>{
+    const v=ratio(r[2],c), ok=v>=7;
+    return `<div><div class="rk">${r[0]}</div>
+      <div class="rv ${ok?'pass':'fail'}">${v.toFixed(2)}:1</div>
+      <span class="rn">${r[1]} · ${ok?'AAA':(v>=4.5?'AA only':'fails AA')}</span></div>`;
+  }).join('');
+}
+
+/* ── question renderers ──────────────────────────────────── */
+function qHTML(q,i){
+  const id=q.id; let body='';
+  if(q.type==='prose')
+    body=`<textarea data-q="${id}" rows="${q.rows||3}" placeholder="${esc(q.ph||'')}">${esc(A[id]||'')}</textarea>`;
+  else if(q.type==='choice'){
+    const v=A[id];
+    body=`<div class="opts">`+q.opts.map(o=>
+      `<label class="opt ${v===o.v?'on':''}" data-opt="${id}" data-v="${o.v}"><span class="box"></span>
+       <span class="txt"><span class="t">${o.t}</span>${o.d?`<span class="d">${o.d}</span>`:''}</span></label>`).join('')+`</div>`;
+  }
+  else if(q.type==='multi'){
+    const v=Array.isArray(A[id])?A[id]:[];
+    body=`<div class="opts">`+q.opts.map(o=>
+      `<label class="opt multi ${v.indexOf(o.v)>-1?'on':''}" data-multi="${id}" data-v="${o.v}"><span class="box"></span>
+       <span class="txt"><span class="t">${o.t}</span>${o.d?`<span class="d">${o.d}</span>`:''}</span>
+       ${v.indexOf(o.v)>-1?`<span class="pill">${v.indexOf(o.v)+1}</span>`:''}</label>`).join('')+`</div>`;
+  }
+  else if(q.type==='specimen'){
+    const v=A[id];
+    body=`<div class="spgrid">`+q.opts.map(o=>{
+      /* dyn options are computed at render time from earlier answers */
+      const stage=o.dyn?ruleTable(o.dyn,A['x-side']==='green'?'green':(A['x-side']==='bone'?'bone':'teal')):o.html;
+      return `<div class="spwrap ${v===o.v?'on':''}">
+        <div class="sphead" data-opt="${id}" data-v="${o.v}"><span class="box"></span>
+          <span class="k">${o.k}</span>
+          ${o.cost?`<span class="cost ${o.cost}">${o.cost==='free'?'FREE':o.cost==='paid'?'PAID':'HIGH COST'}</span>`:''}
+          ${o.tag?`<span class="tag">${o.tag}</span>`:''}</div>
+        <div class="spstage">${stage}</div>
+        ${o.note?`<div class="spnote">${o.note}</div>`:''}
+      </div>`;}).join('')+`</div>`;
+  }
+  else if(q.type==='meter') body=meterHTML(q);
+
+  return `<div class="q" id="q-${id}">
+    <div class="q-top"><span class="q-id">${q.optional?'○':String(i).padStart(2,'0')}</span>
+    <p class="q-label">${q.label}</p></div>
+    ${q.help?`<div class="q-help">${q.help}</div>`:''}
+    <div class="q-body">${body}</div></div>`;
+}
+
+/* ── intro ───────────────────────────────────────────────── */
+function introHTML(){
+  const g=sim(TOK.green,DEUTER), l=sim(TOK.lime,DEUTER), t=sim(TOK.teal,DEUTER), b=sim(TOK.blue,DEUTER);
+  return `
+  <div class="warn forced"><b>The colour question is now forced, not preferential.</b>
+    Sweeping 115°–185° at AAA on <code>#161614</code>: the deuteranopia hue flip sits between
+    <b>160° and 165°</b>. Below it a structure colour simulates to the same hue as lime; above it,
+    to the same hue as blue. <b>No hue is far from both.</b> Structure picks a side.</div>
+
+  <div class="axis">
+    <div class="lbl">Deuteranopia collapses the hue wheel to one axis</div>
+    <div class="axisbar">
+      <i style="left:12%" data-l="lime 80° → 60°"></i>
+      <i style="left:30%" data-l="green 120° → 61°"></i>
+      <i style="left:47%" data-l="flip 160–165°"></i>
+      <i style="left:66%" data-l="teal 175° → 240°"></i>
+      <i style="left:86%" data-l="blue 208° → 240°"></i>
+    </div>
+    <div class="axisends"><span>yellow side</span><span>blue side</span></div>
+    <div class="axiscap">Simulated values, Viénot 1999. Green <span style="color:${TOK.green}">■</span>
+      → <span style="color:${g}">■ ${g}</span> lands beside lime
+      <span style="color:${TOK.lime}">■</span> → <span style="color:${l}">■ ${l}</span>.
+      Teal <span style="color:${TOK.teal}">■</span> → <span style="color:${t}">■ ${t}</span>
+      lands beside blue <span style="color:${TOK.blue}">■</span> → <span style="color:${b}">■ ${b}</span>.
+      Every swatch above is computed in the page, not transcribed.</div>
+  </div>
+
+  <div class="lbl" style="margin:26px 0 14px">Settled in Calibration 03 — not re-asked</div>
+  <dl class="kv">
+    <dt>Ordinals</dt><dd class="set">Rail <b>01 SECTION</b> readout deleted. Section eyebrow becomes a bare label. Nothing above the hero. Card indices <b>01–04</b> kept.</dd>
+    <dt>Hero</dt><dd class="set">SHADE on desktop, cells stay <b>9 / 15 / 13</b> on the baseline, mask start <b>30%</b>, ramp end <b>72%</b>, line width <b>58%</b>, field <b>62%</b>.</dd>
+    <dt>Overrun</dt><dd class="set">Opacity drop under the text column. <b>§03</b> sets the number that makes it provable.</dd>
+    <dt>Light mode</dt><dd class="set">Printer's-ink metaphor. <code>prefers-color-scheme</code> plus a manual override that wins. Salience restated as <b>distance from ground</b>. Light band ramp authored.</dd>
+    <dt>Validation</dt><dd class="set">Error below field with a glyph. Validate on blur, re-validate on input. Full ARIA. Hairline-box controls. Zebra tables. Skeleton loading. Instrument-reads-zero empty states.</dd>
+    <dt>Deferred</dt><dd class="set">Framework adapters, token pipeline, Figma kit, dropdown menu — decided in Calibration 03, recorded, not built. Non-goals page confirmed.</dd>
+  </dl>
+
+  <div class="lbl" style="margin:26px 0 12px">What this page closes</div>
+  <table class="px">
+    <tr><th>§</th><th>Open question</th><th>Why it was not resolved</th></tr>
+    <tr class="hi"><td class="n">01</td><td>Structure colour</td><td>You chose A (keep green) and also chose the teal value, then adopted a constraint green fails. Now a forced either/or.</td></tr>
+    <tr><td class="n">02</td><td>Mode below 860px</td><td>"Keep the current split" only applies if STRATA had won on desktop. It did not.</td></tr>
+    <tr><td class="n">03</td><td>Overrun opacity</td><td>Never asked for a number. It is provable at ≤0.30, so the treatment you picked is fine.</td></tr>
+    <tr><td class="n">04</td><td>CVD rule wording</td><td>The absolute form fails pairs unrelated to green and lime, including lime against body text.</td></tr>
+    <tr><td class="n">05</td><td>Light mode values</td><td>Out of scope when Calibration 03 was written. Ground, focus ring, grain, ramp cap, toggle.</td></tr>
+    <tr><td class="n">06</td><td>Validation surface</td><td><code>index.html</code> contains no form, so the states have nowhere to live.</td></tr>
+  </table>
+
+  <div class="warn"><b>One correction carried forward.</b> In the last round I called the
+    opacity-drop overrun "the weakest position to defend". That was too soft. It is provable —
+    at a field opacity of 0.30 over the brightest band the worst case is <b>7.56:1</b>. Your pick
+    was right; it just needed a number, and §03 lets you set it live.</div>
+
+  <div class="lbl" style="margin:26px 0 12px">Using this page</div>
+  <div style="font-size:14.5px;line-height:1.7;color:var(--bone);max-width:66ch">
+    <p style="margin:0 0 12px"><b>§01 and §04 are interactive in a way that matters.</b> Hover the
+    nav items in the §01 specimens to see the active and hover rules together, then flip the vision
+    simulator. §04's tables are <em>generated from your §01 answer</em> — change it and they change.</p>
+    <p style="margin:0 0 12px"><b>§03 is a live meter.</b> Drag the opacity and the contrast figures
+    recompute from the same WCAG arithmetic used everywhere else in this project. Nothing is
+    transcribed.</p>
+    <p style="margin:0"><b>§02 option three is a running prototype</b> of a topolang mode that does
+    not exist yet — SHADE with a contour pass — so you can judge it before deciding whether to
+    break spec conformance for it.</p>
+  </div>`;
+}
+
+/* ── output ──────────────────────────────────────────────── */
+function brief(){
+  const L=[];
+  L.push('# Verdigris — Calibration 04: Resolutions');
+  L.push('');
+  SECTIONS.filter(s=>s.qs).forEach(s=>{
+    if(!s.qs.some(answered))return;
+    L.push(''); L.push('## '+s.num+' · '+s.title);
+    s.qs.forEach(q=>{
+      if(!answered(q))return;
+      const v=A[q.id];
+      L.push(''); L.push('**'+strip(q.label)+'**'); L.push('');
+      if(q.type==='specimen'||q.type==='choice'){
+        const o=q.opts.find(x=>x.v===v); L.push('→ '+(o?strip(o.k||o.t):v));
+      } else if(q.type==='multi'){
+        v.forEach((x,i)=>{const o=q.opts.find(y=>y.v===x); L.push((i+1)+'. '+(o?strip(o.t):x));});
+      } else if(q.type==='meter'){
+        const c=composite(BAND_TOP,G,v/100);
+        L.push('→ '+v+'% field opacity under the text column');
+        L.push('   composite '+c+' · bone-700 '+ratio(TOK.bone7,c).toFixed(2)+':1'+
+               ' · bone-500 '+ratio(TOK.bone5,c).toFixed(2)+':1'+
+               ' · bone-400 '+ratio(TOK.bone4,c).toFixed(2)+':1');
+      } else String(v).trim().split('\n').forEach(l=>L.push('> '+l));
+    });
+  });
+  L.push(''); L.push('---'); L.push('');
+  L.push('## The forced result behind §01');
+  L.push('');
+  L.push('- Swept 115°–185° at AAA on `#161614`; deuteranopia hue flip sits between **160° and 165°**');
+  L.push('- No structure hue is >=20° from BOTH lime and blue after simulation — structure must pick a side');
+  L.push('- green `#44BB44` → `'+sim(TOK.green,DEUTER)+'`: 0.4° from lime, 179.3° from blue');
+  L.push('- teal  `#4FB8AF` → `'+sim(TOK.teal,DEUTER)+'`: 179.7° from lime, 0.0° from blue');
+  L.push('- lime vs body text fails on both axes regardless of the structure choice');
+  L.push('  (0.3° / 1.27:1 deuter) — carried by the mono face and tabular figures, not by colour');
+  L.push('');
+  L.push('## Light-mode values available');
+  L.push('');
+  L.push('- accents AAA on `#F0EDE4`: patina `#0A5450` 7.48 · citron `#454F00` 7.56 · slate `#22506F` 7.34 · oxide `#8A1F1F` 7.81');
+  L.push('- lime is `1.05:1` on paper — cannot be the light focus ring');
+  L.push('- light field ramp: band 3 `#AEC1BA` is 7.60:1 under ink; band 4 drops to 6.66:1');
+  return L.join('\n');
+}
+
+function outputHTML(){
+  const r=allQs().filter(x=>req(x.q)), done=r.filter(x=>answered(x.q)).length;
+  const gaps=r.filter(x=>!answered(x.q));
+  return `<div style="display:flex;gap:26px;margin:18px 0 26px">
+    <div><div style="font-family:var(--f-mono);font-size:26px;color:var(--white)">${done}/${r.length}</div><div class="lbl">Answered</div></div>
+    <div><div style="font-family:var(--f-mono);font-size:26px;color:var(--white)">${Math.round(done/r.length*100)}%</div><div class="lbl">Complete</div></div>
+  </div>
+  ${gaps.length?`<div class="warn"><b>${gaps.length} unanswered.</b> ${gaps.map(g=>g.s.num+' · '+strip(g.q.label).slice(0,64)).join('<br>')}</div>`
+   :`<div class="warn ok"><b>Complete.</b> Copy or download, then hand it back.</div>`}
+  <div class="outbox" id="outbox"></div>
+  <div style="display:flex;gap:9px;margin-top:14px">
+    <button class="btn pri" id="b-copy">Copy</button>
+    <button class="btn" id="b-dl">Download</button></div>`;
+}
+
+function vbarHTML(){
+  return `<div class="vbar">
+    <span class="lbl">Vision</span>
+    ${[['none','Normal'],['deuter','Deuteranopia'],['protan','Protanopia'],['gray','Greyscale']]
+      .map(v=>`<button data-vsim="${v[0]}" class="${vsim===v[0]?'on':''}">${v[1]}</button>`).join('')}
+    <span class="hint">Viénot 1999 · applied to every specimen below</span>
+  </div>`;
+}
+
+function render(){
+  killFields();
+  const s=SECTIONS[cur], st=document.getElementById('stage');
+  let h=`<div class="sec-head"><div class="sec-num">${s.num==='—'?'OUTPUT':'SECTION '+s.num}</div>
+    <h1 class="sec-title">${s.title}</h1>${s.lede?`<p class="sec-lede">${s.lede}</p>`:''}</div>`;
+  if(s.vbar)h+=vbarHTML();
+  if(s.intro)h+=introHTML();
+  else if(s.output)h+=outputHTML();
+  else{let n=0;h+=s.qs.map(q=>{if(!q.optional)n++;return qHTML(q,n);}).join('');}
+  h+=`<div class="secnav"><button class="btn" id="b-prev" ${cur===0?'disabled':''}>← Back</button>
+    <div class="spacer"></div>
+    ${cur<SECTIONS.length-1?`<button class="btn pri" id="b-next">${cur===0?'Begin':'Next'} →</button>`:''}</div>`;
+  st.innerHTML=h;
+  window.scrollTo({top:0,behavior:'instant'});
+  if(s.output){const b=document.getElementById('outbox'); if(b)b.textContent=brief();}
+  bind(); renderNav(); mountFields();
+}
+
+function renderNav(){
+  document.getElementById('nav').innerHTML=SECTIONS.map((s,i)=>{
+    const st=secStats(s), done=st&&st.total>0&&st.done===st.total;
+    return `<button class="nav-item ${i===cur?'on':''} ${done?'done':''}" data-go="${i}">
+      <span class="n">${s.num==='—'?'··':s.num}</span><span>${s.nav}</span>
+      ${st?`<span class="ct">${st.done}/${st.total}</span>`:''}</button>`;}).join('');
+  const r=allQs().filter(x=>req(x.q)), done=r.filter(x=>answered(x.q)).length;
+  const pct=Math.round(done/r.length*100);
+  document.getElementById('barfill').style.width=pct+'%';
+  document.getElementById('pcount').textContent=done+' / '+r.length;
+  document.getElementById('ppct').textContent=pct+'%';
+}
+
+function set(k,v){A[k]=v;save();renderNav();}
+
+function bind(){
+  const st=document.getElementById('stage');
+
+  st.querySelectorAll('textarea[data-q]').forEach(el=>
+    el.addEventListener('input',()=>set(el.dataset.q,el.value)));
+
+  st.querySelectorAll('[data-opt]').forEach(el=>el.addEventListener('click',()=>{
+    const k=el.dataset.opt,v=el.dataset.v;
+    set(k,A[k]===v?undefined:v);
+    const q=allQs().find(x=>x.q.id===k).q;
+    if(q.type==='specimen')
+      st.querySelectorAll('[data-opt="'+k+'"]').forEach(h=>h.parentElement.classList.toggle('on',h.dataset.v===A[k]));
+    else
+      st.querySelectorAll('[data-opt="'+k+'"]').forEach(h=>h.classList.toggle('on',h.dataset.v===A[k]));
+    /* §01 drives the generated tables in §04, so a change there
+       invalidates anything rendered from it. */
+    if(k==='x-side'&&SECTIONS[cur].id==='rule') render();
+  }));
+
+  st.querySelectorAll('[data-multi]').forEach(el=>el.addEventListener('click',()=>{
+    const k=el.dataset.multi,v=el.dataset.v;
+    const c=Array.isArray(A[k])?A[k].slice():[];
+    const i=c.indexOf(v); if(i>-1)c.splice(i,1); else c.push(v);
+    set(k,c);
+    st.querySelectorAll('[data-multi="'+k+'"]').forEach(h=>{
+      const on=c.indexOf(h.dataset.v)>-1;
+      h.classList.toggle('on',on);
+      let pill=h.querySelector('.pill');
+      if(on){ if(!pill){pill=document.createElement('span');pill.className='pill';h.appendChild(pill);}
+        pill.textContent=c.indexOf(h.dataset.v)+1; }
+      else if(pill) pill.remove();
+    });
+  }));
+
+  /* live meter — recomputes contrast on every input event */
+  st.querySelectorAll('[data-meter]').forEach(box=>{
+    const id=box.dataset.meter;
+    const r=box.querySelector('input[type=range]');
+    const out=box.querySelector('output');
+    const q=allQs().find(x=>x.q.id===id).q;
+    const paint=()=>{
+      const a=+r.value;
+      out.textContent=a+(q.ctrl.unit||'');
+      document.getElementById('mst-'+id).innerHTML=meterStage(a);
+      document.getElementById('mro-'+id).innerHTML=meterReadout(a);
+      const cb=box.querySelector('.chipbox');
+      cb.innerHTML=`<i style="background:${BAND_TOP}"></i> brightest band
+        <i style="background:${composite(BAND_TOP,G,a/100)};margin-left:10px"></i> composited at ${a}%`;
+    };
+    r.addEventListener('input',paint);
+    r.addEventListener('change',()=>{set(id,+r.value);paint();});
+  });
+
+  st.querySelectorAll('[data-vsim]').forEach(b=>b.addEventListener('click',()=>{
+    vsim=b.dataset.vsim;
+    document.body.classList.remove('sim-deuter','sim-protan','sim-gray');
+    if(vsim!=='none')document.body.classList.add('sim-'+vsim);
+    st.querySelectorAll('[data-vsim]').forEach(x=>x.classList.toggle('on',x.dataset.vsim===vsim));
+  }));
+
+  const p=document.getElementById('b-prev'),n=document.getElementById('b-next');
+  if(p)p.addEventListener('click',()=>{if(cur>0){cur--;render();}});
+  if(n)n.addEventListener('click',()=>{if(cur<SECTIONS.length-1){cur++;render();}});
+  const c=document.getElementById('b-copy');
+  if(c)c.addEventListener('click',()=>navigator.clipboard.writeText(brief())
+    .then(()=>toast('Copied'),()=>toast('Copy blocked, select manually')));
+  const d=document.getElementById('b-dl');
+  if(d)d.addEventListener('click',()=>{
+    const b=new Blob([brief()],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(b);
+    a.download='verdigris-brief-04.md';a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Saved');});
+}
+
+document.getElementById('nav').addEventListener('click',e=>{
+  const b=e.target.closest('[data-go]'); if(!b)return; cur=+b.dataset.go; render();});
+document.getElementById('b-out').addEventListener('click',()=>{cur=SECTIONS.length-1;render();});
+const rs=document.getElementById('b-reset'); let armed=false;
+rs.addEventListener('click',()=>{
+  if(!armed){armed=true;rs.textContent='Erase all?';rs.style.color='var(--red)';rs.style.borderColor='var(--red)';
+    clearTimeout(rs._t);rs._t=setTimeout(()=>{armed=false;rs.textContent='Reset';rs.style.color='';rs.style.borderColor='';},3500);return;}
+  armed=false;rs.textContent='Reset';rs.style.color='';rs.style.borderColor='';
+  A={};save();cur=0;render();toast('Erased');});
+document.addEventListener('keydown',e=>{
+  if(e.target.matches('textarea,input,select'))return;
+  if(e.key==='ArrowRight'&&cur<SECTIONS.length-1){cur++;render();}
+  if(e.key==='ArrowLeft'&&cur>0){cur--;render();}});
+
+load(); render();
+</script>
+</body>
+</html>
