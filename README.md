@@ -16,10 +16,10 @@ Both calibration passes are **complete**. The system is **built and verified**.
 | 02 | `calibration/calibration-02.html` | Done, 7/7 |
 | Build | `verdigris/`, `index.html`, `docs/`, `template.html`, `reader.html`, `resume.html` | Shipped |
 
-**Run `serve.cmd` in your own terminal and leave the window open.** A server started by an
-agent lives only as long as its session and gets reaped; this one lasts as long as the window
-does. `serve.cmd` also detects a server already on 8787 and just opens the browser instead of
-failing.
+**Run the dev server in your own terminal and leave the window open** — `serve.cmd` on Windows,
+`./serve.command` on macOS and Linux. A server started by an agent lives only as long as its
+session and gets reaped; this one lasts as long as the window does. Both detect a server already
+on 8787 and just open the browser instead of failing.
 
 | | |
 |---|---|
@@ -181,7 +181,8 @@ labelled proxy plus a link to the foundry's own live tester.
 | `verdigris/` | **The design system.** See `verdigris/README.md` |
 | `index.html` | The homepage, built on it |
 | `docs/` | The system published as a portfolio piece |
-| `serve.cmd` | Dev server. Run in your own terminal, leave it open |
+| `serve.cmd` | Dev server, Windows. Run in your own terminal, leave it open |
+| `serve.command` | Dev server, macOS/Linux. Same, and double-clickable in Finder |
 | `preview-mobile.html` | Mobile harness. `?w=320,390` picks widths, `&y=` sets scroll |
 | `calibration/calibration.html` | Pass one instrument |
 | `all-response.txt` | Pass one output |
