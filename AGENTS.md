@@ -54,8 +54,9 @@ The two exceptions are directory indexes that already exist: the site root, whos
 `https://dreyburn.com/`, and `docs/`.
 
 **A copy in `work/` or `notes/` is one directory down, so every relative path gains a `../`.**
-Stylesheets, scripts, the nav's four links, and the footer. Four of those are easy to miss
-because the page still renders without them.
+The stylesheets, every script, the nav's four links, and the footer's. The nav and footer links
+are the ones that get missed, because the page still renders correctly without them — it just
+sends every reader to a 404.
 
 **`reader.html` and `template.html` are specimens, not pages.** They stay at the root, stay
 generic, and keep their placeholders — that is what makes them copyable. A *copy* is not
@@ -74,8 +75,9 @@ links pointing nowhere.
 
 Absolute URLs, every time — a relative `og:image` is ignored by every crawler that reads it.
 `og:type` is `article` for anything in `work/` or `notes/`, `website` elsewhere. The rest of the
-head — charset, viewport, `color-scheme`, the blocking theme script, the four asset tags, the
-favicon — is already correct in both templates. Copy it, do not retype it.
+head — charset, viewport, `color-scheme`, the blocking theme script, the asset tags and the
+favicon — is already correct in both templates. Copy it, do not retype it. A reader page needs
+`topolang.js` only if it carries a field, which by Calibration 06 it does not.
 
 `audit.js` ships on every page. It is deferred and inert until called, and a system that
 publishes its own conformance does not hide the instrument that measures it.
