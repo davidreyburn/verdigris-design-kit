@@ -157,9 +157,19 @@ done
 [ -f og.png ] || echo 'og.png missing — regenerate with tools/og.html'
 ```
 
-1, 2, 4 and 5 must print nothing. Then the three-load audit below, on **every new page** — ink,
-paper, 320px. Not a spot check on one representative page: reflow failures are per-layout, and
-every case study has a different one.
+1, 2, 4 and 5 must print nothing. Then, with the server and headless Chrome up:
+
+```sh
+# 7 — every page, ink + paper + 320px. Exits non-zero on a measured failure.
+#     find, not a glob: zsh aborts the whole command on an unmatched one,
+#     so work/ and notes/ not existing yet would take the line down with them.
+PAGES=$(find . -name '*.html' -not -path './calibration/*' -not -path './archive/*' \
+        -not -path './tools/*' -not -name 'preview-mobile.html' \
+        | sed 's|^\./||' | sort | paste -sd, -) node tools/audit.mjs
+```
+
+Audit **every** new page, not one representative one: reflow failures are per-layout, and every
+case study has a different layout.
 
 
 ---
@@ -184,6 +194,20 @@ only. Several real bugs were found by this script on pages that had already been
 Spacing exception, under which an undersized target still conforms if a 44px circle centred on it
 does not overlap another's. A narrow but well-spaced nav link appears in `notes` without being a
 failure. Do not report notes as violations.
+
+`tools/audit.mjs` drives all of it — every page, all three loads — over the DevTools protocol
+using Node's built-in WebSocket, so it adds no dependency:
+
+```sh
+./serve.command                                    # in its own terminal
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+  --headless=new --remote-debugging-port=9222 --no-first-run \
+  --user-data-dir=/tmp/vd-audit about:blank &      # never your real profile
+node tools/audit.mjs                               # exits non-zero on a measured failure
+```
+
+It disables the HTTP cache first. Without that the audit will measure the page as it was before
+your last edit and report it as passing, which is worse than not running it.
 
 **A full check is three page loads**, and there is no shortcut:
 
@@ -299,6 +323,7 @@ template.html       starter page — copy this. A specimen, not a page
 reader.html         case study / Field Note template. A specimen, not a page
 preview-mobile.html width harness. ?w=320,390 picks widths, &y= sets scroll
 tools/og.html       redraws the hero field at 1200×630 and saves og.png
+tools/audit.mjs     drives the three-load audit over every page. See Verify your work
 
 verdigris/          the kit: verdigris.css, verdigris.js, topolang.js, print.css, audit.js
 og.png              the social card. Regenerate with tools/og.html, do not hand-edit

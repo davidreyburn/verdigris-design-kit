@@ -383,6 +383,25 @@ from the running CSS. To check this table has not gone stale, diff it against
 Classes marked `__` are internals written by a custom element. You will rarely author them by
 hand; they are listed so you can target them and so the surface is not a mystery.
 
+### `vd-swatch` measures against a ground you have to choose
+
+`against` defaults to `--vd-ink-000`, which is a tier-1 primitive and therefore the same value in
+both themes. That default is right for a swatch showing a **primitive**, where the claim is fixed
+— "this ink hex measures 7.31:1 on the ink ground" stays true whatever theme the reader is in,
+which is why `docs/` pairs the paper primitives with an explicit `against="--vd-paper-000"`.
+
+It is wrong for a swatch showing a **semantic token**. Those follow the theme while the default
+ground does not, so on paper the component measures a paper foreground against a near-black
+background and prints a red `FAIL` for a token that is correct. Pass `against="--vd-surface"`,
+which resolves to `#161614` in ink and `#F0EDE4` on paper:
+
+```html
+<vd-swatch token="--vd-link" against="--vd-surface" min="7"></vd-swatch>
+```
+
+The component cannot pick for you: it has no way to know whether the swatch is making a fixed
+claim about a primitive or a live one about the current theme.
+
 ## Document primitives
 
 `.vd-prose` styles the elements an author types without reaching for a component. Three of these
@@ -445,8 +464,9 @@ need.
 
 ## Verified
 
-- **Reflow (WCAG 1.4.10):** passes at 320 CSS px. Measured in a 320px iframe, which has its own
-  viewport — constraining an element does not fire media queries and proves nothing.
+- **Reflow (WCAG 1.4.10):** passes at 320 CSS px. Document scroll width 305 against a 305 client
+  width, zero overflow, on every page in both themes. Measured in a real 320px viewport —
+  constraining an element does not fire media queries and proves nothing.
 - **Target size (2.5.8 AA, 24px):** every target passes.
 - **Target size (2.5.5 AAA, 44px):** met for every standalone control and card. The card itself
   is the target, with the click forwarded under drag, selection and nested-interactive guards.
