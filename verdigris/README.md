@@ -1,7 +1,8 @@
 # Verdigris
 
-Design system for dreyburn.com. Framework-agnostic CSS plus light-DOM web components.
-No build step, no dependencies, no external requests.
+A hand-authored design system. Framework-agnostic CSS plus light-DOM web components.
+No build step, no dependencies, no external requests. This file is the component and class
+reference; the repository root README covers serving and project layout.
 
 ```
 verdigris/
@@ -17,8 +18,9 @@ verdigris/
 ```html
 <link rel="stylesheet" href="verdigris/verdigris.css">
 <link rel="stylesheet" href="verdigris/print.css">
-<script src="verdigris/topolang.js" defer></script>
+<script src="verdigris/topolang.js" defer></script>   <!-- only if the page has a field -->
 <script src="verdigris/verdigris.js" defer></script>
+<script src="verdigris/audit.js" defer></script>
 ```
 
 Every component upgrades markup that is already valid and semantic without JavaScript.
@@ -28,13 +30,13 @@ Nothing uses shadow DOM.
 
 | Decision | Cost accepted |
 |---|---|
-| Dark only, stated as a position | No light theme. A real print stylesheet covers paper. |
+| Two themes, ink and paper | Every semantic token is mapped twice, and the paper mapping exists in two places that must be edited together. |
 | AAA on all text | The palette lost orange, teal and purple as text colours. Red had to be lightened to `#E68C8C`. |
 | Three accents on three salience tiers | More to hold in your head than "max two". Green must be rationed or it becomes cosplay. |
 | Two-register type scale | No size between 18px and 56px. Sub-headings carry hierarchy by weight, case and numbering. |
 | Baseline-derived rhythm | 30px unit forces half-steps (15px, 7.5px) for tight spacing. Embeds must be forced onto the grid. |
 | Light DOM, no shadow roots | No style encapsulation. Component CSS must stay namespaced by hand. |
-| Luminance-capped field bands | Terrain shading in the hero is nearly invisible. Contour lines carry the whole read. |
+| The hero field is masked, not luminance-capped | The mask carries the AAA guarantee under the text column, so the field's own alpha can be tuned for legibility instead of for contrast. |
 | No Tailwind | Slower to write. The point is that the system is authored. |
 
 ## Convention: no padding/margin shorthands on composable classes
@@ -153,15 +155,13 @@ Two notes for a future spec revision:
 
 ## One character mode, at every width
 
-This section used to describe a field that switched character mode at 860px — STRATA with
-contour lines on desktop, SHADE below. **That is gone.** SHADE runs at every width and the
-breakpoint mode switch has been removed from `verdigris.js`.
+The field runs SHADE at every width. `cfn` is null on that mode, so the contour pass never
+executes, no contour colour is read, and `contourColor` is dead configuration on the shipped
+palettes — kept only so they stay conformant with the spec's shape.
 
-The reason the switch existed was real: 30 columns cannot draw a legible contour line, measured
-at 57% of cells as contour against 9% on desktop, which reads as static. But the fix was to
-stop drawing contours at all rather than to keep two renderers. `contourColor` is now dead
-configuration on the shipped palettes — SHADE runs with `cfn: null`, so no contour pass
-executes and the colour is never read.
+Contours are not drawn at any width because they cannot survive the narrow one: 30 columns put
+57% of cells on a contour against 9% on desktop, which reads as static rather than as line-work.
+Two renderers would have been the alternative.
 
 | | Above 860px | Below 860px |
 |---|---|---|
@@ -174,20 +174,24 @@ full-bleed field clear of text once the layout stacks, because the fade line lan
 paragraph happens to end. Below 860px the field becomes a band with `mask-image:none`, which
 makes overlap structurally impossible rather than merely unlikely.
 
-Two failure modes found the hard way, both worth not repeating:
+Two things not to try, because both have been measured:
 
-- **Fixed per-cell frequency with a fixed stretch window** looks correct on one grid only. A
-  small grid samples a small patch of noise space and sees a much narrower slice of the range
-  (measured 0.14–0.21 against 0.17–0.48), so the window collapses it to nothing.
-- **Scaling the noise span to the grid** fixes the flatness and breaks the contours: each cell
-  then steps further through the noise, and contour crossings scale with per-cell gradient.
+- **A fixed stretch window** is correct on one grid only. A small grid samples a small patch of
+  noise space and sees a much narrower slice of the range — 0.14–0.21 against 0.17–0.48 — so a
+  window calibrated on a desktop grid collapses a narrow one to nothing.
+- **Scaling the noise span to the grid** fixes that flatness by making each cell step further
+  through the noise, which rescales every band transition with it. It was rejected when contours
+  were still drawn and there is no reason to revisit it: `autoRange` removes the flatness without
+  touching frequency.
 
-Frequency is therefore fixed and the mode changes instead.
+So per-cell frequency is fixed, and `autoRange` measures the window per grid instead of
+hard-coding it. Leave it on.
 
 ## Forms and feedback
 
-The controls did not exist before v1.7.0 — there was no `input` rule anywhere in the system.
-The kit and the state model landed together.
+The kit and its validation state model are one unit: a control's appearance and the wording of
+its error are defined together, because a styled control with an unstyled error is worse than
+neither.
 
 ```html
 <vd-form>
@@ -441,13 +445,11 @@ need.
 
 ## Verified
 
-- **Reflow (WCAG 1.4.10):** passes at 320 CSS px. Document scroll width 305 against a 305
-  viewport. Tested in a 320px iframe, because constraining an element does not fire media
-  queries. It failed first time: the nav was the only offender in the page.
+- **Reflow (WCAG 1.4.10):** passes at 320 CSS px. Measured in a 320px iframe, which has its own
+  viewport — constraining an element does not fire media queries and proves nothing.
 - **Target size (2.5.8 AA, 24px):** every target passes.
-- **Target size (2.5.5 AAA, 44px):** met for all standalone controls, and for cards. Heading
-  links used to be a stated deviation; they are not any more — the card itself is the target,
-  with the click forwarded under drag, selection and nested-interactive guards.
+- **Target size (2.5.5 AAA, 44px):** met for every standalone control and card. The card itself
+  is the target, with the click forwarded under drag, selection and nested-interactive guards.
 - **topolang conformance:** 9/9 against the spec's own published vector.
 
 ## Not done yet
@@ -459,7 +461,7 @@ need.
   root is the substitute — hand-authored, so it carries a `checkedAgainst` field.
 - A working contact form. The kit exists and is exercised by the docs specimen; the endpoint
   does not, because submitting anywhere needs a runtime dependency this site does not have.
-- Case-study and Field Note page templates.
+- An email address anywhere in a page built on this system. See AGENTS.md, Building a page.
 
 **Target size, resolved.** Heading links are 30px, and the two ways of reaching 44 were both
 rejected: 45px leading on 18px type wrecks a two-line title, and a stretched overlay breaks text

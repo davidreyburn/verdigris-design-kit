@@ -174,7 +174,7 @@ scrollWidth 301 against a 316px viewport: `index.html`, `docs/index.html`, `temp
 
 ## Unreleased — site infrastructure
 
-No version bump: nothing under `verdigris/` changed, so the asset query strings stay at 1.8.0.
+No version bump: no CSS or JS under `verdigris/` changed, so the asset query strings stay at 1.8.0.
 The convention is that a version marks a *kit* release; this is the site around it. Fold this
 section into the next version when the content build lands.
 
@@ -214,6 +214,51 @@ section into the next version when the content build lands.
 - **README listed the page templates as not done.** They exist; the instances do not.
 - **docs §08's usage snippet omitted `audit.js`**, which every page carries, and its
   `vd-system-card` example used a directory-style `href` the URL scheme does not use.
+
+## The design record
+
+Moved here from `README.md`, which describes what works now rather than how it got that way.
+These are the positions the six calibration passes settled and the prices they were settled
+against. Both are historical: the values are current only where the CSS still says so.
+
+### Direction, as settled
+
+- **Spine: Signal Lab.** Guests: Verdigris Native (long-form), Black Box (technical detail),
+  Prismatic Instrument (multi-pillar only). Cybernetic Minimalism and Academic Cyberpunk dead.
+- **Type: Chivo, Literata, IBM Plex Mono.** All open licence, self-hosted, $0 spent.
+- **Structure:** asymmetric content column plus persistent rail; 30px baseline; hairline rules.
+- **Link blue** corrected `#5B8DB8` → `#7FA9CE` (5.25:1 → 7.31:1) to hold AAA.
+- **Green promoted to structural signature.** Three accents at three salience tiers:
+  green (structure, high frequency), blue (links), lime (quantities only, plus focus).
+  Ordinals are green, quantities are lime, and the component enforces it.
+- **Patina teal given a job at last.** `--vd-editorial` is not a fourth tier — it sits outside
+  the salience system, marking where the page quotes, credits or annotates rather than speaks.
+  Lifted to 7.60:1 so it is legal as text, since the old value failed its own tier and stayed.
+- **Inline links underlined.** Colour-only link identification measured 1.51:1 against body
+  text, under the 3:1 that WCAG G183 requires. It was a 1.4.1 failure independent of anything
+  else, and it is now also the channel separating a success message from a link.
+- **Japan:** structural influence, no motifs.
+- Academic Cyberpunk was killed as a *look*, but its serif reading voice and margin rail were
+  chosen independently and survive.
+
+### Verified typeface pricing (2026-08-01)
+
+| Face | Foundry | Web licence |
+|---|---|---|
+| Archivo, Saira, Barlow, Chivo | Omnibus Type and others | $0, OFL |
+| Newsreader, Source Serif 4, Literata, Spectral | various | $0, OFL |
+| JetBrains, IBM Plex, Martian, Azeret Mono | various | $0, OFL |
+| Söhne, Signifier | Klim | $60 per style; 3 styles = $180 |
+| Söhne full family, 16 styles | Klim | $528 |
+| PP Neue Montreal | Pangram Pangram | from $40 |
+| Berkeley Mono | US Graphics | **$370** ($225 Indie + $145 web module) |
+
+Klim pricing is the 5,000 monthly-unique-visitor tier. Berkeley Mono's web fonts are a
+separately priced module, which puts it at nearly twice the budget for the least visible role.
+
+Klim pricing is the 5,000 monthly-unique-visitor tier. Berkeley Mono's web fonts are a
+separately priced module, which put it at nearly twice the budget for the least visible role.
+Every shipped face is OFL, self-hosted, and cost nothing.
 
 ## Earlier
 

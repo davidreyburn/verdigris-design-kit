@@ -1,7 +1,12 @@
 # Working in this repository
 
-Verdigris is a hand-authored design system and the site built on it. No build step, no npm, no
-framework, no shadow DOM. Everything is plain CSS, plain JS and custom elements in light DOM.
+Two things live here. **The kit** is `verdigris/` — a hand-authored design system, usable by any
+project: plain CSS, plain JS, custom elements in light DOM. **The reference site** is everything
+at the root plus `docs/`, and it is the kit's first consumer. No build step, no npm, no
+framework, no shadow DOM anywhere in either.
+
+Sections below marked *(reference site)* carry rules specific to that site — its URLs, its host,
+its contact policy. Everything else applies to the kit wherever it is used.
 
 **Read `LICENSE` first.** This repository is published to be inspected, not reused. If you are
 here to lift the system into another project, the answer is no — ask David instead. If you are
@@ -37,7 +42,7 @@ missing while the manifest reported an exact match.
 
 ---
 
-## Building a page
+## Building a page *(reference site)*
 
 Copy a template. Do not author a page from scratch, and do not edit a template in place.
 
@@ -101,7 +106,7 @@ Recount, do not round.
 
 ---
 
-## Shipping
+## Shipping *(reference site)*
 
 Served from Hostinger (Apache/LiteSpeed) behind Cloudflare, at `dreyburn.com`. Deploy is a file
 copy. There is no build, no pipeline, and nothing to invoke.
@@ -112,10 +117,14 @@ copy. There is no build, no pipeline, and nothing to invoke.
 **Cloudflare caches `verdigris/` and does not cache HTML.** Pages go live on upload; CSS, JS and
 fonts do not — the edge keeps serving the old file until the query string changes.
 
-> **If any byte under `verdigris/` changed, bump the version.** In `?v=` on every page, and in
-> `CHANGELOG.md`. Leaving it alone does not mean "no change shipped" — it means every returning
-> reader gets last week's stylesheet against this week's markup, and the bug reports will
-> describe a page you cannot reproduce.
+> **If any CSS or JS under `verdigris/` changed, bump the version.** In `?v=` on every page, and
+> in `CHANGELOG.md`. Leaving it alone does not mean "no change shipped" — it means every
+> returning reader gets last week's stylesheet against this week's markup, and the bug reports
+> will describe a page you cannot reproduce.
+
+Documentation under `verdigris/` is not served, so it does not count. Fonts are cached
+`immutable` and content-addressed by filename: a changed face is a new file, never an edit in
+place.
 
 ### Release gate
 
@@ -132,7 +141,7 @@ grep -rn 'figure placeholder' work notes 2>/dev/null
 
 # 3 — one asset version across the site, and it moved if verdigris/ did
 grep -rho '?v=[0-9.]*' --include='*.html' . | sort -u   # exactly one line
-git diff --stat HEAD -- verdigris/                       # non-empty ⇒ that line must be new
+git diff --stat HEAD -- 'verdigris/*.css' 'verdigris/*.js'   # non-empty ⇒ that line must be new
 
 # 4 — 404.html has no relative paths. It is served at any depth, so a
 #     relative href resolves against the URL that missed, not against root
