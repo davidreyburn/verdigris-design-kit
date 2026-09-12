@@ -301,10 +301,11 @@ including suppressing printed link destinations. Remove it and every bullet grow
 ## What is deliberately absent
 
 Framework adapters, a Figma kit, a token pipeline, dropdown menus, tabs, a modal, and a working
-form endpoint. Each is recorded with its reason in docs §09. **Do not add them speculatively.**
-If you think one is needed now, say why the reason in §09 no longer holds.
+form endpoint. Each is a **system** non-goal, recorded with its reason in docs §09. **Do not add
+them speculatively.** If you think one is needed now, say why the reason in §09 no longer holds.
 
-An email address, anywhere on the site, is also deliberately absent — see **Building a page**.
+An email address anywhere on the site is absent too, but it is a **site** policy rather than a
+system non-goal, so it is not in §09 — it is under **Building a page** above.
 
 Screen-reader transcripts have not been recorded. That needs NVDA or VoiceOver driven by hand
 and cannot be automated honestly, so it is listed as absent rather than claimed.
@@ -326,12 +327,15 @@ tools/og.html       redraws the hero field at 1200×630 and saves og.png
 tools/audit.mjs     drives the three-load audit over every page. See Verify your work
 
 verdigris/          the kit: verdigris.css, verdigris.js, topolang.js, print.css, audit.js
+custom-elements.json  the element manifest. Hand-authored; carries checkedAgainst
 og.png              the social card. Regenerate with tools/og.html, do not hand-edit
+favicon.svg/.ico    the mark. apple-touch-icon.png is the 180px raster of it
 .htaccess           404 mapping and cache headers. The deploy artifact
 robots.txt          crawl policy. Templates and instruments are excluded, see Shipping
 sitemap.xml         every published URL. Hand-maintained; add new pages to it
 
 calibration/        the questionnaires that settled each decision. Historical record
 archive/            evaluated and rejected. Nothing here is referenced
+inbox/              files handed over by hand. Gitignored, never published
 .private/           not published, gitignored. Do not read or surface it
 ```
