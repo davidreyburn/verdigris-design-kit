@@ -66,10 +66,21 @@
     });
     field.resize();
     field.computeElevation();
+    field.draw();
 
+    /* The ground goes on AFTER the field, under it. Field.draw() opens with
+       clearRect over the whole canvas, so a ground painted first does not
+       survive — the card exports as glyphs on transparency, roughly half the
+       image, and every platform that unfurls it composites that onto its own
+       background rather than ours. destination-over paints beneath what is
+       already there instead.
+
+       This is invisible in the preview below, because the harness page's own
+       background is the same ink. Check the exported file, not the preview. */
+    ctx.globalCompositeOperation = 'destination-over';
     ctx.fillStyle = GROUND;
     ctx.fillRect(0, 0, W, H);
-    field.draw();
+    ctx.globalCompositeOperation = 'source-over';
 
     /* The hero holds the field clear of text with a CSS mask. A canvas has
        no masks, so the same guarantee is made by painting the ground back
