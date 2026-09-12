@@ -10,7 +10,6 @@ Allow: /
 # inspectable is the point of publishing them — but they are large,
 # historical, and should not compete with the work in a search result.
 Disallow: /calibration/
-Disallow: /archive/
 
 # noindex keeps a page OUT of the index, and it is carried in the page
 # head, not here. template.html, reader.html, preview-mobile.html and

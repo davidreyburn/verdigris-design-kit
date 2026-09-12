@@ -163,8 +163,8 @@ done
 # 7 — every page, ink + paper + 320px. Exits non-zero on a measured failure.
 #     find, not a glob: zsh aborts the whole command on an unmatched one,
 #     so work/ and notes/ not existing yet would take the line down with them.
-PAGES=$(find . -name '*.html' -not -path './calibration/*' -not -path './archive/*' \
-        -not -path './tools/*' -not -name 'preview-mobile.html' \
+PAGES=$(find . -name '*.html' -not -path './calibration/*' -not -path './tools/*' \
+        -not -name 'preview-mobile.html' \
         | sed 's|^\./||' | sort | paste -sd, -) node tools/audit.mjs
 ```
 
@@ -335,7 +335,6 @@ robots.txt          crawl policy. Templates and instruments are excluded, see Sh
 sitemap.xml         every published URL. Hand-maintained; add new pages to it
 
 calibration/        the questionnaires that settled each decision. Historical record
-archive/            evaluated and rejected. Nothing here is referenced
 inbox/              files handed over by hand. Gitignored, never published
 .private/           not published, gitignored. Do not read or surface it
 ```

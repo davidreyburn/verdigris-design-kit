@@ -186,9 +186,9 @@ section into the next version when the content build lands.
 - **`404.html`**, built on the system. Every path in it is root-absolute, because it is served
   for a miss at any depth while the browser keeps the URL it asked for — a relative stylesheet
   href would resolve against `/work/` and the error page would arrive unstyled.
-- **`robots.txt`** and **`sitemap.xml`**, both hand-maintained. The instruments and the archive
-  are `Disallow`ed; the specimens carry `noindex` instead, because a page blocked from crawling
-  is never fetched and so its `noindex` is never read.
+- **`robots.txt`** and **`sitemap.xml`**, both hand-maintained. The calibration instruments are
+  `Disallow`ed; the specimens carry `noindex` instead, because a page blocked from crawling is
+  never fetched and so its `noindex` is never read.
 - **Favicon** (`favicon.svg`, `favicon.ico`, `apple-touch-icon.png`) — three contour segments on
   the page ground, reduced until they still read at 16px. The ground is part of the mark, so it
   needs no `prefers-color-scheme` variant it could not carry into `.ico`.
@@ -199,6 +199,12 @@ section into the next version when the content build lands.
   card repaints the ground under the text column at full opacity instead — the published token
   ratios then hold unmodified rather than against a composite needing its own measurement.
 - **AGENTS.md: Building a page and Shipping**, with a six-step release gate.
+
+### Removed
+
+- **`archive/`** — one screenshot, referenced by nothing, constituting a directory.
+- **`calibration/open-calibration.cmd`** — superseded by `serve.cmd` and `serve.command`, and
+  referenced only by the line recording that it was superseded.
 
 ### Fixed
 

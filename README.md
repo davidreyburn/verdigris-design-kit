@@ -132,4 +132,3 @@ that way.
   be wrong. Including the typeface licence survey and the decisions that were reversed.
 - **`calibration/`** — six questionnaire passes, complete, with the answers that produced the
   system. Historical record; nothing in the site references it.
-- **`archive/`** — evaluated and rejected. Nothing here is referenced.

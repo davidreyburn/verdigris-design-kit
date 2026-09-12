@@ -61,5 +61,3 @@ fragments, which is why §02 carries a correction field.
 **It was built to terminate.** Strategy recursion was the named execution risk, and this would
 have been the fifth positioning artifact since March. So the instrument ends in a token file and
 a component contract rather than a direction document.
-
-`open-calibration.cmd` is an older launcher, superseded by `serve.cmd` and `serve.command`.
