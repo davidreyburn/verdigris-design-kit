@@ -7,14 +7,15 @@ framework, no shadow DOM. Everything is plain CSS, plain JS and custom elements 
 here to lift the system into another project, the answer is no — ask David instead. If you are
 here to work *on this site*, carry on.
 
-Start from `template.html`. It is a working page using every major element once, with the
-reasoning written beside it.
+Writing a page? Go to **Building a page** below — it names which template to copy and where
+the file lands. `template.html` is a working page using every major element once, with the
+reasoning written beside it; read it before you write markup by hand.
 
 ---
 
 ## Where facts live
 
-Four documents overlap. When they disagree, this is the order of authority:
+These overlap. When they disagree, this is the order of authority:
 
 | File | Owns | Do not look here for |
 |---|---|---|
@@ -33,6 +34,104 @@ registered custom elements and five CSS-only styling hooks (`vd-nav`, `vd-footer
 change an element, update it — and verify against **both** the `defs` array in `verdigris.js` and
 the `vd-*` selectors in `verdigris.css`. Checking only the first is how the five CSS-only ones went
 missing while the manifest reported an exact match.
+
+---
+
+## Building a page
+
+Copy a template. Do not author a page from scratch, and do not edit a template in place.
+
+| Writing | Copy | Lands at |
+|---|---|---|
+| A case study | `reader.html` | `work/<slug>.html` |
+| A Field Note | `reader.html` | `notes/<slug>.html` |
+| Anything else | `template.html` | `<slug>.html` |
+
+**URLs are flat and carry `.html`.** `work/agent-os.html`, never `work/agent-os/`. Write the
+extension in every href. The host would strip it and `python -m http.server` would not, so a
+directory-style URL works in production and 404s on the dev server — the worst possible split.
+
+**A copy in `work/` or `notes/` is one directory down, so every relative path gains a `../`.**
+Stylesheets, scripts, the nav's four links, and the footer. Four of those are easy to miss
+because the page still renders without them.
+
+**`reader.html` and `template.html` are specimens, not pages.** They stay at the root, stay
+generic, and keep their placeholders — that is what makes them copyable. A *copy* is not
+finished while it still holds `href="#"`, the `figure placeholder` data-URI, or previous/next
+links pointing nowhere.
+
+### Every page carries
+
+```html
+<link rel="canonical" href="https://dreyburn.com/work/<slug>.html">
+<meta property="og:url"   content="https://dreyburn.com/work/<slug>.html">
+<meta property="og:title" content="...">   <!-- the <title>, without the site suffix -->
+<meta property="og:description" content="...">  <!-- the same text as <meta name=description> -->
+<meta property="og:image" content="https://dreyburn.com/og.png">
+```
+
+Absolute URLs, every time — a relative `og:image` is ignored by every crawler that reads it.
+`og:type` is `article` for anything in `work/` or `notes/`, `website` elsewhere. The rest of the
+head — charset, viewport, `color-scheme`, the blocking theme script, the four asset tags, the
+favicon — is already correct in both templates. Copy it, do not retype it.
+
+`audit.js` ships on every page. It is deferred and inert until called, and a system that
+publishes its own conformance does not hide the instrument that measures it.
+
+### Never put an email address on this site
+
+Not a `mailto:`, not in prose, not in the résumé, not in print, not in JSON-LD. The site is
+public and scrapable; LinkedIn is the contact channel. A contact section that wants an address
+links to LinkedIn instead. The form kit in docs §10 is a specimen with no endpoint and stays
+that way.
+
+This is the rule most likely to be broken by reflex, because "add a contact section" and "add a
+mailto" are the same motion almost everywhere else.
+
+### Numbers in the rail are measurements
+
+`index.html` claims `04 Systems`, `03 Published` and `7,300 Words`. Those are assertions about
+what is actually on the site. Ship fewer pages and the numbers are wrong — and a number in the
+data colour that nobody can verify is precisely the failure this system exists to argue against.
+Recount, do not round.
+
+---
+
+## Shipping
+
+Served from Hostinger (Apache/LiteSpeed) behind Cloudflare, at `dreyburn.com`. Deploy is a file
+copy. There is no build, no pipeline, and nothing to invoke.
+
+**`.htaccess` is the deploy artifact.** It carries the 404 mapping and the cache headers. A bare
+`404.html` is never used unless `ErrorDocument` names it.
+
+**Cloudflare caches `verdigris/` and does not cache HTML.** Pages go live on upload; CSS, JS and
+fonts do not — the edge keeps serving the old file until the query string changes.
+
+> **If any byte under `verdigris/` changed, bump the version.** In `?v=` on every page, and in
+> `CHANGELOG.md`. Leaving it alone does not mean "no change shipped" — it means every returning
+> reader gets last week's stylesheet against this week's markup, and the bug reports will
+> describe a page you cannot reproduce.
+
+### Release gate
+
+Run all five before calling a build done. Each has caught something real.
+
+```sh
+# 1 — no dead links outside the two specimens
+grep -rn 'href="#"' --include='*.html' . | grep -vE 'template\.html|reader\.html|/(calibration|archive)/'
+
+# 2 — no template scaffolding survived a copy
+grep -rn 'figure placeholder' work/ notes/
+
+# 3 — asset version is single-valued, and matches whether verdigris/ moved
+grep -rho '?v=[0-9.]*' --include='*.html' . | sort -u      # must print exactly one line
+git diff --stat HEAD -- verdigris/                          # if non-empty, that line must be new
+```
+
+4. Every new page appears in `sitemap.xml` with a `<lastmod>`, and nothing in it 404s.
+5. The three-load audit below, on **every new page** — ink, paper, 320px. Not a spot check on one
+   representative page; reflow failures are per-layout, and every case study has a different one.
 
 ---
 
@@ -152,18 +251,32 @@ Framework adapters, a Figma kit, a token pipeline, dropdown menus, tabs, a modal
 form endpoint. Each is recorded with its reason in docs §09. **Do not add them speculatively.**
 If you think one is needed now, say why the reason in §09 no longer holds.
 
+An email address, anywhere on the site, is also deliberately absent — see **Building a page**.
+
 Screen-reader transcripts have not been recorded. That needs NVDA or VoiceOver driven by hand
 and cannot be automated honestly, so it is listed as absent rather than claimed.
 
 ## Layout
 
 ```
-index.html          the site
-template.html       starter page — copy this
-reader.html         case study / Field Note template
+index.html          the homepage
+work/               case studies.  work/<slug>.html
+notes/              Field Notes.   notes/<slug>.html
 resume.html         résumé. Print is the deliverable, the screen is the courtesy
 docs/               the design system, published as a portfolio piece
+404.html            not-found page. Reached only via .htaccess ErrorDocument
+
+template.html       starter page — copy this. A specimen, not a page
+reader.html         case study / Field Note template. A specimen, not a page
+preview-mobile.html width harness. ?w=320,390 picks widths, &y= sets scroll
+tools/og.html       redraws the hero field at 1200×630 and saves og.png
+
 verdigris/          the kit: verdigris.css, verdigris.js, topolang.js, print.css, audit.js
+og.png              the social card. Regenerate with tools/og.html, do not hand-edit
+.htaccess           404 mapping and cache headers. The deploy artifact
+robots.txt          crawl policy. Templates and instruments are excluded, see Shipping
+sitemap.xml         every published URL. Hand-maintained; add new pages to it
+
 calibration/        the questionnaires that settled each decision. Historical record
 archive/            evaluated and rejected. Nothing here is referenced
 .private/           not published, gitignored. Do not read or surface it

@@ -8,13 +8,9 @@ ship as a portfolio piece in its own right.
 
 ## Current state
 
-Both calibration passes are **complete**. The system is **built and verified**.
-
-| Pass | File | Status |
-|---|---|---|
-| 01 | `calibration/calibration.html` | Done, 67/68 |
-| 02 | `calibration/calibration-02.html` | Done, 7/7 |
-| Build | `verdigris/`, `index.html`, `docs/`, `template.html`, `reader.html`, `resume.html` | Shipped |
+All six calibration passes are **complete**, and the design system is **built and verified**.
+What is not built is the site's content: the case-study and Field Note pages the homepage
+links to. See **Building a page** in [AGENTS.md](AGENTS.md) before writing one.
 
 **Run the dev server in your own terminal and leave the window open** — `serve.cmd` on Windows,
 `./serve.command` on macOS and Linux. A server started by an agent lives only as long as its
@@ -77,8 +73,10 @@ typed into a table.
 | Colour vision | Viénot 1999 simulation published for every same-context pair, including the two that **fail** and what carries them instead |
 | Form controls, 1.4.11 | Every control boundary ≥3:1 against its adjacent surface, both themes |
 
-Not done: screen-reader transcripts (needs NVDA/VoiceOver by hand), React and Astro adapters
-(no consumer yet), case-study and Field Note page templates.
+Not done: screen-reader transcripts (needs NVDA/VoiceOver by hand), and React and Astro
+adapters (no consumer yet — see docs §09). The page templates exist: `reader.html` serves both
+case studies and Field Notes, and `template.html` is the general starter. What is missing is the
+*instances* — every card on the homepage still points at `#`.
 
 ### Responsive
 
@@ -174,19 +172,36 @@ Every open-source typeface in sections 04 to 06 is self-hosted and rendered for 
 you see is what ships. The five paid faces cannot legally be embedded, so those show a clearly
 labelled proxy plus a link to the foundry's own live tester.
 
+## Deploying
+
+`dreyburn.com` runs on Hostinger behind Cloudflare. Deploy is a file copy — there is no build
+step, no pipeline and nothing to invoke. `.htaccess` carries the 404 mapping and the cache
+headers, and is the only server configuration.
+
+Cloudflare caches everything under `verdigris/` and does not cache HTML, so pages go live on
+upload while CSS and JS do not. **Changing a byte under `verdigris/` without bumping `?v=` ships
+new markup against last week's stylesheet.** The full rule and the five-step release gate are in
+[AGENTS.md](AGENTS.md) under **Shipping**.
+
 ## Files
 
 | File | Purpose |
 |---|---|
 | `verdigris/` | **The design system.** See `verdigris/README.md` |
+| `verdigris/fonts/` | The three shipped families, each with its verbatim OFL licence |
 | `index.html` | The homepage, built on it |
+| `work/`, `notes/` | Case studies and Field Notes — `work/<slug>.html` |
+| `resume.html` | Résumé. Print is the deliverable, the screen is the courtesy |
 | `docs/` | The system published as a portfolio piece |
+| `404.html` | Not-found page. Reached through `.htaccess`, not by filename |
+| `template.html` | Starter page, every element once. A specimen — copy it, do not edit it |
+| `reader.html` | Case-study and Field Note template. Also a specimen |
+| `.htaccess` | 404 mapping and cache headers. The deploy artifact |
+| `robots.txt`, `sitemap.xml` | Crawl policy and the published URL list. Both hand-maintained |
+| `og.png` | Social card, drawn by `tools/og.html`. Regenerate, do not hand-edit |
+| `tools/og.html` | Redraws the hero field at 1200×630 and saves `og.png` |
 | `serve.cmd` | Dev server, Windows. Run in your own terminal, leave it open |
 | `serve.command` | Dev server, macOS/Linux. Same, and double-clickable in Finder |
 | `preview-mobile.html` | Mobile harness. `?w=320,390` picks widths, `&y=` sets scroll |
-| `calibration/calibration.html` | Pass one instrument |
-| `all-response.txt` | Pass one output |
-| `calibration/calibration-02.html` | Pass two instrument |
-| `verdigris/fonts/` | The three shipped families, each with its verbatim OFL licence |
-| `open-calibration.cmd` | Older launcher, superseded by `serve.cmd` |
+| `calibration/` | Six passes and `all-response.txt`. Historical record, not referenced |
 | `verdigris.md` | The terminal palette spec (input) |
