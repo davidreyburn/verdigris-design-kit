@@ -4,6 +4,9 @@ Copyright (c) 2026 David Reyburn. All rights reserved.
 This repository is published to be READ, not reused. It is a portfolio piece:
 the reasoning is the point, and hiding the source would hide the evidence.
 
+Two parts are carved out and carry their own terms. They are listed at the
+bottom, and nothing in this file narrows them.
+
 ────────────────────────────────────────────────────────────────────────────
 YOU MAY
 
@@ -11,13 +14,17 @@ YOU MAY
   · Quote short excerpts in commentary, review, teaching or criticism, with
     attribution to David Reyburn and a link to the source.
   · Link to it, and cite the measurements it publishes.
+  · Consume the machine-readable manifests — custom-elements.json and
+    verdigris/fonts/manifest.json — in an editor, language server or other
+    developer tool. They are published so tooling can read them, and that
+    would be a hollow offer if reading them were a breach.
 
 YOU MAY NOT, without prior written permission
 
   · Copy, adapt or redistribute this work or any substantial part of it.
   · Use it, in whole or in part, in another project, product, site, template,
     design system or published work, commercial or otherwise.
-  · Train a model on it as a source of reusable design assets.
+  · Use it as training data for a machine learning model.
 
 No licence is granted by implication. Publishing source publicly does not
 place it in the public domain and does not grant permission to reuse it.
@@ -29,20 +36,45 @@ the browsers and content described. They are evidence of method, not a
 guarantee about your own page.
 
 ────────────────────────────────────────────────────────────────────────────
-NOT COVERED BY THE ABOVE
+THIS LICENCE ONLY EVER LOOSENS
 
-The terms above apply to work I authored. They do not — and cannot — apply
-to third-party work redistributed here, which stays under its own licence:
+Permissions granted for a version already published are not withdrawn. If
+these terms are relaxed, the relaxation applies to everything released up to
+that point. If they are ever narrowed, the narrowing binds only versions
+released afterwards, and what you already have stays under the terms you got
+it under.
 
-  verdigris/fonts/     Chivo, Literata and IBM Plex Mono web fonts.
-                       SIL Open Font License 1.1, each by its own authors.
-                       The verbatim licence for each ships alongside them as
-                       OFL-chivo.txt, OFL-literata.txt and OFL-plex-mono.txt;
-                       see verdigris/fonts/LICENSES.md. Nothing in this file
-                       restricts your rights to those fonts. The OFL governs
-                       them and it grants far more than this licence does.
+────────────────────────────────────────────────────────────────────────────
+CARVE-OUTS
+
+1 · verdigris/topolang.js — Apache License 2.0
+
+   The topolang runtime is licensed under Apache 2.0, whose full text ships
+   as LICENSE-APACHE-2.0.txt. You may use, modify and redistribute it,
+   including commercially, subject to that licence.
+
+   It is carved out because it is an implementation of a specification.
+   topolang declares a version, negotiates capabilities, and self-tests
+   against a conformance vector — machinery that exists so that OTHER
+   implementations can be written and checked against the same vector. A
+   conformance suite nobody is permitted to conform to is decoration, so the
+   runtime carries a licence that lets you write your own.
+
+   SPDX-License-Identifier: Apache-2.0
+
+2 · verdigris/fonts/ — SIL Open Font License 1.1
+
+   Chivo, Literata and IBM Plex Mono, each by its own authors, redistributed
+   here under the OFL. The verbatim licence for each ships alongside them as
+   OFL-chivo.txt, OFL-literata.txt and OFL-plex-mono.txt; see
+   verdigris/fonts/LICENSES.md. Nothing in this file restricts your rights to
+   those fonts. The OFL governs them and it grants far more than this licence
+   does.
+
+────────────────────────────────────────────────────────────────────────────
 
 If you want to use any part of the work I did author, ask. The answer is
 often yes, and it is a short conversation.
 
-Contact: reyburn.david@gmail.com
+Ask by opening an issue:
+https://github.com/davidreyburn/verdigris-design-kit/issues

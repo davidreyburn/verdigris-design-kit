@@ -1,4 +1,11 @@
 /* ═══════════════════════════════════════════════════════════════════════
+   SPDX-License-Identifier: Apache-2.0
+   Copyright (c) 2026 David Reyburn
+
+   Carved out of this repository's licence on purpose. Everything else here
+   is read-only; this file is Apache 2.0 so you can write your own conformant
+   runtime and check it against the same vector. See LICENSE, carve-out 1.
+
    topolang — browser runtime
    Conformant with spec-topolang v1.3.2 (pure-field core; the stateful
    sketch extension is NOT claimed, so step()-bearing sketches are rejected

@@ -9,8 +9,9 @@ Sections below marked *(reference site)* carry rules specific to that site — i
 its contact policy. Everything else applies to the kit wherever it is used.
 
 **Read `LICENSE` first.** This repository is published to be inspected, not reused. If you are
-here to lift the system into another project, the answer is no — ask David instead. If you are
-here to work *on this site*, carry on.
+here to lift the system into another project, the answer is no — ask David instead. Two things
+are carved out and do carry reusable licences: `verdigris/topolang.js` is Apache 2.0, and
+`verdigris/fonts/` is OFL. If you are here to work *on this site*, carry on.
 
 Writing a page? Go to **Building a page** below — it names which template to copy and where
 the file lands. `template.html` is a working page using every major element once, with the

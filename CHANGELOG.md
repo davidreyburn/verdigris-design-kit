@@ -172,11 +172,38 @@ All five pages pass every `verdigrisAudit()` check, and all five pass 1.4.10 at 
 scrollWidth 301 against a 316px viewport: `index.html`, `docs/index.html`, `template.html`,
 `reader.html`, `resume.html`.
 
-## Unreleased — site infrastructure
+## 1.9.0 — 2026-09-12
 
-No version bump: no CSS or JS under `verdigris/` changed, so the asset query strings stay at 1.8.0.
-The convention is that a version marks a *kit* release; this is the site around it. Fold this
-section into the next version when the content build lands.
+Site infrastructure, and a licence that distinguishes what may be reused from what may not.
+
+The version moved because `verdigris/topolang.js` did — it gained an SPDX header. That is a
+comment, and a comment cannot break a page, which is exactly the judgement call the bump rule
+exists to remove: the rule is that any change to served CSS or JS moves the query string, so
+nobody has to decide which byte was harmless.
+
+### Licensing
+
+- **`verdigris/topolang.js` is now Apache 2.0**, carved out of the repository's otherwise
+  read-only terms, with the full text as `LICENSE-APACHE-2.0.txt`. It implements a spec: it
+  declares a version, negotiates capabilities, and self-tests against a conformance vector —
+  machinery that exists so *other* implementations can be written and checked. A conformance
+  suite nobody is permitted to conform to is decoration.
+- **`LICENSE` gained a ratchet.** Permissions granted for a published version are never
+  withdrawn; a narrowing binds only later releases.
+- **Machine-readable manifests may be consumed by tooling.** `custom-elements.json` is published
+  so editors can read it, which was a hollow offer while reading it was a breach.
+- **The model-training clause lost its qualifier.** It read "as a source of reusable design
+  assets", which invited the reading that other training was fine.
+- **Contact moved to GitHub issues.** The site carries no email address anywhere by policy; a
+  licence in a public repository putting one back was the same address by another route.
+
+### Fixed in the docs
+
+- **`verdigris/README.md` published a local filesystem path** — `~/agent/config/specs/` — for the
+  topolang spec. The spec is not in this repository, and the path was wrong as well as private.
+- **"the spec's own published vector"** overstated a claim in two READMEs. The vector is embedded
+  in `topolang.js`, so `selfTest()` is verifiable from what ships; the spec it came from is not
+  published. Reworded to say what is actually checkable.
 
 ### Added
 

@@ -127,8 +127,9 @@ cannot drift from the actual values.
 
 ## topolang
 
-`topolang.js` is a conformant browser runtime for **spec-topolang v1.3.2**
-(`~/agent/config/specs/spec-topolang.md`). Pure-field core only; the stateful sketch
+`topolang.js` is a conformant browser runtime for **spec-topolang v1.3.2**. The spec itself is
+not in this repository; the conformance vector it is checked against is embedded in the runtime,
+so `topolang.selfTest()` is verifiable from what ships here. Pure-field core only; the stateful sketch
 extension is not claimed, so `step()`-bearing sketches are rejected as the spec requires.
 
 Noise primitives are bit-exact ports of the normative arithmetic. The fixed pipeline runs in
@@ -470,7 +471,8 @@ need.
 - **Target size (2.5.8 AA, 24px):** every target passes.
 - **Target size (2.5.5 AAA, 44px):** met for every standalone control and card. The card itself
   is the target, with the click forwarded under drag, selection and nested-interactive guards.
-- **topolang conformance:** 9/9 against the spec's own published vector.
+- **topolang conformance:** 9/9 against the spec's conformance vector, which is embedded in
+  `topolang.js` and run live on the docs page. `topolang.js` is Apache 2.0 — see LICENSE.
 
 ## Not done yet
 

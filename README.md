@@ -1,5 +1,7 @@
 # Verdigris
 
+Copyright © 2026 David Reyburn. Published to be read — see [Licence](#licence).
+
 A hand-authored design system: framework-agnostic CSS and light-DOM custom elements. No build
 step, no dependencies, no npm, no external requests, no Tailwind. Everything it needs — three
 typefaces, a generative field runtime, a conformance harness — is in the repository and served
@@ -59,7 +61,8 @@ already valid and semantic without JavaScript, and nothing uses shadow DOM.
 Assets carry a `?v=` query string. Bump it whenever CSS or JS changes, or browsers and the CDN
 will keep serving the old file.
 
-`LICENSE` governs reuse: this is published to be inspected, not lifted.
+[`LICENSE`](LICENSE) governs reuse: this is published to be inspected, not lifted. Two parts are
+carved out and are genuinely reusable — see below.
 
 ## What it is
 
@@ -87,7 +90,7 @@ conformance checks live from the running tokens rather than printing a stored ta
 | Target size, 2.5.5 AAA | Every standalone control and card passes. The card is the target, with the click forwarded under drag, selection and nested-interactive guards |
 | Form controls, 1.4.11 | Every control boundary 3:1 or better against its adjacent surface, both themes |
 | Colour vision | Viénot 1999 simulation published for every same-context pair, including the two that **fail** and what carries them instead |
-| topolang conformance | 9/9 against the spec's own published vector, run live on the docs page |
+| topolang conformance | 9/9 against the spec's conformance vector, embedded in the runtime and run live on the docs page |
 
 Not done: screen-reader transcripts, which need NVDA or VoiceOver driven by hand and cannot be
 automated honestly. React and Astro adapters are deliberately absent — see docs §09.
@@ -132,3 +135,22 @@ that way.
   be wrong. Including the typeface licence survey and the decisions that were reversed.
 - **`calibration/`** — six questionnaire passes, complete, with the answers that produced the
   system. Historical record; nothing in the site references it.
+
+## Licence
+
+**Copyright © 2026 David Reyburn. All rights reserved.**
+
+This repository is published to be read, not reused: the reasoning is the point, and hiding the
+source would hide the evidence. You may view, clone, study and quote it with attribution. You may
+not copy it into another project without asking — and asking is a
+[short conversation](https://github.com/davidreyburn/verdigris-design-kit/issues) that often ends
+in yes. The terms only ever loosen: permissions given for a published version are never withdrawn.
+
+Two carve-outs carry their own licences, and nothing in `LICENSE` narrows them:
+
+| Part | Licence | Why |
+|---|---|---|
+| `verdigris/topolang.js` | **Apache 2.0** — [`LICENSE-APACHE-2.0.txt`](LICENSE-APACHE-2.0.txt) | It implements a spec, and declares a version, negotiates capabilities and self-tests against a conformance vector. That machinery exists so other implementations can be written and checked. A conformance suite nobody may conform to is decoration |
+| `verdigris/fonts/` | **SIL OFL 1.1** | Chivo, Literata and IBM Plex Mono are not mine. Each ships with its verbatim licence; see [`verdigris/fonts/LICENSES.md`](verdigris/fonts/LICENSES.md) |
+
+Full terms in [`LICENSE`](LICENSE).
