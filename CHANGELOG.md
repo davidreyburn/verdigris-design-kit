@@ -172,6 +172,49 @@ All five pages pass every `verdigrisAudit()` check, and all five pass 1.4.10 at 
 scrollWidth 301 against a 316px viewport: `index.html`, `docs/index.html`, `template.html`,
 `reader.html`, `resume.html`.
 
+## Unreleased — site infrastructure
+
+No version bump: nothing under `verdigris/` changed, so the asset query strings stay at 1.8.0.
+The convention is that a version marks a *kit* release; this is the site around it. Fold this
+section into the next version when the content build lands.
+
+### Added
+
+- **`.htaccess`** — `ErrorDocument`, cache headers, `Options -Indexes`, and the `woff2` MIME
+  type. Deliberately contains no HTTPS rewrite: Cloudflare terminates TLS and the origin sees
+  plain HTTP, so a rewrite would redirect against its own output indefinitely.
+- **`404.html`**, built on the system. Every path in it is root-absolute, because it is served
+  for a miss at any depth while the browser keeps the URL it asked for — a relative stylesheet
+  href would resolve against `/work/` and the error page would arrive unstyled.
+- **`robots.txt`** and **`sitemap.xml`**, both hand-maintained. The instruments and the archive
+  are `Disallow`ed; the specimens carry `noindex` instead, because a page blocked from crawling
+  is never fetched and so its `noindex` is never read.
+- **Favicon** (`favicon.svg`, `favicon.ico`, `apple-touch-icon.png`) — three contour segments on
+  the page ground, reduced until they still read at 16px. The ground is part of the mark, so it
+  needs no `prefers-color-scheme` variant it could not carry into `.ico`.
+- **Canonical, Open Graph and Twitter tags** on every page, with absolute URLs throughout.
+- **`tools/og.html`** — draws the 1200×630 social card from the same topolang runtime, mode,
+  palette and seed as the hero, with `frozen:true` so the card is reproducible from the seed.
+  The hero's AAA guarantee comes from a CSS mask, which a canvas has no equivalent for, so the
+  card repaints the ground under the text column at full opacity instead — the published token
+  ratios then hold unmodified rather than against a composite needing its own measurement.
+- **AGENTS.md: Building a page and Shipping**, with a six-step release gate.
+
+### Fixed
+
+- **`custom-elements.json` was stamped 1.7.0** while docs §09 said the five CSS-only hooks
+  entered the manifest in 1.8.0. Re-verified against both sources — nine `defs` entries plus five
+  CSS-only hooks, fourteen total, exact — and re-stamped. The note now carries the procedure and
+  the three `vd-*` strings that are comment headers or CSS counter names, which produce a false
+  positive in the obvious grep.
+- **README claimed two calibration passes**; there are six.
+- **README described the hero field as switching STRATA/SHADE at 860px.** It has run SHADE at
+  every width since the breakpoint switch was removed. What varies by theme is palette and
+  opacity: `VERDIGRIS_BAND` at 0.62 in ink, `VERDIGRIS_PAPER` at 1.0 on paper.
+- **README listed the page templates as not done.** They exist; the instances do not.
+- **docs §08's usage snippet omitted `audit.js`**, which every page carries, and its
+  `vd-system-card` example used a directory-style `href` the URL scheme does not use.
+
 ## Earlier
 
 Not retroactively written up. Calibration 01–04 and the sessions that implemented them are the

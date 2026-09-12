@@ -36,6 +36,30 @@ catch(e){}
 
 <!-- print.css must load AFTER verdigris.css: it matches theme-attribute
      specificity deliberately and relies on source order to win. -->
+<!-- SPECIMEN. noindex keeps this out of search as a thin duplicate of the
+     pages it seeds. It is deliberately NOT blocked in robots.txt: a page
+     blocked there is never fetched, so this tag would never be read and the
+     URL could still be indexed from a link. Crawling must stay allowed for
+     noindex to do anything.
+
+     A copy of this file DELETES the noindex and replaces every value below
+     with its own. -->
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://dreyburn.com/&lt;slug&gt;.html">
+<!-- Absolute URLs throughout: a relative og:image is ignored by every
+     crawler that reads it. See AGENTS.md, Building a page. -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dreyburn.com/&lt;slug&gt;.html">
+<meta property="og:title" content="The page title, without the — David Reyburn suffix">
+<meta property="og:description" content="The same sentence as meta name=description above.">
+<meta property="og:image" content="https://dreyburn.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="David Reyburn">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="verdigris/verdigris.css?v=1.8.0">
 <link rel="stylesheet" href="verdigris/print.css?v=1.8.0">
 <script src="verdigris/topolang.js?v=1.8.0" defer></script>

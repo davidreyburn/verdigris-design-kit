@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Not found — David Reyburn</title>
+<meta name="description" content="That page does not exist.">
+<meta name="robots" content="noindex">
+
+<!-- EVERY PATH IN THIS FILE IS ROOT-ABSOLUTE, and must stay that way.
+     .htaccess serves this document for a 404 at any depth, but the browser
+     keeps the URL it asked for — so a miss at /work/nothing.html renders
+     this file while relative paths resolve against /work/. The stylesheet,
+     the scripts and the nav would all 404 in turn, and the error page would
+     arrive unstyled. This is the one page in the site that cannot use
+     relative paths. -->
+
+<meta name="color-scheme" content="dark light">
+<script>
+try{var t=localStorage.getItem('verdigris-theme');
+    if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}
+catch(e){}
+</script>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/verdigris/verdigris.css?v=1.8.0">
+<link rel="stylesheet" href="/verdigris/print.css?v=1.8.0">
+<script src="/verdigris/verdigris.js?v=1.8.0" defer></script>
+<script src="/verdigris/audit.js?v=1.8.0" defer></script>
+</head>
+<body>
+<a class="vd-skip" href="#main">Skip to content</a>
+
+<vd-nav>
+  <div class="vd-nav__inner">
+    <a class="vd-nav__mark" href="/">David Reyburn</a>
+    <ul class="vd-nav__list">
+      <li><a href="/#work">Work</a></li>
+      <li><a href="/#notes">Field Notes</a></li>
+      <li><a href="/#about">About</a></li>
+      <li><a href="/docs/">System</a></li>
+    </ul>
+    <vd-theme-toggle></vd-theme-toggle>
+  </div>
+</vd-nav>
+
+<main id="main">
+  <section class="vd-page vd-section" aria-labelledby="nf-h">
+    <div class="vd-spread">
+      <div class="vd-spread__rail">
+        <span class="vd-label">Error</span>
+        <span class="vd-readout">
+          <span class="vd-readout__value">404</span>
+          <span class="vd-readout__key">Status</span>
+        </span>
+      </div>
+
+      <div class="vd-spread__body">
+        <h1 id="nf-h">No page at that address</h1>
+        <div class="vd-prose" style="margin-top:var(--vd-space-1)">
+          <p>
+            The URL resolved to nothing. Either it was mistyped, or it pointed at something
+            that has since moved — this site was rebuilt, and old addresses were not preserved.
+          </p>
+          <p>
+            The four systems and the Field Notes are on <a href="/">the homepage</a>. The design
+            system this page is built from, including the conformance runner that measures it, is
+            at <a href="/docs/">/docs/</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<vd-footer>
+  <div class="vd-footer__inner">
+    <div>
+      <span class="vd-label">Elsewhere</span>
+      <ul style="list-style:none;margin:var(--vd-space-h) 0 0;padding:0;display:flex;gap:var(--vd-space-1);flex-wrap:wrap">
+        <li><a class="vd-tag" href="https://github.com/davidreyburn">GitHub</a></li>
+        <li><a class="vd-tag" href="https://www.linkedin.com/in/davidreyburn">LinkedIn</a></li>
+        <li><a class="vd-tag" href="/docs/">Design system</a></li>
+        <li><a class="vd-tag" href="/resume.html">Résumé</a></li>
+      </ul>
+    </div>
+    <div class="vd-footer__sig">
+      <b>David Reyburn</b><br>
+      a studio practice by Chives<br>
+      built on Verdigris · AAA · ink and paper
+    </div>
+  </div>
+</vd-footer>
+
+</body>
+</html>

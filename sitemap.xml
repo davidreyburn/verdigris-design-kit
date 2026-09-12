@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hand-maintained: the site has no build step to generate it.
+  Every page added under work/ or notes/ gets an entry here, with a real
+  <lastmod>. Nothing listed may 404. Specimens (template.html,
+  reader.html, preview-mobile.html, tools/) are never listed.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <url>
+    <loc>https://dreyburn.com/</loc>
+    <lastmod>2026-09-12</lastmod>
+    <priority>1.0</priority>
+  </url>
+
+  <url>
+    <loc>https://dreyburn.com/docs/</loc>
+    <lastmod>2026-09-12</lastmod>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://dreyburn.com/resume.html</loc>
+    <lastmod>2026-09-12</lastmod>
+    <priority>0.6</priority>
+  </url>
+
+</urlset>

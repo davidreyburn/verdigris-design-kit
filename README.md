@@ -80,10 +80,14 @@ case studies and Field Notes, and `template.html` is the general starter. What i
 
 ### Responsive
 
-The field changes character mode with the viewport, not just size. Above 860px it is a masked
-background behind the hero in STRATA (contour lines); below 860px it becomes a standalone band
-in its own grid row and switches to SHADE, whose `cfn` is null so the contour pass never runs.
-Thirty columns cannot draw a legible contour line. The caption reports whichever mode is live.
+The field runs **one character mode at every width**: SHADE, whose `cfn` is null, so the
+contour pass never runs and there is no contour colour anywhere on the site. This replaced an
+earlier breakpoint switch into STRATA above 860px — SHADE reads as dithered relief rather than
+line-work, which is quieter where the display line crosses the field, and the line is now meant
+to cross it. What still changes with the theme is the palette and opacity: `VERDIGRIS_BAND` at
+0.62 in ink, `VERDIGRIS_PAPER` at 1.0 on paper, because subtractive marks on bone have less room
+than emissive marks on near-black. The AAA guarantee under the text column is carried by the CSS
+mask, not by the palette — 7.56:1 in ink, 7.29:1 on paper.
 
 Two bugs worth not repeating, both documented in `verdigris/README.md`:
 

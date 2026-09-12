@@ -50,6 +50,8 @@ Copy a template. Do not author a page from scratch, and do not edit a template i
 **URLs are flat and carry `.html`.** `work/agent-os.html`, never `work/agent-os/`. Write the
 extension in every href. The host would strip it and `python -m http.server` would not, so a
 directory-style URL works in production and 404s on the dev server — the worst possible split.
+The two exceptions are directory indexes that already exist: the site root, whose canonical is
+`https://dreyburn.com/`, and `docs/`.
 
 **A copy in `work/` or `notes/` is one directory down, so every relative path gains a `../`.**
 Stylesheets, scripts, the nav's four links, and the footer. Four of those are easy to miss
@@ -115,23 +117,39 @@ fonts do not — the edge keeps serving the old file until the query string chan
 
 ### Release gate
 
-Run all five before calling a build done. Each has caught something real.
+Run all six before calling a build done. Each has caught something real. They are scoped to the
+pages that ship — `docs/` and the calibration instruments contain deliberate `href="#"` specimens
+and are not checked.
 
 ```sh
-# 1 — no dead links outside the two specimens
-grep -rn 'href="#"' --include='*.html' . | grep -vE 'template\.html|reader\.html|/(calibration|archive)/'
+# 1 — no dead links on a published page
+grep -rn 'href="#"' index.html resume.html 404.html work notes 2>/dev/null
 
 # 2 — no template scaffolding survived a copy
-grep -rn 'figure placeholder' work/ notes/
+grep -rn 'figure placeholder' work notes 2>/dev/null
 
-# 3 — asset version is single-valued, and matches whether verdigris/ moved
-grep -rho '?v=[0-9.]*' --include='*.html' . | sort -u      # must print exactly one line
-git diff --stat HEAD -- verdigris/                          # if non-empty, that line must be new
+# 3 — one asset version across the site, and it moved if verdigris/ did
+grep -rho '?v=[0-9.]*' --include='*.html' . | sort -u   # exactly one line
+git diff --stat HEAD -- verdigris/                       # non-empty ⇒ that line must be new
+
+# 4 — 404.html has no relative paths. It is served at any depth, so a
+#     relative href resolves against the URL that missed, not against root
+grep -nP '(href|src)="(?!/|https?:|#)' 404.html
+
+# 5 — every sitemap URL resolves to a file that exists
+grep -oE '<loc>[^<]+' sitemap.xml | sed 's|<loc>https://dreyburn.com||' | while read -r u; do
+  case "$u" in */) f=".${u}index.html";; *) f=".${u}";; esac
+  [ -f "$f" ] || echo "MISSING $u"
+done
+
+# 6 — the social card exists
+[ -f og.png ] || echo 'og.png missing — regenerate with tools/og.html'
 ```
 
-4. Every new page appears in `sitemap.xml` with a `<lastmod>`, and nothing in it 404s.
-5. The three-load audit below, on **every new page** — ink, paper, 320px. Not a spot check on one
-   representative page; reflow failures are per-layout, and every case study has a different one.
+1, 2, 4 and 5 must print nothing. Then the three-load audit below, on **every new page** — ink,
+paper, 320px. Not a spot check on one representative page: reflow failures are per-layout, and
+every case study has a different one.
+
 
 ---
 

@@ -11,6 +11,21 @@ try{var t=localStorage.getItem('verdigris-theme');
     if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}
 catch(e){}
 </script>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://dreyburn.com/docs/">
+<!-- Absolute URLs throughout: a relative og:image is ignored by every
+     crawler that reads it. See AGENTS.md, Building a page. -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://dreyburn.com/docs/">
+<meta property="og:title" content="Verdigris — the design system behind dreyburn.com">
+<meta property="og:description" content="A documented design system with published contrast measurements, dichromat simulation, a conformant topolang runtime, and a stated list of non-goals.">
+<meta property="og:image" content="https://dreyburn.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="David Reyburn">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="../verdigris/verdigris.css?v=1.8.0">
 <link rel="stylesheet" href="../verdigris/print.css?v=1.8.0">
 <script src="../verdigris/topolang.js?v=1.8.0" defer></script>
@@ -670,13 +685,14 @@ catch(e){}
 &lt;link rel="stylesheet" href="verdigris/print.css"&gt;
 &lt;script src="verdigris/topolang.js" defer&gt;&lt;/script&gt;
 &lt;script src="verdigris/verdigris.js" defer&gt;&lt;/script&gt;
+&lt;script src="verdigris/audit.js" defer&gt;&lt;/script&gt;
 
 &lt;vd-hero
   thesis="Designing instruments for cognition, creativity, and complex systems."
   seed="20260801"&gt;&lt;/vd-hero&gt;
 
 &lt;vd-system-card index="01" kicker="Agent systems"
-  title="The Agent Operating System" href="/work/agent-os"
+  title="The Agent Operating System" href="/work/agent-os.html"
   proof="agents:4|externally adopted:2026"&gt;
   A governed multi-agent organization on infrastructure I own.
 &lt;/vd-system-card&gt;</pre>

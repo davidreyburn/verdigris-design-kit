@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>OG card — Verdigris</title>
+
+<!-- Draws the social card at 1200×630 using the SAME topolang runtime the
+     hero uses, so the card is the field rather than a picture of it.
+     Open it on the dev server, click Save, and put og.png at the repo root.
+
+     Not part of the site. It is excluded from the sitemap and carries
+     noindex. It is here rather than in .private because regenerating the
+     card must be reproducible by whoever holds the repo next. -->
+
+<link rel="stylesheet" href="../verdigris/verdigris.css?v=1.8.0">
+<style>
+  body{padding:var(--vd-space-2);max-width:1240px;margin:0 auto}
+  /* Laid out at true size: Field.resize() reads getBoundingClientRect, so
+     the canvas must occupy 1200×630 CSS px while it draws. The preview
+     scales the BITMAP down for display only, after the draw. */
+  #card{width:1200px;height:630px;display:block}
+  #stage{width:1200px;height:630px;overflow:hidden;position:absolute;left:-20000px;top:0}
+  #preview{width:100%;max-width:900px;height:auto;border:1px solid var(--vd-rule)}
+</style>
+</head>
+<body>
+
+<div id="stage"><canvas id="card" width="1200" height="630"></canvas></div>
+
+<h1>Social card</h1>
+<p class="vd-prose">1200×630, drawn from topolang <code>SHADE</code> on seed
+  <span class="vd-is-data">20260801</span> — the same mode, palette and seed as the homepage
+  hero. Save it to the repository root as <code>og.png</code>.</p>
+
+<p style="margin:var(--vd-space-1) 0">
+  <button class="vd-btn vd-btn--primary" id="save" type="button">Save og.png</button>
+  <button class="vd-btn" id="redraw" type="button">Redraw</button>
+</p>
+
+<img id="preview" alt="Preview of the generated card">
+
+<script src="../verdigris/topolang.js?v=1.8.0"></script>
+<script>
+(function () {
+  const W = 1200, H = 630, SEED = 20260801;
+  const GROUND = '#161614';          // --vd-ink-000
+  const TEXT   = '#D0CAB8';          // --vd-bone-500,  11.06:1
+  const MUTED  = '#A8A192';          // --vd-bone-400,   7.06:1
+  const GREEN  = '#44BB44';          // --vd-green-400,  7.28:1
+
+  const canvas = document.getElementById('card');
+  const ctx = canvas.getContext('2d');
+
+  function draw() {
+    const T = window.topolang;
+
+    /* The field first, full bleed. Same mode/palette/opacity pair the hero
+       runs in ink: SHADE, VERDIGRIS_BAND, 0.62. frozen:true because a still
+       image has no frames to advance — drift state stays at t0, which is
+       what makes the card reproducible from the seed alone. */
+    const field = new T.Field(canvas, {
+      seed: SEED, frozen: true, mode: T.modes.SHADE,
+      palette: T.palettes.VERDIGRIS_BAND, opacity: 0.62, autoRange: true
+    });
+    field.resize();
+    field.computeElevation();
+
+    ctx.fillStyle = GROUND;
+    ctx.fillRect(0, 0, W, H);
+    field.draw();
+
+    /* The hero holds the field clear of text with a CSS mask. A canvas has
+       no masks, so the same guarantee is made by painting the ground back
+       over the text column at full opacity — the text is then on GROUND
+       exactly, and the published token ratios hold unmodified rather than
+       against a composite that would have to be re-measured. */
+    const col = 700;
+    const g = ctx.createLinearGradient(0, 0, col, 0);
+    g.addColorStop(0, GROUND);
+    g.addColorStop(0.72, GROUND);
+    g.addColorStop(1, 'rgba(22,22,20,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, col, H);
+
+    const x = 80;
+
+    ctx.fillStyle = GREEN;
+    ctx.fillRect(x, 96, 64, 2);
+
+    ctx.fillStyle = MUTED;
+    ctx.font = '500 22px PlexMono, ui-monospace, monospace';
+    ctx.fillText('DAVID REYBURN', x, 152);
+
+    ctx.fillStyle = TEXT;
+    ctx.font = '700 62px Chivo, system-ui, sans-serif';
+    wrap(['Designing instruments for', 'cognition, creativity,', 'and complex systems.'], x, 248, 78);
+
+    ctx.fillStyle = MUTED;
+    ctx.font = '400 24px PlexMono, ui-monospace, monospace';
+    ctx.fillText('Product designer · human-AI systems', x, 530);
+
+    document.getElementById('preview').src = canvas.toDataURL('image/png');
+  }
+
+  function wrap(lines, x, y, lead) {
+    lines.forEach(function (line, i) { ctx.fillText(line, x, y + i * lead); });
+  }
+
+  document.getElementById('save').addEventListener('click', function () {
+    canvas.toBlob(function (b) {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(b);
+      a.download = 'og.png';
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    }, 'image/png');
+  });
+  document.getElementById('redraw').addEventListener('click', draw);
+
+  // Webfonts must be resolved before the first fillText or the card is
+  // drawn in the fallback face and looks nothing like the site.
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(draw);
+})();
+</script>
+</body>
+</html>

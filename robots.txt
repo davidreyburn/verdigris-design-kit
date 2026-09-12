@@ -1,0 +1,22 @@
+# dreyburn.com
+
+User-agent: *
+Allow: /
+
+# Two different tools for two different jobs, and they do not compose.
+#
+# Disallow stops the fetch. Use it for bulk that should not be crawled at
+# all: the instruments and the reject pile stay reachable by hand — being
+# inspectable is the point of publishing them — but they are large,
+# historical, and should not compete with the work in a search result.
+Disallow: /calibration/
+Disallow: /archive/
+
+# noindex keeps a page OUT of the index, and it is carried in the page
+# head, not here. template.html, reader.html, preview-mobile.html and
+# tools/og.html use it, which is why none of them appear above: a URL
+# blocked by Disallow is never fetched, so its noindex is never read and
+# the URL can still be indexed from an inbound link. Blocking a page you
+# want deindexed is the one combination that does not work.
+
+Sitemap: https://dreyburn.com/sitemap.xml
