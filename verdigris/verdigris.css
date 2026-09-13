@@ -1605,7 +1605,7 @@ legend{
 /* Disabled is MUTED, never faded. opacity:.5 is the usual move and it is
    wrong here: it composites the text toward the surface and destroys the
    measured ratio, turning an AAA token into whatever falls out. Muted text
-   on the page ground is 7.06:1 in ink and 8.50:1 on paper — still legal. */
+   on the page ground is 7.25:1 in ink and 8.50:1 on paper — still legal. */
 .vd-input:disabled,.vd-textarea:disabled,.vd-select:disabled{
   color:var(--vd-text-muted);background:var(--vd-surface);
   border-style:dashed;cursor:not-allowed;
@@ -2338,7 +2338,7 @@ a.vd-tag{display:inline-flex;align-items:center;min-height:44px}
     background:var(--vd-surface);border-bottom-color:var(--vd-rule);
   }
   /* No colour override. The field is masked out behind the nav, so the links
-     sit on flat ground and --vd-text-muted holds at 7.06:1. Had the field run
+     sit on flat ground and --vd-text-muted holds at 7.25:1. Had the field run
      under them they would have needed --vd-text: muted peaks at 6.22 over
      this field even at an alpha low enough to make it invisible. */
   @media(prefers-reduced-motion:reduce){

@@ -744,6 +744,17 @@ invalidated, and the palette document's rewrite.
   It is the length of what is written, which is exactly where `resume.html` says the one-page
   constraint is enforced. Recorded rather than fixed.
 
+## 2.0.2 — 2026-09-13
+
+PATCH. Two more stale copies of the same figure, in `verdigris.css` comments: the disabled-control
+note and the mobile nav-overlay note both still said `--vd-text-muted` holds at 7.06:1. It is
+7.25:1.
+
+2.0.1's sweep missed them because the filter excluded every line that mentioned the old value in a
+historical sense — and these two read as history but are live claims about the current token. The
+remaining three occurrences are genuinely historical and stay: two describe what the value *was*,
+and one is a field-band measurement that has nothing to do with muted text.
+
 ## The design record
 
 Moved here from `README.md`, which describes what works now rather than how it got that way.
