@@ -38,3 +38,29 @@ exactly what the OFL expects — hence three files rather than one.
 
 If you add or replace a family, add its `OFL-*.txt` at the same time. The obligation attaches to
 redistribution, and publishing this repository is redistribution.
+
+## Before you subset these further
+
+They are already subset, but broadly — `literata-400-normal.woff2` alone is 86 KB. Cutting them
+tighter is a real saving and the kit has not done it, because it ships no build step and no
+`fonttools`. If you do it in a consumer, **the range is not "Latin-1 plus punctuation".**
+
+`topolang.js` paints glyphs chosen from a mode's `fill` and `cfn` arrays, so they appear nowhere
+in the CSS and nothing greps them out of the markup. Across the three shipped modes that is:
+
+```
+STRATA  fill  . _ - = ≈ ≡ █      cfn  # = ‖ #
+RELIEF  fill  . ° o O 0 @ █      cfn  + - ¦ +
+SHADE   fill  . + # @            cfn  none
+```
+
+`≈ ≡ █ ‖` are U+2248, U+2261, U+2588 and U+2016 — none of them Latin-1. A Latin-1 subset drops
+all four, and the field silently falls back to a system face for those cells, at a different
+advance width, which breaks the grid the whole renderer assumes. The site ships SHADE, whose set
+is pure ASCII, so the damage would not appear until someone changed mode.
+
+Also required and easy to miss: **U+2193 (↓)** for `.vd-hero__cue`, and `° · — ’ é` across the
+mono and text faces. Verified present in the shipped faces by advance-width probe — in a
+monospace face every glyph shares one advance, so a substituted glyph measures differently.
+
+If you subset, re-run that probe afterwards rather than trusting the range.

@@ -51,7 +51,15 @@
   --vd-ink-300:#3a3835;   /* hairline, emphasised                          */
 
   /* bone ramp — every value below is measured against --vd-ink-000 */
-  --vd-bone-400:#A8A192;  /*  7.06:1  AAA · lowest legal text value        */
+  /* WAS #A8A192, published at 7.06:1. That ratio is against the --vd-ink-000
+     TOKEN, and the page a reader sees is not that colour: body::before lays
+     5% grain over it, which lifts the worst ground pixel to #1F1F1A. Measured
+     against what actually renders, #A8A192 was 6.44:1 — under AAA on every
+     page in ink, for as long as the grain has existed, and invisible to
+     audit.js because that resolves tokens and cannot see an overlay.
+     #B2AB9C measures 7.25:1 against the same rendered ground. */
+  --vd-bone-400:#B2AB9C;  /*  7.25:1  AAA · lowest legal text value, measured
+                                 against the GRAINED ground, not the token   */
   --vd-bone-500:#D0CAB8;  /* 11.06:1  AAA · primary text                   */
   --vd-bone-600:#E8E2D0;  /* 14.00:1  AAA · emphasis                       */
   --vd-bone-700:#F0EDE4;  /* 15.48:1  AAA · maximum                        */
@@ -945,7 +953,7 @@ vd-hero{display:block;position:relative;padding:var(--vd-space-4) 0 var(--vd-spa
        composite            #20381E
        bone-700 display     10.90:1  AAA
        bone-500 body         7.79:1  AAA
-       bone-400 muted        4.97:1  — must not be placed over the field
+       bone-400 muted        under 5:1 — must not be placed over the field
 
      LIGHT. Canvas at 1.0, because subtractive marks on bone have far less
      room to work in, so the mask alone limits — and the held alpha is LOWER
@@ -1009,7 +1017,7 @@ vd-hero{display:block;position:relative;padding:var(--vd-space-4) 0 var(--vd-spa
    comment, and the table in it, before changing either. */
 .vd-hero__thesis{text-wrap:balance;margin:0;max-width:58%}
 /* bone-500, NOT bone-400. The sub-line now sits inside the field's text
-   column, and bone-400 measures 4.82:1 against the worst-case composite —
+   column, and bone-400 measures well under 7:1 against the worst composite —
    below AAA. bone-500 measures 7.56:1 there and holds. This is the one
    place the overrun decision forced a text colour to change; the muted
    value is still correct anywhere the field cannot reach. */
@@ -1133,7 +1141,17 @@ vd-system-card[data-clickable]:hover .vd-system-card__title a::after,
 .vd-system-card__proof b{color:var(--vd-text-strong);font-weight:500}
 .vd-system-card__proof b.vd-is-data{color:var(--vd-data);font-variant-numeric:tabular-nums}
 
-.vd-grid{display:grid;gap:var(--vd-space-1);grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
+/* --vd-grid-min is the knob, not a new component. auto-fit lands on two
+   columns inside .vd-spread__body at 320px minimum, so three cards leave one
+   orphaned on its own row — the grid tiles at 2 or 4 and taxes 3. That is a
+   content decision the grid should not be making, so the magic number is
+   exposed: 280px gives three columns in a 928px body, 220px gives four.
+   Set it on the .vd-grid element, not on :root, or it moves every grid. */
+.vd-grid{
+  --vd-grid-min:320px;
+  display:grid;gap:var(--vd-space-1);
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,var(--vd-grid-min)),1fr));
+}
 
 /* ── vd-note-card · field notes ──────────────────────────────────────── */
 /* Inline padding with matching negative margin: the hover fill extends past
@@ -1778,6 +1796,18 @@ legend{
   margin:0;color:var(--vd-text);padding:var(--vd-space-q) 0;
   border-bottom:var(--vd-hairline) solid var(--vd-rule);
 }
+/* A LINKED value carries its own height. An inline anchor's box is driven by
+   font metrics, not by the row's line-height, so a link in a 14px mono value
+   measures about 193x18 — under the 24px of 2.5.8, never mind the 44px of
+   2.5.5. A masthead is exactly where a repo, a DOI or a live URL wants to go,
+   so this is not an edge case; it is the second thing anyone puts here.
+
+   45px, not 44: the row then closes at 45 + 15 of padding = 60, two
+   baselines, so buying the target costs the grid nothing. */
+.vd-article__meta dd a{
+  display:inline-flex;align-items:center;min-height:45px;
+}
+
 /* The last pair closes on the block's own bottom border, not its own. */
 .vd-article__meta dt:nth-last-of-type(1),
 .vd-article__meta dd:nth-last-of-type(1){border-bottom:0}

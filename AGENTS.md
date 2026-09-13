@@ -123,6 +123,13 @@ fonts do not — the edge keeps serving the old file until the query string chan
 > returning reader gets last week's stylesheet against this week's markup, and the bug reports
 > will describe a page you cannot reproduce.
 
+**A consumer that re-subsets the fonts loses it on every pull**, because a fresh `verdigris/`
+copy overwrites both the `.woff2` files and the `@font-face` sources that name them — leaving a
+page that references thirteen files which are not there. The kit does not subset further itself:
+it ships no build step and no `fonttools`. If you do it downstream, read
+`verdigris/fonts/LICENSES.md` first — the glyph range is not the obvious one, because
+`topolang.js` paints from arrays that appear in no stylesheet and no markup.
+
 Documentation under `verdigris/` is not served, so it does not count. Fonts are cached
 `immutable` and content-addressed by filename: a changed face is a new file, never an edit in
 place.
@@ -312,6 +319,12 @@ body text at 7:1 sitting directly under the display line, and no mask clears one
 the other. `VdHero` sets `data-hero-sub`, which drops the field to `--vd-hero-mask-dim`. Measured
 there: sub 7.53 / 7.79. Set from JS rather than `:has()` so an engine without `:has()` cannot
 silently ship the sub under-measured.
+
+**A published ratio measured token-against-token is not the ratio a reader gets.** `body::before`
+lays 5% grain over the ground, which lifted `--vd-bone-400` from its published 7.06:1 to a
+rendered 6.44:1 — under AAA on every page in ink, for as long as the grain has existed, and
+invisible to `audit.js` because that resolves tokens and cannot see an overlay. The token is now
+`#B2AB9C`. Any new text token must be measured against the **grained** ground, not `--vd-surface`.
 
 **Measure the rendered page, never the token.** `audit.js` computes contrast against
 `--vd-surface` and cannot see a canvas, so it passes hero text that is failing. Screenshot with

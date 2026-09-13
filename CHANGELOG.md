@@ -495,6 +495,51 @@ The reading view. Five complaints from actually reading a 2,700-word essay in it
   raised initial is the obvious device and reads as magazine pastiche in a system this geometric.
 - **`--vd-size-section`, `--vd-lead-1h`**, and a masthead specimen in `reader.html`.
 
+## 1.15.0 — 2026-09-13
+
+A token that had been failing AAA for as long as the grain has existed, and the second round of
+consumer reports.
+
+### Fixed
+
+- **`--vd-bone-400` was published at 7.06:1 and rendered at 6.44:1.** The published figure is
+  measured against the `--vd-ink-000` *token*, and no reader ever sees that colour: `body::before`
+  lays 5% grain over it, lifting the worst ground pixel from `#161614` to `#1F1F1A`. Every muted
+  element in ink — nav links, labels, captions, `dt`, swatch meta — has been under AAA on every
+  page since the grain landed. `#A8A192` → **`#B2AB9C`, 7.25:1 against the grained ground.**
+  Re-measured across 66 muted elements on four pages: **7.25–7.94 ink, 8.21–8.50 paper**, none
+  under 7:1.
+
+  `audit.js` could not have caught this. It resolves tokens and composites against
+  `--vd-surface`; an overlay painted by a pseudo-element is invisible to it. The rendered-pixel
+  method is the authority, and AGENTS.md now says so.
+
+- **A link in `.vd-article__meta` failed 2.5.8.** Reported by the build agent and confirmed: an
+  inline anchor's box is driven by font metrics, not the row's line-height, so a link in a 14px
+  mono value measured **193×18** against a 24px minimum. A masthead is where a repo, a DOI or a
+  live URL goes — the second thing anyone puts there. `dd a` now carries **45px**, so the row
+  closes at 60 and buying the target costs the grid nothing. The specimen gained a linked row,
+  because the reason this shipped broken is that four rows of plain text never exercised it.
+
+### Added
+
+- **`--vd-grid-min`**, set on the `.vd-grid` element. `auto-fit` lands on two columns inside
+  `.vd-spread__body`, so three cards orphan one — the grid tiles at 2 or 4 and taxes 3, which is
+  a content decision it should not be making. `280px` gives three columns in a 928px body. A knob
+  on an existing magic number, not a new component.
+
+- **`verdigris/fonts/LICENSES.md` — "Before you subset these further".** The faces are subset but
+  broadly, and cutting them tighter is a real saving the kit cannot make (no build step, no
+  `fonttools`). The range is **not** Latin-1 plus punctuation: `topolang.js` paints from a mode's
+  `fill` and `cfn` arrays, which appear in no stylesheet and no markup, and `≈ ≡ █ ‖` are all
+  outside Latin-1. A Latin-1 subset drops them, the field falls back to a system face at a
+  different advance, and the grid the renderer assumes breaks — invisibly, because the shipped
+  mode is SHADE and its set is pure ASCII. `U+2193` for the scroll cue is the other easy miss.
+  Coverage in the shipped faces verified by advance-width probe.
+
+- **AGENTS.md, Shipping:** a downstream subset is lost on every pull, since a fresh `verdigris/`
+  copy overwrites both the `.woff2` files and the `@font-face` rules naming them.
+
 ## The design record
 
 Moved here from `README.md`, which describes what works now rather than how it got that way.

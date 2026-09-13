@@ -354,7 +354,7 @@ from the running CSS. To check this table has not gone stale, diff it against
 | `.vd-spread` | Rail-plus-body grid. Collapses to one column below 860px |
 | `.vd-spread__rail` | The sticky left rail. Offsets itself by `--vd-nav-h` to clear the nav |
 | `.vd-spread__body` | The content column |
-| `.vd-grid` | Auto-fitting card grid. `auto-fit` lands on **two columns** inside `.vd-spread__body` at desktop width, so it tiles at 2 or 4 and leaves a third card orphaned on its own row. Nothing breaks; decide the pillar count knowing the cost |
+| `.vd-grid` | Auto-fitting card grid. `auto-fit` lands on **two columns** inside `.vd-spread__body` at desktop width, so it tiles at 2 or 4 and orphans a third card. Set `--vd-grid-min` **on the element** to change it: `280px` gives three columns in a 928px body, `220px` gives four |
 | `.vd-stack` | Vertical flow with consistent spacing |
 | `.vd-rule` | A horizontal hairline. Decorative, exempt from 1.4.11 |
 
@@ -365,7 +365,7 @@ from the running CSS. To check this table has not gone stale, diff it against
 | `.vd-prose` | Body copy, capped at `--vd-measure`. Also carries the document primitives: lists, `hr`, bare `img`, bare `blockquote`, `dl` |
 | `.vd-prose--lead` | One register up, for a standfirst |
 | `.vd-article__body` | Long-form reading register: 18px at `--vd-measure-read` above 860px, body register below. See **Two measures** above |
-| `.vd-article__meta` | The masthead block. A `<dl>` in mono at half leading with a rule under each row, and a stronger rule closing it — metadata to scan, not prose to read. Put it between the dek and the body |
+| `.vd-article__meta` | The masthead block. A `<dl>` in mono with a rule under each row and a stronger rule closing it — metadata to scan, not prose to read. Put it between the dek and the body. A **linked value** gets its target height automatically; the row grows to 60px |
 | `.vd-article__title` | Article or resume h1. One register below the hero display line |
 | `.vd-article__dek` | Standfirst. Capped shorter than the measure so it reads as a summary |
 | `.vd-article__body` | The article body wrapper |

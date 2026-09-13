@@ -47,10 +47,10 @@ catch(e){}
 <meta property="og:image:height" content="630">
 <meta property="og:site_name" content="David Reyburn">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="verdigris/verdigris.css?v=1.14.0">
-<link rel="stylesheet" href="verdigris/print.css?v=1.14.0">
-<script src="verdigris/verdigris.js?v=1.14.0" defer></script>
-<script src="verdigris/audit.js?v=1.14.0" defer></script>
+<link rel="stylesheet" href="verdigris/verdigris.css?v=1.15.0">
+<link rel="stylesheet" href="verdigris/print.css?v=1.15.0">
+<script src="verdigris/verdigris.js?v=1.15.0" defer></script>
+<script src="verdigris/audit.js?v=1.15.0" defer></script>
 </head>
 <body>
 <a class="vd-skip" href="#main">Skip to content</a>
@@ -115,6 +115,12 @@ catch(e){}
           <dd>2026-08. Revised 2026-09.</dd>
           <dt>Reading time</dt>
           <dd>9 minutes, 2,400 words.</dd>
+          <!-- A LINKED value. Exercised here on purpose: an inline anchor in
+               a mono row is about 18px tall, under the 24px that 2.5.8 asks
+               for, and a masthead is exactly where a repo, a DOI or a live
+               URL wants to go. .vd-article__meta dd a carries the height. -->
+          <dt>Live</dt>
+          <dd><a href="https://github.com/davidreyburn">github.com/davidreyburn</a></dd>
         </dl>
 
         <div class="vd-article__body vd-prose">
