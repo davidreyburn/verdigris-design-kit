@@ -443,6 +443,58 @@ Four fixes to the mobile hero, all from looking at it on a real phone.
 
 - **`--vd-hero-mask-dim`** and `data-hero-sub`, the guard above.
 
+## 1.14.0 — 2026-09-13
+
+The reading view. Five complaints from actually reading a 2,700-word essay in it.
+
+### Fixed
+
+- **Headings in long-form prose had no rhythm at all.** `h1,h2,h3,h4{margin:0}` is global and
+  correct for a sectioned page, where `.vd-section` supplies the space. An essay has no such
+  wrapper, so an `h2` was a bare sibling of a `<p>`: 30px above — and that 30 is the *previous
+  paragraph's* bottom margin, not the heading's — and **0px below**. The heading touched the first
+  line of its own section. `.vd-prose h2/h3/h4` now carry it, 90/30 for `h2`, and space above
+  always exceeds space below.
+
+- **`-webkit-font-smoothing:antialiased` was costing 26% of the ink on screen.** It forces
+  grayscale AA over the platform default, which renders every glyph thinner; light text on dark
+  already reads lighter in weight than the same pair inverted, and the two compound. Measured on
+  an 18px paragraph in ink: coverage **13.22% with it, 16.68% without**; mean luminance 43.42
+  against 50.02. Removed. The colour is untouched, so every ratio published in this repository
+  stands. Raising `--vd-text` a step instead buys 3.6% and takes contrast from 11.06:1 to 14:1,
+  which is where halation starts for sustained reading — the obvious lever was worth almost
+  nothing next to the one nobody looks at.
+
+- **Three right edges stacked down one page.** The title ran the full 928px of the spread body
+  while the prose stopped at 689 and the metadata ran wider still. The eye takes the widest as
+  true and everything narrower as squeezed, which is why a 70-character column read as cramped.
+  Title, masthead and prose now share one edge.
+
+### Changed
+
+- **`--vd-measure-read` is 752px, not 66ch** — about 76 characters, up from 70. The unit is the
+  point: `ch` resolves against each element's own font-size, so one token is 752px on 18px prose
+  and 2340px on a 56px title and can never make the two agree.
+
+- **Article `h2` drops to a third register, 32px.** The scale is deliberately two-register and
+  that holds for UI, where hierarchy comes from weight, case and numbering. It fails across an
+  essay: `h2` at 56px was the same size as the article title, so a section shouted as loudly as
+  the piece, and `h3` at 18px is the same size as the body it introduces. `--vd-size-section`
+  sits clear of both, on a 45px line — one and a half baselines, so the grid holds.
+
+### Added
+
+- **`.vd-article__meta`**, the masthead. A plain `<dl>` in `.vd-prose` renders its values in the
+  reading face at reading size, so six rows of metadata *were* prose — the block read as the
+  first section of the essay rather than the card in front of it, and cost ~180px before the
+  first sentence. Mono values at half leading, a hairline under each row, and a stronger rule
+  closing the block. About half the height, and scanned rather than read.
+- **The closing rule is the threshold.** It bounds the metadata and it is the line the reader
+  crosses into the essay, which is the other half of why the piece used to just start.
+- **`.vd-article__body>p:first-of-type`** takes `--vd-text-strong`. One step, nothing else. A
+  raised initial is the obvious device and reads as magazine pastiche in a system this geometric.
+- **`--vd-size-section`, `--vd-lead-1h`**, and a masthead specimen in `reader.html`.
+
 ## The design record
 
 Moved here from `README.md`, which describes what works now rather than how it got that way.

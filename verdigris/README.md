@@ -365,6 +365,7 @@ from the running CSS. To check this table has not gone stale, diff it against
 | `.vd-prose` | Body copy, capped at `--vd-measure`. Also carries the document primitives: lists, `hr`, bare `img`, bare `blockquote`, `dl` |
 | `.vd-prose--lead` | One register up, for a standfirst |
 | `.vd-article__body` | Long-form reading register: 18px at `--vd-measure-read` above 860px, body register below. See **Two measures** above |
+| `.vd-article__meta` | The masthead block. A `<dl>` in mono at half leading with a rule under each row, and a stronger rule closing it — metadata to scan, not prose to read. Put it between the dek and the body |
 | `.vd-article__title` | Article or resume h1. One register below the hero display line |
 | `.vd-article__dek` | Standfirst. Capped shorter than the measure so it reads as a summary |
 | `.vd-article__body` | The article body wrapper |

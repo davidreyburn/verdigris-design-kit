@@ -145,12 +145,21 @@
   --vd-size-xs:14px;
   --vd-size-s:16px;
   --vd-size-m:18px;
+  /* A THIRD register, and it exists only inside long-form prose. The scale
+     is deliberately two-register -- flat body, large display, nothing
+     between -- and that holds for UI, where hierarchy comes from weight,
+     case and numbering. It fails across a 2,700 word essay: h2 at 56px is
+     the same size as the article title, so sections shout as loudly as the
+     piece, and h3 at 18px is the same size as the body it introduces.
+     32 sits clear of both. See .vd-prose h2. */
+  --vd-size-section:32px;
   --vd-size-xl:56px;
   --vd-size-2xl:72px;
 
   /* every line-height is a multiple or half of the 30px baseline */
   --vd-lead-half:15px;
   --vd-lead-1:30px;
+  --vd-lead-1h:45px;        /* one and a half baselines, for --vd-size-section */
   --vd-lead-2:60px;
   --vd-lead-hero:75px;
 
@@ -180,7 +189,13 @@
      element's own font-size, so one token cannot serve two registers: 58ch is
      538px at 16px and 1997px at 56px. See .vd-article__body, and the note in
      verdigris/README.md before reaching for either of these. */
-  --vd-measure-read:66ch;
+  /* 752px, NOT 72ch, and the unit is the point. `ch` resolves against the
+     element's own font-size, so the same token is 752px on 18px prose and
+     2340px on a 56px title — it cannot make two elements share an edge,
+     which is exactly what this measure has to do. Derived once: 72ch at the
+     18px reading size, about 76 characters. If --vd-size-read moves, this
+     has to be re-derived by hand; that is the price of an edge that holds. */
+  --vd-measure-read:752px;
   /* How far the mobile field is held back behind the display line. It is set
      by the LARGE-TEXT threshold, not the body one, and that is the whole
      reason the field can be vibrant here.
@@ -482,7 +497,20 @@ body{
   font-family:var(--vd-face-text);
   font-size:var(--vd-size-s);
   line-height:var(--vd-lead-1);
-  -webkit-font-smoothing:antialiased;
+  /* NO -webkit-font-smoothing:antialiased. It was here, and it was costing
+     26% of the ink on screen.
+
+     `antialiased` forces grayscale AA in place of the platform default,
+     which renders every glyph thinner. Light text on a dark ground already
+     looks lighter in weight than the same pair inverted — irradiation — so
+     on the ink theme the two compound and body text reads as if it is
+     hiding. Measured on a real paragraph at 18px: ink coverage 13.22% with
+     it, 16.68% without; mean luminance 43.42 against 50.02.
+
+     Raising --vd-text to --vd-bone-600 instead buys 3.6%, against 26% here,
+     and costs contrast that long-form reading does not want: 11.06:1 is
+     comfortable for sustained text, 14:1 is where halation starts. The
+     colour is unchanged, so every measured ratio in this repository stands. */
   text-rendering:optimizeLegibility;
 }
 /* flat ground plus 5% grain, per calibration §04. Fixed so it does not
@@ -521,6 +549,23 @@ h2{font-size:var(--vd-size-xl);line-height:var(--vd-lead-2);letter-spacing:var(-
 /* No intermediate sizes exist by design. Below h2, hierarchy is carried by
    weight, case, rules and numbering rather than by size. */
 h3{font-size:var(--vd-size-m);line-height:var(--vd-lead-1);font-weight:600;color:var(--vd-text-strong)}
+
+/* HEADING RHYTHM, and it exists only inside prose. Headings are margin:0
+   everywhere else on purpose: a sectioned page gets its vertical rhythm from
+   .vd-section, and a margin here would fight it.
+
+   Long-form has no .vd-section to lean on. An h2 in an essay is a sibling of
+   a <p> and inherited nothing, so it sat 30px below the previous paragraph --
+   that 30 is the PARAGRAPH's bottom margin, not the heading's -- and 0px
+   above the text it introduces. The heading touched its own first line.
+
+   Space above always exceeds space below. That is what binds a heading to the
+   section it opens rather than the one it closes; equal space makes it float
+   between two blocks and belong to neither. All values stay on the 30px grid. */
+.vd-prose h2{margin:var(--vd-space-3) 0 var(--vd-space-1)}
+.vd-prose h3{margin:var(--vd-space-2) 0 var(--vd-space-h)}
+.vd-prose h4{margin:var(--vd-space-2) 0 var(--vd-space-h)}
+.vd-prose>:first-child{margin-top:0}
 h4{font-family:var(--vd-face-mono);font-size:var(--vd-size-xs);line-height:var(--vd-lead-1);
    font-weight:500;text-transform:uppercase;letter-spacing:var(--vd-track-label);color:var(--vd-text-muted)}
 p{margin:0 0 var(--vd-space-1)}
@@ -1666,6 +1711,11 @@ legend{
   font-size:var(--vd-size-xl);line-height:var(--vd-lead-2);
   letter-spacing:var(--vd-track-display);color:var(--vd-text-max);
   margin:0;
+  /* Same right edge as the prose. The title ran the full 928px of the
+     spread body while the text stopped at 689, and two left-aligned edges
+     239px apart read as a constrained column rather than a generous one:
+     the eye takes the wider as true and the narrower as squeezed. */
+  max-width:var(--vd-measure-read);
 }
 /* The standfirst. One register above body, capped shorter than the measure so
    it reads as a summary rather than as the first paragraph. */
@@ -1687,6 +1737,62 @@ legend{
    Element, not descendant: the reader page puts both classes on one div
    (`class="vd-article__body vd-prose"`). Equal specificity, so this wins on
    source order — keep it after .vd-prose. */
+/* ── .vd-article__meta · the masthead block ──────────────────────────────
+   A definition list in .vd-prose renders its values in the reading face at
+   the reading size, which is right for a glossary and wrong for metadata:
+   six rows of 18px Literata IS prose, so the block reads as the first
+   section of the essay rather than as the card in front of it. It also cost
+   about 180px before a reader reached the first sentence.
+
+   Mono values, half-leading, a hairline under each row. It becomes a table
+   to scan rather than a passage to read, in the same register as .vd-readout
+   and vd-meta, and it takes roughly half the height.
+
+   The closing rule is doing two jobs. It bounds the block, and it is the line
+   the reader crosses into the essay -- which is the other half of why the
+   article used to "just start". */
+.vd-article__meta{
+  display:grid;grid-template-columns:minmax(0,132px) minmax(0,1fr);
+  gap:0 var(--vd-space-1);
+  /* Same edge as the title and the prose. A table could justify running
+     wider than the measure, but three different right edges stacked down one
+     page is the thing this release is fixing. */
+  max-width:var(--vd-measure-read);
+  margin:var(--vd-space-2) 0 var(--vd-space-2);
+  border-top:var(--vd-hairline) solid var(--vd-rule);
+  /* Strong, not the hairline: this edge is a threshold, not a row divider. */
+  border-bottom:var(--vd-hairline) solid var(--vd-rule-strong);
+}
+.vd-article__meta dt{
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  line-height:var(--vd-lead-1);text-transform:uppercase;
+  letter-spacing:var(--vd-track-label);color:var(--vd-text-muted);
+  font-weight:500;padding:var(--vd-space-q) 0;
+  border-bottom:var(--vd-hairline) solid var(--vd-rule);
+}
+.vd-article__meta dd{
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-xs);
+  line-height:var(--vd-lead-1);font-variant-numeric:tabular-nums;
+  margin:0;color:var(--vd-text);padding:var(--vd-space-q) 0;
+  border-bottom:var(--vd-hairline) solid var(--vd-rule);
+}
+/* The last pair closes on the block's own bottom border, not its own. */
+.vd-article__meta dt:nth-last-of-type(1),
+.vd-article__meta dd:nth-last-of-type(1){border-bottom:0}
+
+/* THE FIRST PARAGRAPH. One step up in colour, nothing else -- no drop cap,
+   no size change. A raised initial is the obvious device and it reads as
+   magazine pastiche in a system this geometric; a single step of emphasis
+   says "start here" and then gets out of the way. */
+.vd-article__body>p:first-of-type{color:var(--vd-text-strong)}
+
+/* Section headings inside an article take the third register. Outside an
+   article, h2 stays at display size -- a landing-page section head IS the
+   loudest thing in its band, and there is no title above it competing. */
+.vd-article__body h2{
+  font-size:var(--vd-size-section);line-height:var(--vd-lead-1h);
+  font-weight:600;
+}
 .vd-article__body{
   margin-top:var(--vd-space-2);
   font-size:var(--vd-size-read);max-width:var(--vd-measure-read);
@@ -2200,6 +2306,13 @@ a.vd-tag{display:inline-flex;align-items:center;min-height:44px}
   .vd-prose dt{padding-top:0;margin-bottom:var(--vd-space-q)}
   .vd-prose dd{margin-bottom:var(--vd-space-1)}
   .vd-prose dd:last-child{margin-bottom:0}
+  /* The masthead stacks too, but keeps its rules: a 132px label column
+     leaves nothing for a value at this width, and the rule under each PAIR
+     is what still reads as a row once the columns are gone. So the label
+     sheds its border and the value keeps one. */
+  .vd-article__meta{grid-template-columns:minmax(0,1fr)}
+  .vd-article__meta dt{padding-bottom:0;border-bottom:0}
+  .vd-article__meta dd{padding-top:0}
 }
 
 /* Note cards. The desktop row is date | title | length on one baseline.

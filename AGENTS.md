@@ -262,6 +262,23 @@ sideways at 320px, which is a 1.4.10 failure. The audit checks this specifically
 and release gate 1 fails the page for it. This is the supported way to ship sanitized work whose
 artifact cannot travel.
 
+**Headings are `margin:0` globally, and `.vd-prose` overrides that.** A sectioned page gets its
+rhythm from `.vd-section`; long-form has no such wrapper, so an `h2` in an essay inherited nothing
+and sat flush against the text it introduced. `.vd-prose h2/h3/h4` carry the rhythm, and space
+above always exceeds space below — that is what binds a heading to the section it opens rather
+than the one it closes.
+
+**`--vd-measure-read` is a px length, not `ch`, and that is deliberate.** `ch` resolves against
+each element's own font-size, so the same token is 752px on 18px prose and 2340px on a 56px
+title — it cannot make two elements share an edge, which is its job. It is derived by hand (72ch
+at the 18px reading size, ~76 characters); if `--vd-size-read` moves, re-derive it.
+
+**Do not add `-webkit-font-smoothing:antialiased`.** It was in `body` and cost 26% of the ink on
+screen: measured on an 18px paragraph in ink, coverage 13.22% with it against 16.68% without.
+Light text on dark already reads lighter in weight than the same pair inverted, and grayscale AA
+compounds it. If body text ever reads dim, check this before reaching for a brighter token —
+raising `--vd-text` a step buys 3.6% and costs contrast that long reading does not want.
+
 **`.vd-prose` serves two registers. Never retune it globally.** It sets both a three-line card
 blurb and a long essay, so a change made for one silently resizes the other. Long-form has its
 own register — `--vd-size-read` and `--vd-measure-read`, applied by `.vd-article__body` above

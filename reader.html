@@ -47,10 +47,10 @@ catch(e){}
 <meta property="og:image:height" content="630">
 <meta property="og:site_name" content="David Reyburn">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="verdigris/verdigris.css?v=1.13.0">
-<link rel="stylesheet" href="verdigris/print.css?v=1.13.0">
-<script src="verdigris/verdigris.js?v=1.13.0" defer></script>
-<script src="verdigris/audit.js?v=1.13.0" defer></script>
+<link rel="stylesheet" href="verdigris/verdigris.css?v=1.14.0">
+<link rel="stylesheet" href="verdigris/print.css?v=1.14.0">
+<script src="verdigris/verdigris.js?v=1.14.0" defer></script>
+<script src="verdigris/audit.js?v=1.14.0" defer></script>
 </head>
 <body>
 <a class="vd-skip" href="#main">Skip to content</a>
@@ -96,6 +96,26 @@ catch(e){}
         <p class="vd-article__dek">Accessibility has always been machine legibility. The screen
           reader was the first agent, and everything we learned making interfaces legible to it
           applies directly to the agents arriving now.</p>
+
+        <!-- THE MASTHEAD. A plain <dl> in .vd-prose renders its values in the
+             reading face at reading size, which is right for a glossary and
+             wrong for metadata: it reads as the first section of the essay
+             rather than as the card in front of it. .vd-article__meta puts
+             the values in mono at half leading with a rule under each row,
+             so it is scanned rather than read.
+
+             The rule under the block is load-bearing twice: it bounds the
+             metadata, and it is the line the reader crosses into the essay. -->
+        <dl class="vd-article__meta">
+          <dt>What</dt>
+          <dd>A maturity model for agent-mediated work, in four levels.</dd>
+          <dt>Role</dt>
+          <dd>Author.</dd>
+          <dt>Published</dt>
+          <dd>2026-08. Revised 2026-09.</dd>
+          <dt>Reading time</dt>
+          <dd>9 minutes, 2,400 words.</dd>
+        </dl>
 
         <div class="vd-article__body vd-prose">
           <p>Teams are not struggling because they lack AI tools. They are struggling because the
