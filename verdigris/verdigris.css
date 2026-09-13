@@ -1493,7 +1493,13 @@ code{font-family:var(--vd-face-mono);font-size:.92em}
    ═══════════════════════════════════════════════════════════════════════ */
 vd-quote{display:block;margin:var(--vd-space-2) 0;padding-left:var(--vd-space-1);
   border-left:2px solid var(--vd-editorial)}
-vd-quote blockquote{margin:0;font-size:var(--vd-size-m);line-height:var(--vd-lead-1);
+/* Capped at the reading measure. A pull quote inherits the width of whatever
+   holds it, and in a .vd-spread__body that is 928px — which measured 91
+   characters a line, the widest text on the site and well past the 80 any
+   reader tolerates. It was invisible to the audit because the measure check
+   only inspected <p> and this text sits directly in a <blockquote>. */
+vd-quote blockquote{margin:0;max-width:var(--vd-measure-read);
+  font-size:var(--vd-size-m);line-height:var(--vd-lead-1);
   color:var(--vd-text-strong)}
 vd-quote figcaption{margin-top:var(--vd-space-h);font-family:var(--vd-face-mono);
   font-size:var(--vd-size-micro);letter-spacing:.06em;color:var(--vd-text-muted)}
@@ -1634,6 +1640,39 @@ legend{
   border-color:var(--vd-danger);
   box-shadow:inset 2px 0 0 var(--vd-danger);
 }
+/* ── submission ──────────────────────────────────────────────────────────
+   The trap is positioned off-screen, NOT display:none. A display:none input
+   is trivially detected by anything worth defending against, and some
+   assistive tech still reaches a visually-hidden control — so it is moved out
+   of the viewport and out of the tab order instead. */
+.vd-form__trap{
+  position:absolute;left:-9999px;width:1px;height:1px;
+  opacity:0;pointer-events:none;
+}
+.vd-form__result{
+  margin-top:var(--vd-space-1);
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-xs);
+  line-height:var(--vd-lead-1);
+}
+.vd-form__result[data-state="idle"]{display:none}
+.vd-form__result[data-state="pending"]{color:var(--vd-text-muted)}
+/* NO underline, and never an anchor. --vd-ok aliases --vd-link, so the
+   underline is the only channel separating a success message from a link —
+   see docs section 10. A success line that carried one would read as
+   something to click. */
+.vd-form__result[data-state="ok"]{color:var(--vd-ok);text-decoration:none}
+.vd-form__result[data-state="error"]{color:var(--vd-danger)}
+/* The global :focus-visible rule at the top already covers this. It is
+   repeated only because the region is given tabindex -1 and focused from
+   script, and a programmatic focus must still show a ring. */
+.vd-form__result:focus-visible{outline:var(--vd-focus-ring);outline-offset:var(--vd-focus-offset)}
+
+/* Pending is a disabled control, and disabled is MUTED, never faded. opacity
+   composites the label toward the surface and destroys the measured ratio;
+   --vd-text-muted is 7.25:1 and stays legal. Stated as an invariant in
+   AGENTS.md and it applies here too. */
+.vd-btn[aria-busy="true"]{color:var(--vd-text-muted);cursor:progress}
+
 .vd-field.is-invalid .vd-field__msg{color:var(--vd-danger)}
 
 /* SUCCESS. --vd-ok is --vd-link, so this line is exactly the colour of a
@@ -1864,15 +1903,22 @@ legend{
   font-size:var(--vd-size-section);line-height:var(--vd-lead-1h);
   font-weight:600;
 }
+/* THE REGISTER IS A MODIFIER, not a property of being an article. It was
+   welded to .vd-article__body, which is why the About section on the homepage
+   — running prose by any measure — stayed on the 16px UI register in a 928px
+   column while the essay two clicks away had 19px in a 790px one. Anything
+   that is read rather than scanned opts in. */
+.vd-prose--read,
 .vd-article__body{
-  margin-top:var(--vd-space-2);
   font-size:var(--vd-size-read);max-width:var(--vd-measure-read);
 }
+.vd-article__body{margin-top:var(--vd-space-2)}
 /* Below 860 the column IS the viewport, so there is no empty gutter to close
    and the larger size only costs characters: 18px measures 29 a line at 320px
    against 33 at 16px, under every comfortable minimum. The narrow screen was
    never the problem, so it keeps the body register. */
 @media(max-width:860px){
+  .vd-prose--read,
   .vd-article__body{font-size:var(--vd-size-s);max-width:var(--vd-measure)}
 }
 

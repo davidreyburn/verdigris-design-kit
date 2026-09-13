@@ -118,6 +118,18 @@ copy. There is no build, no pipeline, and nothing to invoke.
 **Cloudflare caches `verdigris/` and does not cache HTML.** Pages go live on upload; CSS, JS and
 fonts do not — the edge keeps serving the old file until the query string changes.
 
+**Semantic versioning, and the major digit is not decorative.** MAJOR is anything that changes an
+existing page without its markup changing — a token value, a removed custom property, altered
+class behaviour, new margins on a shared selector. MINOR is additions. PATCH is fixes nobody
+depends on. The kit *is* consumed now, so a consumer must be able to read the number and know
+whether pulling will move their layout. 1.14.0 through 1.16.0 each broke something and each
+shipped as a minor; a consumer pulled one and their card grid went from three columns to two with
+nothing in the version to warn them.
+
+**One version per handoff, not per commit.** Nobody consumes intermediate states during a working
+session. Bump once, immediately before pushing, and lead the changelog entry with a `### Breaking`
+table if there is anything in it.
+
 > **If any CSS or JS under `verdigris/` changed, bump the version.** In `?v=` on every page, and
 > in `CHANGELOG.md`. Leaving it alone does not mean "no change shipped" — it means every
 > returning reader gets last week's stylesheet against this week's markup, and the bug reports
@@ -295,11 +307,9 @@ Light text on dark already reads lighter in weight than the same pair inverted, 
 compounds it. If body text ever reads dim, check this before reaching for a brighter token —
 raising `--vd-text` a step buys 3.6% and costs contrast that long reading does not want.
 
-**`.vd-prose` serves two registers. Never retune it globally.** It sets both a three-line card
-blurb and a long essay, so a change made for one silently resizes the other. Long-form has its
-own register — `--vd-size-read` and `--vd-measure-read`, applied by `.vd-article__body` above
-860px only. Below 860px the column is already the viewport, and the larger size there only costs
-characters: 29 a line at 320px against 33.
+**`.vd-prose` serves two registers, and the reading one is opt-in.** Add `vd-prose--read` to a
+block that is read rather than scanned — running prose on a landing page needs it as much as an
+essay does. Never retune `.vd-prose` itself: it would resize every card blurb on the site.
 
 **`--vd-measure` is in `ch`, which resolves against the element's own font-size.** It is 538px on
 16px prose and 1997px on a 56px title — wide enough to constrain nothing. Adding it to a display

@@ -261,7 +261,13 @@
   function measure() {
     const notes = [];
     const counts = [];
-    document.querySelectorAll('p').forEach(p => {
+    /* Not just <p>. A pull quote's text sits directly in a <blockquote>, a
+       definition body in a <dd>, a long list item in an <li> — all running
+       text, and all previously invisible here. The 91-character pull quote
+       this check exists to catch was missed for exactly that reason. */
+    document.querySelectorAll('p, blockquote, dd, li').forEach(p => {
+      // A blockquote wrapping its own <p> would otherwise be counted twice.
+      if (p.querySelector('p, blockquote, dd, li')) return;
       const text = p.textContent.trim();
       if (text.length < 200 || !visible(p)) return;        // running text only
       const cs = getComputedStyle(p);

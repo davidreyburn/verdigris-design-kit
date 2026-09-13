@@ -758,6 +758,101 @@
     control.setAttribute('aria-describedby', ids.join(' '));
   }
 
+  /* ── wireSubmit ────────────────────────────────────────────────────────
+     Spam traps first, because they decide whether anything is sent.
+
+     A HONEYPOT is a field a person never sees and a bot fills in. Off-screen,
+     not display:none — a hidden input is trivially detected, and some
+     assistive tech still reaches it. aria-hidden and tabindex -1 keep it away
+     from anyone real; autocomplete off keeps a browser from helpfully filling
+     it for them.
+
+     A TIMING trap rejects anything submitted faster than a person could read
+     the form. Both cost nothing and neither needs a service.
+
+     Both fail SILENTLY: a tripped trap renders success and sends nothing.
+     Telling a bot it failed is how it learns to pass.
+
+     The honest limit, stated because the kit cannot fix it: a bot that
+     ignores script posts straight to the endpoint and sees neither trap. The
+     kit provides the client half and names the contract — the honeypot field
+     rides in the payload under its own name, and the ENDPOINT must reject it
+     when non-empty. Server-side enforcement is not something a stylesheet and
+     a custom element can promise. */
+  function wireSubmit(host, form, controls) {
+    const born = Date.now();
+    const minMs = (parseFloat(host.getAttribute('min-seconds')) || 2.5) * 1000;
+
+    let trap = null;
+    if (host.hasAttribute('honeypot')) {
+      const name = host.getAttribute('honeypot') || 'company';
+      trap = document.createElement('input');
+      trap.type = 'text'; trap.name = name; trap.tabIndex = -1;
+      trap.setAttribute('autocomplete', 'off');
+      trap.setAttribute('aria-hidden', 'true');
+      trap.className = 'vd-form__trap';
+      form.appendChild(trap);
+    }
+
+    /* Authored if present, generated only if not: every other element in this
+       kit upgrades markup that is already complete, and a result region the
+       author wrote is one they can position and word. */
+    let out = form.querySelector('.vd-form__result');
+    if (!out) {
+      out = document.createElement('div');
+      out.className = 'vd-form__result';
+      form.appendChild(out);
+    }
+    /* role=status, not alert, for both outcomes. Focus is what actually
+       announces a result — the same reasoning as the missing error summary —
+       and an assertive region that interrupts on a success message is rude. */
+    out.setAttribute('role', 'status');
+    out.setAttribute('tabindex', '-1');
+    if (!out.dataset.state) out.dataset.state = 'idle';
+
+    const btn = form.querySelector('[type="submit"], button:not([type])');
+
+    function settle(state, text) {
+      out.dataset.state = state;
+      out.textContent = text;
+      form.dataset.state = state;
+      if (btn) { btn.disabled = false; btn.removeAttribute('aria-busy'); }
+      out.focus();
+    }
+
+    form.addEventListener('submit', function (e) {
+      // The validation listener above has already run and may have stopped it.
+      if (e.defaultPrevented) return;
+      e.preventDefault();
+
+      const tripped = (trap && trap.value) || (Date.now() - born) < minMs;
+      if (tripped) return settle('ok', host.getAttribute('data-msg-ok') || 'Thank you. Your message is on its way.');
+
+      if (btn) { btn.disabled = true; btn.setAttribute('aria-busy', 'true'); }
+      out.dataset.state = 'pending';
+      out.textContent = host.getAttribute('data-msg-pending') || 'Sending…';
+
+      /* FormData over the whole form, never a hand-built object. A Turnstile
+         widget — or any third-party field — contributes a hidden input, and
+         collecting the form wholesale is what carries it along without this
+         kit knowing the vendor exists. */
+      fetch(endpointOf(form), {
+        method: (form.getAttribute('method') || 'POST').toUpperCase(),
+        body: new FormData(form),
+        headers: { Accept: 'application/json' }
+      }).then(function (r) {
+        if (!r.ok) throw new Error(r.status);
+        settle('ok', host.getAttribute('data-msg-ok') || 'Thank you. Your message is on its way.');
+        form.reset();
+      }).catch(function () {
+        settle('error', host.getAttribute('data-msg-error') ||
+          'That did not send. Please try again, or use one of the links below.');
+      });
+    });
+  }
+
+  function endpointOf(form) { return form.getAttribute('action'); }
+
   function validate(control) {
     if (control.disabled || control.type === 'submit' || control.type === 'button') return true;
     const ok = control.checkValidity();
@@ -812,6 +907,25 @@
           if (first.scrollIntoView) first.scrollIntoView({ block: 'center', behavior: 'smooth' });
         }
       });
+
+      /* ── SUBMISSION ──────────────────────────────────────────────────
+         Only when the form has an `action`. Without one the kit does
+         nothing at all: a form with no endpoint is a specimen, and the
+         consumer supplies whatever channel it falls back to.
+
+         `action` IS the transport abstraction. A Cloudflare Worker, a
+         hosted form service, anything that accepts a POST — the kit never
+         knows which, and never carries a URL, a key or an address.
+
+         NOT mailto:. It behaves differently in every browser, hands the
+         reader a half-filled mail client, and publishes the address in the
+         markup, which defeats the reason anyone wanted a form. If that is
+         the channel, use a link and no form.
+
+         With script off, none of this runs and the form posts natively.
+         That path is the platform's, not a fallback this kit maintains. */
+      const endpoint = form.getAttribute('action');
+      if (endpoint && !/^mailto:/i.test(endpoint)) wireSubmit(this, form, controls);
 
       form.addEventListener('reset', function () {
         // Defer: the reset has not been applied to values yet.

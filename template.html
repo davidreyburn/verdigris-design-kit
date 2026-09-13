@@ -60,11 +60,11 @@ catch(e){}
 <meta property="og:image:height" content="630">
 <meta property="og:site_name" content="David Reyburn">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="verdigris/verdigris.css?v=1.16.0">
-<link rel="stylesheet" href="verdigris/print.css?v=1.16.0">
-<script src="verdigris/topolang.js?v=1.16.0" defer></script>
-<script src="verdigris/verdigris.js?v=1.16.0" defer></script>
-<script src="verdigris/audit.js?v=1.16.0" defer></script>
+<link rel="stylesheet" href="verdigris/verdigris.css?v=2.0.0">
+<link rel="stylesheet" href="verdigris/print.css?v=2.0.0">
+<script src="verdigris/topolang.js?v=2.0.0" defer></script>
+<script src="verdigris/verdigris.js?v=2.0.0" defer></script>
+<script src="verdigris/audit.js?v=2.0.0" defer></script>
 </head>
 <body>
 
@@ -337,7 +337,27 @@ catch(e){}
         <span class="vd-label">Contact</span>
         <h2 id="contact-h">Form and feedback</h2>
 
-        <vd-form>
+        <!-- NO action here, deliberately. A form with no endpoint is a
+             specimen: the kit does not intercept it, nothing is sent, and the
+             submit button only exercises validation. Give the inner <form> an
+             `action` and the kit takes over the submission — a fetch POST, a
+             pending state, and a result announced in .vd-form__result.
+
+             `action` is the whole transport seam. A Cloudflare Worker, a
+             hosted form service, anything that accepts a POST: the kit never
+             learns which, and carries no URL, key or address. It refuses
+             `mailto:` on purpose — see the note in verdigris.js.
+
+             `honeypot` adds an off-screen trap field, and `min-seconds` sets
+             the floor below which a submission is treated as a bot. Both fail
+             silently. The ENDPOINT must also reject a non-empty honeypot: a
+             bot that ignores script never sees either trap.
+
+             A third-party challenge widget (Turnstile and the like) goes in
+             the form body as ordinary markup. The kit submits the whole form
+             with FormData, so the widget's hidden input rides along without
+             the kit knowing the vendor exists. -->
+        <vd-form honeypot="company" min-seconds="2.5">
           <form class="vd-form" style="margin-top:var(--vd-space-1)">
             <!-- The asterisk is a symbol with no intrinsic meaning, so this
                  legend is not decoration — it is what makes it parseable.
@@ -375,6 +395,12 @@ catch(e){}
               <textarea class="vd-textarea" id="t-msg" name="message" required minlength="20"
                         data-msg-short="Twenty characters minimum."></textarea>
             </div>
+
+            <!-- Authored, not generated. The kit fills this and moves focus
+                 to it; it creates one only if the author did not, because
+                 every element here upgrades markup that is already complete.
+                 role and tabindex are set by the kit. -->
+            <div class="vd-form__result" data-state="idle"></div>
 
             <fieldset>
               <legend>Options</legend>

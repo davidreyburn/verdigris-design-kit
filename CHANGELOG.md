@@ -1,8 +1,27 @@
 # Changelog
 
-Verdigris is versioned by what it publishes, not by semver on an API — nothing consumes it as
-a package. A version bump means the asset query strings moved and the docs page changed with
-them. Entries record what was *measured*, because that is the part that can be wrong.
+**Semantic versioning, as of 2.0.0.** The old rule was "versioned by what it publishes, not by
+semver on an API — nothing consumes it as a package." That stopped being true the moment a site
+was built on the kit, and 1.14.0 through 1.16.0 shipped breaking changes as minor bumps because
+of it: heading margins that relayout every prose page, a token whose colour changed, a custom
+property removed, and a measure whose unit changed under the same name. A consumer pulled a minor
+and their card grid silently went from three columns to two.
+
+From here:
+
+| | |
+|---|---|
+| **MAJOR** | Anything that changes existing pages without their markup changing — a token value, a removed custom property, altered class behaviour, new margins on a shared selector |
+| **MINOR** | Additions. A new component, a new opt-in modifier, a new attribute |
+| **PATCH** | Fixes that change nothing a consumer depends on |
+
+**One version per handoff, not per commit.** The asset query strings still carry the version, so
+a change to served CSS or JS must move it before anyone pulls — but nobody consumes intermediate
+states during a working session, and eight versions in a day is churn with no information in it.
+Bump once, immediately before pushing.
+
+Entries record what was *measured*, because that is the part that can be wrong. An entry with
+breaking changes leads with them.
 
 ## 1.7.0 — 2026-08-06
 
@@ -593,6 +612,102 @@ consumer reports.
 - **`U+2193` is carried by PlexMono only; Chivo does not have it.** `.vd-hero__cue` now says so
   beside the `--vd-face-mono` declaration, because changing that family would replace the arrow
   with a fallback silently — a substituted glyph still draws.
+
+## 2.0.0 — 2026-09-13
+
+`vd-form` learns to submit, and the reading register stops being article-only.
+
+**Numbered 2.0.0, and the major digit is overdue rather than earned by this release alone.**
+1.14.0 through 1.16.0 each shipped breaking changes as minor bumps, on the strength of a
+convention — "nothing consumes it as a package" — that a consumer had already disproved. Those
+versions are published and are not being rewritten. The list below is therefore everything that
+breaks for anyone upgrading **from 1.13.0 or earlier**, not only what changed today, so the whole
+jump can be read in one place.
+
+### Breaking
+
+| Since | Change | What it does to an existing page |
+|---|---|---|
+| **2.0.0** | `vd-quote blockquote` capped at `--vd-measure-read` | Pull quotes narrow. They were running 91 characters a line |
+| **1.16.0** | `--vd-grid-min` **removed**; `.vd-grid` fixed at two columns | A three-column grid becomes two. Use `--vd-grid-cols` |
+| **1.16.0** | `--vd-measure-read` changed from `ch` to `px` | Same token name, different unit. Re-derive any override |
+| **1.16.0** | `vd-system-card` is a flex column; proof takes `margin-top:auto` | Card internals reflow and the proof line pins to the foot |
+| **1.15.0** | `--vd-bone-400` `#A8A192` → `#B2AB9C` | Every muted element in ink lightens. It was failing AAA at 6.44:1 against the grained ground |
+| **1.14.0** | `.vd-prose h2/h3/h4` gained margins | Every page with headings inside prose relayouts vertically |
+| **1.14.0** | `-webkit-font-smoothing:antialiased` removed from `body` | All text renders heavier. It was costing 26% of the ink on screen |
+| **1.14.0** | `--vd-measure-read` 66ch → 752px, `--vd-size-read` 18px → 19px | The reading column widens and the type grows |
+| **1.13.0** | Mobile hero rebuilt: full-viewport, field behind the text | Any page using `vd-hero` below 860px changes shape entirely |
+
+None of these require a markup change. All of them change what renders.
+
+### Fixed
+
+- **A pull quote measured 91 characters a line** — the widest text on the site, well past the 80
+  any reader tolerates. `vd-quote blockquote` inherits the width of whatever holds it, and in a
+  `.vd-spread__body` that is 928px. Capped at the reading measure: **80 characters**.
+
+  **The audit should have caught this and did not.** Its measure check only inspected `<p>`, and a
+  pull quote's text sits directly in a `<blockquote>`. The net now covers `blockquote`, `dd` and
+  `li` — everything that holds running text — while skipping any element that wraps another, so
+  nothing is counted twice.
+
+- **The reading register was welded to `.vd-article__body`**, so the About section on the
+  homepage — running prose by any measure — sat at 16px in a 928px column while the essay two
+  clicks away had 19px in a 790px one. It is now a modifier, `.vd-prose--read`, and anything read
+  rather than scanned can opt in. About measures **790px, 19px, 76 characters**, up from 538px,
+  16px, 61.
+
+  Deliberately unchanged: the About `h2` stays at 56px, because a landing-page section head is
+  the loudest thing in its band with no title above it competing. The first-paragraph emphasis
+  stays article-only — it marks the start of an essay, and elsewhere it is noise.
+
+### Added
+
+- **A submission lifecycle on `vd-form`**, active only when the inner `<form>` has an `action`:
+  a fetch POST, a pending state, and the outcome announced in `.vd-form__result` with focus moved
+  to it. Focus is what announces a result — the same reasoning as the absent error summary.
+
+  **`action` is the entire transport seam.** A Cloudflare Worker, a hosted form service, anything
+  accepting a POST: the kit never learns which and carries no URL, key or address. With no
+  `action` it does nothing beyond validating, because a form without an endpoint is a specimen.
+  With script off the form posts natively — that path is the platform's, not one this kit
+  maintains.
+
+  **`mailto:` is refused deliberately.** Different behaviour in every browser, a half-filled mail
+  client handed to the reader, and the address published in the markup — which defeats the reason
+  anyone wanted a form.
+
+- **Two spam traps, both silent.** `honeypot` adds an off-screen field; `min-seconds` rejects
+  anything submitted faster than a person could read the form. A tripped trap renders success and
+  sends nothing, because telling a bot it failed is how it learns to pass. Verified: with the trap
+  filled, `fetch` is called **zero** times.
+
+  The trap is positioned off-screen, not `display:none` — a hidden input is trivially detected and
+  some assistive tech still reaches it.
+
+  **Stated, not glossed:** a bot that ignores script posts straight to the endpoint and sees
+  neither trap. The kit provides the client half and names the contract — the honeypot rides in
+  the payload under its own name and the endpoint must reject it non-empty. Server-side
+  enforcement is not something a stylesheet and a custom element can promise.
+
+- **Challenge-widget compatibility, with no vendor branch.** The body is submitted with
+  `FormData` over the whole form, so a Turnstile-style hidden input rides along. This is also why
+  `vd-form` only queries and wires and never rebuilds `innerHTML` — doing so would destroy a
+  third-party widget.
+
+- **`.vd-form__result` and `.vd-form__trap`.** The result region is authored and the kit generates
+  one only if absent. Pending uses `aria-busy` and the **muted** colour, never `opacity` — the
+  existing invariant. Success carries no underline and is never an anchor, because `--vd-ok`
+  aliases `--vd-link` and the underline is the only channel separating them.
+
+- **`template.html`** exercises it: honeypot, timing floor, authored result region, and a comment
+  explaining that the absent `action` is the point.
+
+### Changed
+
+- **docs §09's contact-form row** said the endpoint is absent because submitting needs a runtime
+  dependency. Still true of this site, so the row stays — but it now records that the kit carries
+  the lifecycle, since a lifecycle is not an endpoint and the row would otherwise read as false.
 
 ## The design record
 

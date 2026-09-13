@@ -55,6 +55,7 @@
   /* .vd-hero__fieldwrap is the field's mask carrier; hiding only the canvas
      inside it would leave an empty band in the stacked print layout. */
   vd-nav,vd-footer,.vd-hero__fieldwrap,.vd-hero__field,.vd-hero__cue,.vd-skip,.vd-code__copy,vd-toc,
+  .vd-form__trap,.vd-form__result,
   .vd-btn,.vd-nav__list{display:none !important}
 
   .vd-spread{display:block}

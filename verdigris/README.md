@@ -127,13 +127,14 @@ right for the blurb, thin for the essay, because 538px of 16px type in a 928px c
 --vd-measure-read:790px;  /* ~76 characters. px, not ch — see below */
 ```
 
-applied by `.vd-article__body`, and **only above 860px**. The reading size is 19px and the measure 790px — about 76 characters at a 1.58 leading ratio. Three things improve together and
+applied by `.vd-prose--read` — and by `.vd-article__body`, which carries it — and **only above 860px**. The reading size is 19px and the measure 790px — about 76 characters at a 1.58 leading ratio. Three things improve together and
 nothing is traded: 70 characters instead of 61, leading from 16/30 (1.88, loose) to 18/30
 (1.67), and the 30px baseline untouched. Below 860px the column is the viewport, so there is no
 empty space to reclaim and the larger size only costs characters — 29 a line at 320px against
 33. The narrow screen was never the problem and keeps the body register.
 
-**Do not fix this by retuning `.vd-prose`.** It would resize every card blurb on the site.
+**Do not fix this by retuning `.vd-prose`.** It would resize every card blurb on the site. Add
+`vd-prose--read` to the block that needs it instead.
 
 ## Contrast
 
@@ -327,6 +328,60 @@ A reader should not drag a sentence horizontally to finish it.
 
 Attribute selector, so it needs no JavaScript and survives the upgrade.
 
+## Submitting a form
+
+`vd-form` validates whether or not there is an endpoint. It takes over **submission** only when
+the inner `<form>` has an `action`:
+
+```html
+<vd-form honeypot="company" min-seconds="2.5">
+  <form class="vd-form" action="https://your-endpoint.example" method="post">
+    …fields…
+    <div class="vd-form__result" data-state="idle"></div>
+    <button class="vd-btn vd-btn--primary" type="submit">Send</button>
+  </form>
+</vd-form>
+```
+
+**`action` is the whole transport seam.** A Cloudflare Worker, a hosted form service, anything
+that accepts a POST — the kit never learns which, and carries no URL, key or address. With no
+`action` it does nothing on submit beyond validating, because a form without an endpoint is a
+specimen; the consumer supplies whatever channel it falls back to.
+
+**`mailto:` is refused.** It behaves differently in every browser, hands the reader a half-filled
+mail client, and publishes the address in the markup — which defeats the reason anyone wanted a
+form. If that is the channel, use a link and no form.
+
+**With script off the form posts natively.** That path is the platform's, not a fallback this kit
+maintains.
+
+### Spam, and what the kit can and cannot promise
+
+`honeypot` adds an off-screen trap field; `min-seconds` rejects anything submitted faster than a
+person could read the form. Both fail **silently** — a tripped trap renders success and sends
+nothing, because telling a bot it failed is how it learns to pass.
+
+The trap is positioned off-screen, not `display:none`: a hidden input is trivially detected, and
+some assistive tech still reaches it.
+
+**A bot that ignores script posts straight to your endpoint and sees neither trap.** The kit
+provides the client half and names the contract — the honeypot rides in the payload under its own
+name, and the endpoint must reject it when non-empty. Server-side enforcement is not something a
+stylesheet and a custom element can promise, and it would be dishonest to imply otherwise.
+
+### A challenge widget
+
+Drop it in the form body as ordinary markup. The kit submits with `FormData` over the whole form,
+so the widget's hidden input rides along — no vendor branch, no script, no key in the kit. This is
+also why `vd-form` only ever queries and wires, and never rebuilds `innerHTML`: doing so would
+destroy a third-party widget.
+
+### The result region
+
+Author it. The kit fills it and moves focus to it, and generates one only if you did not — every
+element here upgrades markup that is already complete. `role="status"` and `tabindex="-1"` are set
+by the kit. Focus is what announces the outcome, the same reasoning as the absent error summary.
+
 ## Reduced motion
 
 Not "everything stops". The field freezes to a single deterministic seeded frame, so it is
@@ -364,6 +419,7 @@ from the running CSS. To check this table has not gone stale, diff it against
 |---|---|
 | `.vd-prose` | Body copy, capped at `--vd-measure`. Also carries the document primitives: lists, `hr`, bare `img`, bare `blockquote`, `dl` |
 | `.vd-prose--lead` | One register up, for a standfirst |
+| `.vd-prose--read` | The reading register, as a modifier. Anything **read** rather than scanned opts in — a long About section as much as an essay. `.vd-article__body` applies it automatically |
 | `.vd-article__body` | Long-form reading register: 18px at `--vd-measure-read` above 860px, body register below. See **Two measures** above |
 | `.vd-article__meta` | The masthead block. A `<dl>` in mono with a rule under each row and a stronger rule closing it — metadata to scan, not prose to read. Put it between the dek and the body. A **linked value** gets its target height automatically; the row grows to 60px |
 | `.vd-article__title` | Article or resume h1. One register below the hero display line |
