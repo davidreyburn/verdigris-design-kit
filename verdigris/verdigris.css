@@ -546,8 +546,10 @@ body>*{position:relative;z-index:1}
 h1,h2,h3,h4{font-family:var(--vd-face-display);margin:0;font-weight:600;color:var(--vd-text-max)}
 h1{font-size:var(--vd-size-2xl);line-height:var(--vd-lead-hero);letter-spacing:var(--vd-track-display)}
 h2{font-size:var(--vd-size-xl);line-height:var(--vd-lead-2);letter-spacing:var(--vd-track-display);font-weight:500}
-/* No intermediate sizes exist by design. Below h2, hierarchy is carried by
-   weight, case, rules and numbering rather than by size. */
+/* No intermediate size in the general scale, by design: below h2, hierarchy
+   is carried by weight, case, rules and numbering rather than by size. The
+   one exception is --vd-size-section, which applies to headings inside
+   .vd-article__body and nowhere else — see the note beside that token. */
 h3{font-size:var(--vd-size-m);line-height:var(--vd-lead-1);font-weight:600;color:var(--vd-text-strong)}
 
 /* HEADING RHYTHM, and it exists only inside prose. Headings are margin:0

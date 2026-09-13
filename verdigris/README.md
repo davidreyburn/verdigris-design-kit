@@ -33,7 +33,7 @@ Nothing uses shadow DOM.
 | Two themes, ink and paper | Every semantic token is mapped twice, and the paper mapping exists in two places that must be edited together. |
 | AAA on all text | The palette lost orange, teal and purple as text colours. Red had to be lightened to `#E68C8C`. |
 | Three accents on three salience tiers | More to hold in your head than "max two". Green must be rationed or it becomes cosplay. |
-| Two-register type scale | No size between 18px and 56px. Sub-headings carry hierarchy by weight, case and numbering. |
+| Two-register type scale, plus one reading size | Nothing between 18px and 56px for UI, where hierarchy comes from weight, case and numbering. That failed across a 2,700-word essay — `h2` matched the article title and `h3` matched the body — so `--vd-size-section` (32px) exists for headings inside `.vd-article__body` and nowhere else. |
 | Baseline-derived rhythm | 30px unit forces half-steps (15px, 7.5px) for tight spacing. Embeds must be forced onto the grid. |
 | Light DOM, no shadow roots | No style encapsulation. Component CSS must stay namespaced by hand. |
 | The hero field is masked, not luminance-capped | The mask carries the AAA guarantee under the text column, so the field's own alpha can be tuned for legibility instead of for contrast. |
