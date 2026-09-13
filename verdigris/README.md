@@ -354,7 +354,7 @@ from the running CSS. To check this table has not gone stale, diff it against
 | `.vd-spread` | Rail-plus-body grid. Collapses to one column below 860px |
 | `.vd-spread__rail` | The sticky left rail. Offsets itself by `--vd-nav-h` to clear the nav |
 | `.vd-spread__body` | The content column |
-| `.vd-grid` | Auto-fitting card grid |
+| `.vd-grid` | Auto-fitting card grid. `auto-fit` lands on **two columns** inside `.vd-spread__body` at desktop width, so it tiles at 2 or 4 and leaves a third card orphaned on its own row. Nothing breaks; decide the pillar count knowing the cost |
 | `.vd-stack` | Vertical flow with consistent spacing |
 | `.vd-rule` | A horizontal hairline. Decorative, exempt from 1.4.11 |
 

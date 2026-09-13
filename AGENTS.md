@@ -154,8 +154,10 @@ grep -oE '<loc>[^<]+' sitemap.xml | sed 's|<loc>https://dreyburn.com||' | while 
   [ -f "$f" ] || echo "MISSING $u"
 done
 
-# 6 — the social card exists
+# 6 — the social card exists, and still says what the hero says. It is the
+#     one copy surface grep cannot reach; tools/og.html redraws it.
 [ -f og.png ] || echo 'og.png missing — regenerate with tools/og.html'
+grep -o 'thesis="[^"]*"' index.html   # compare by eye with the card
 ```
 
 1, 2, 4 and 5 must print nothing. Then, with the server and headless Chrome up:
@@ -206,6 +208,10 @@ using Node's built-in WebSocket, so it adds no dependency:
   --user-data-dir=/tmp/vd-audit about:blank &      # never your real profile
 node tools/audit.mjs                               # exits non-zero on a measured failure
 ```
+
+`PAGES` defaults to **this** site's pages, specimens included. A site built on the kit that
+ships none of them must override it — the release gate below derives the list with `find`, which
+is the form to copy.
 
 It disables the HTTP cache first. Without that the audit will measure the page as it was before
 your last edit and report it as passing, which is worse than not running it.
@@ -345,6 +351,8 @@ work/               case studies.  work/<slug>.html
 notes/              Field Notes.   notes/<slug>.html
 resume.html         résumé. Print is the deliverable, the screen is the courtesy
 docs/               the design system, published as a portfolio piece
+                    COUPLED: shipping without it means editing the nav and
+                    footer on every page, the resume rail, and sitemap.xml
 404.html            not-found page. Reached only via .htaccess ErrorDocument
 
 template.html       starter page — copy this. A specimen, not a page
