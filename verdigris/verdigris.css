@@ -176,6 +176,12 @@
   --vd-radius:2px;              /* barely there, per calibration §06 */
   --vd-hairline:1px;
   --vd-measure:58ch;
+  /* A SECOND measure, for sustained reading only. `ch` resolves against the
+     element's own font-size, so one token cannot serve two registers: 58ch is
+     538px at 16px and 1997px at 56px. See .vd-article__body, and the note in
+     verdigris/README.md before reaching for either of these. */
+  --vd-measure-read:66ch;
+  --vd-size-read:var(--vd-size-m);
   --vd-rail:132px;
   --vd-gutter:var(--vd-space-2);
   --vd-page:1180px;
@@ -1597,11 +1603,17 @@ legend{
 /* No topolang field on an article, by decision. The field is the landing-page
    signature and this is a page for sustained reading; prefers-reduced-motion
    would stop it anyway, but "still while reading" is the stronger position. */
+/* No max-width. It used to carry `max-width:var(--vd-measure)`, which looked
+   like a cap and was not one: `ch` is relative to the element's own font-size,
+   so 58ch at 56px display type resolves to 1997px — wider than any container
+   this title can occupy. The spread body caps it at 928px and always did. A
+   rule that appears to constrain and does not is worse than no rule, because
+   the next person tunes the token and nothing moves. */
 .vd-article__title{
   font-family:var(--vd-face-display);font-weight:500;
   font-size:var(--vd-size-xl);line-height:var(--vd-lead-2);
   letter-spacing:var(--vd-track-display);color:var(--vd-text-max);
-  margin:0;max-width:var(--vd-measure);
+  margin:0;
 }
 /* The standfirst. One register above body, capped shorter than the measure so
    it reads as a summary rather than as the first paragraph. */
@@ -1609,7 +1621,31 @@ legend{
   margin:var(--vd-space-1) 0 0;max-width:52ch;
   font-size:var(--vd-size-m);line-height:var(--vd-lead-1);color:var(--vd-text-strong);
 }
-.vd-article__body{margin-top:var(--vd-space-2)}
+/* THE READING REGISTER, and the only place it applies.
+   .vd-prose is one rule serving two jobs: a three-line card blurb and a
+   2,700-word essay. At 16px/58ch both render 61 characters a line, which is
+   right for the blurb and thin for the essay — 538px of text sitting in a
+   928px column, so every line carries 390px of empty space beside it.
+
+   18px fixes three things at once and costs nothing:
+     · 70 characters a line instead of 61, still inside 45–75
+     · leading goes from 16/30 (1.88, very loose) to 18/30 (1.67)
+     · 30px is unchanged, so the baseline grid is untouched
+
+   Element, not descendant: the reader page puts both classes on one div
+   (`class="vd-article__body vd-prose"`). Equal specificity, so this wins on
+   source order — keep it after .vd-prose. */
+.vd-article__body{
+  margin-top:var(--vd-space-2);
+  font-size:var(--vd-size-read);max-width:var(--vd-measure-read);
+}
+/* Below 860 the column IS the viewport, so there is no empty gutter to close
+   and the larger size only costs characters: 18px measures 29 a line at 320px
+   against 33 at 16px, under every comfortable minimum. The narrow screen was
+   never the problem, so it keeps the body register. */
+@media(max-width:860px){
+  .vd-article__body{font-size:var(--vd-size-s);max-width:var(--vd-measure)}
+}
 
 /* ENDNOTES, not sidenotes. Sidenotes would need the rail, which on this page
    already carries the metadata, and below 860px they would have to become

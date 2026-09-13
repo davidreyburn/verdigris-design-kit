@@ -248,6 +248,53 @@ nobody has to decide which byte was harmless.
 - **docs §08's usage snippet omitted `audit.js`**, which every page carries, and its
   `vd-system-card` example used a directory-style `href` the URL scheme does not use.
 
+## 1.10.0 — 2026-09-12
+
+A reading register. Long-form prose was set at the UI size.
+
+### Fixed
+
+- **The article column was 16px in a 928px container** — 538px of text, 61 characters a line,
+  and 390px of empty space beside every line. The count was never the problem; 61 is inside the
+  45–75 range. The problem was physical size, and the leading gave it away: 16/30 is a **1.88**
+  ratio, very loose. `.vd-article__body` now sets `--vd-size-read` (18px) at `--vd-measure-read`
+  (66ch) **above 860px only**, which moves three things at once and trades nothing — 70
+  characters a line, leading to **1.67**, and the 30px baseline untouched.
+
+  Below 860px the column already *is* the viewport, so there is no empty space to reclaim and
+  the larger size only costs characters: 29 a line at 320px against 33. Narrow screens keep the
+  body register, measured at 320, 390, 768, 1024 and 1440 with no horizontal overflow at any.
+
+- **`.vd-article__title` carried a `max-width` that capped nothing.** `--vd-measure` is `58ch`,
+  and `ch` resolves against the element's own font-size — 538px on 16px prose, **1997px** on a
+  56px title, wider than any container it can occupy. Removed. The spread body caps it at 928px
+  and always did. A rule that appears to constrain and does not is worse than no rule, because
+  the next person tunes the token and nothing moves.
+
+### Added
+
+- **`--vd-size-read` and `--vd-measure-read`**, the long-form register, semantic tokens aliasing
+  the existing scale rather than new steps in it.
+- **A measure check in `audit.js`.** Reports characters per line (min, median, max) for every
+  block of running text, and flags only the unambiguous: over 80, or under 45 where there is
+  room to be wider. Characters are counted from a rendered lowercase alphabet, not from `ch` —
+  `ch` is the width of `0`, so a 58ch cap reads about 61 characters, and that three-character
+  gap is part of how the column looked right in the token and thin on screen.
+
+  Two heuristics were tried and removed. Flagging a column for using little of its container
+  fired on 56–65% of every deliberately asymmetric block on the site — it cannot tell an
+  authored margin from a starved one, and a check that flags the design's own signature gets
+  ignored. Flagging the leading ratio fired on every 16px paragraph, which is one global
+  decision, not a per-page fault. The check is also honest that it would **not** have caught the
+  bug above: 61 characters is in range, and line length and type size are separate faults.
+
+### Documented
+
+- **`verdigris/README.md` — "Two measures, because `ch` is not a unit of width"**, with the
+  resolution table and the rule that `.vd-prose` must never be retuned globally.
+- **Two AGENTS.md invariants**: `.vd-prose` serves two registers, and `--vd-measure` in `ch`
+  constrains nothing when applied to display type.
+
 ## The design record
 
 Moved here from `README.md`, which describes what works now rather than how it got that way.

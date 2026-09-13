@@ -251,6 +251,16 @@ not `PASS`. `vd-system-card` enforces this in code; the audit checks it everywhe
 **Wrap wide tables in `.vd-table-scroll`.** Without it a wide table scrolls the whole document
 sideways at 320px, which is a 1.4.10 failure. The audit checks this specifically.
 
+**`.vd-prose` serves two registers. Never retune it globally.** It sets both a three-line card
+blurb and a long essay, so a change made for one silently resizes the other. Long-form has its
+own register — `--vd-size-read` and `--vd-measure-read`, applied by `.vd-article__body` above
+860px only. Below 860px the column is already the viewport, and the larger size there only costs
+characters: 29 a line at 320px against 33.
+
+**`--vd-measure` is in `ch`, which resolves against the element's own font-size.** It is 538px on
+16px prose and 1997px on a 56px title — wide enough to constrain nothing. Adding it to a display
+rule looks like a cap and is not one. See `verdigris/README.md`, **Two measures**.
+
 **Do not remove the underline on inline links.** It is load-bearing in two places: `--vd-ok`
 aliases `--vd-link`, so the underline is what separates a success message from a link; and
 `--vd-editorial` teal collapses onto link blue for a deuteranope. Remove it and both become real

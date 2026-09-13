@@ -102,6 +102,39 @@ keeps them apart.
 rules and marks, never on fills or large text. Thin green on near-black reads as
 instrumentation; thick green reads as hacker cosplay, which is a named anti-goal.
 
+## Two measures, because `ch` is not a unit of width
+
+`--vd-measure` is `58ch`. `ch` resolves against **the element's own font-size**, so one token
+does not mean one width:
+
+| Applied to | Font size | Resolves to | Effect |
+|---|---|---|---|
+| `.vd-prose` | 16px | 538px | caps the column, renders ~61 characters |
+| `.vd-article__title` | 56px | 1997px | caps nothing — wider than any container it can occupy |
+
+Two consequences, both of which were live bugs:
+
+**`ch` is the width of `0`, which is wider than average lowercase.** A 58ch cap therefore renders
+about 61 characters, not 58. If you tune the token, expect it to read long by roughly three.
+
+**`.vd-prose` serves two registers and they want different things.** The same rule sets a
+three-line card blurb and a 2,700-word essay. At 16px/58ch both render 61 characters a line —
+right for the blurb, thin for the essay, because 538px of 16px type in a 928px column leaves
+390px of empty space beside every line. Long-form therefore has its own register:
+
+```css
+--vd-size-read:var(--vd-size-m);   /* 18px */
+--vd-measure-read:66ch;            /* ~70 characters */
+```
+
+applied by `.vd-article__body`, and **only above 860px**. Three things improve together and
+nothing is traded: 70 characters instead of 61, leading from 16/30 (1.88, loose) to 18/30
+(1.67), and the 30px baseline untouched. Below 860px the column is the viewport, so there is no
+empty space to reclaim and the larger size only costs characters — 29 a line at 320px against
+33. The narrow screen was never the problem and keeps the body register.
+
+**Do not fix this by retuning `.vd-prose`.** It would resize every card blurb on the site.
+
 ## Contrast
 
 Every text token clears 7:1 against `--vd-ink-000`. Measured in-browser, not by hand:
@@ -295,6 +328,7 @@ from the running CSS. To check this table has not gone stale, diff it against
 |---|---|
 | `.vd-prose` | Body copy, capped at `--vd-measure`. Also carries the document primitives: lists, `hr`, bare `img`, bare `blockquote`, `dl` |
 | `.vd-prose--lead` | One register up, for a standfirst |
+| `.vd-article__body` | Long-form reading register: 18px at `--vd-measure-read` above 860px, body register below. See **Two measures** above |
 | `.vd-article__title` | Article or resume h1. One register below the hero display line |
 | `.vd-article__dek` | Standfirst. Capped shorter than the measure so it reads as a summary |
 | `.vd-article__body` | The article body wrapper |

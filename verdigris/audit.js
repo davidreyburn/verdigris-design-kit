@@ -235,6 +235,82 @@
     return { name: 'Tables wrapped for reflow', checked: tables.length, fails };
   }
 
+  /* Doctrine, not WCAG: measure. No conformance criterion governs line
+     length, so nothing here is ever a failure — it reports, and flags only
+     what is unambiguous.
+
+     Two things it deliberately does NOT do:
+
+     · It does not flag a column for using little of its container. The
+       reading column that prompted this check was 538px inside 928px, which
+       looks like the signal — but so is every deliberately asymmetric block
+       on the site, at 56-65%. The heuristic cannot tell an authored margin
+       from a starved one, and a check that flags the design's own signature
+       on every page gets ignored, which costs more than it saves.
+     · It does not catch the case that prompted it. That column measured 61
+       characters, comfortably inside 45-80. It read thin because it was 16px
+       type in a wide column, not because the count was wrong. The guard for
+       that is the reading register existing at all — see --vd-size-read in
+       verdigris.css. Line length and type size are separate faults and only
+       one of them is measurable here.
+
+     Characters per line comes from a rendered lowercase alphabet in the
+     element's own font, NOT from `ch`. `ch` is the width of "0", wider than
+     average lowercase, so a 58ch cap renders about 61 characters. Anyone
+     tuning the token should know it reads long by roughly three. */
+  function measure() {
+    const notes = [];
+    const counts = [];
+    document.querySelectorAll('p').forEach(p => {
+      const text = p.textContent.trim();
+      if (text.length < 200 || !visible(p)) return;        // running text only
+      const cs = getComputedStyle(p);
+      const probe = document.createElement('span');
+      probe.style.cssText =
+        'position:absolute;visibility:hidden;white-space:pre;font:' + cs.font;
+      probe.textContent = 'abcdefghijklmnopqrstuvwxyz';
+      document.body.appendChild(probe);
+      const per = probe.getBoundingClientRect().width / 26;
+      probe.remove();
+      if (!per) return;
+
+      const width = p.getBoundingClientRect().width;
+      const cpl = Math.round(width / per);
+      counts.push(cpl);
+
+      /* Content box, not border box: a padded parent would otherwise look
+         wider than the paragraph could ever be, and every narrow-screen
+         paragraph would report as short. */
+      const parent = p.parentElement;
+      let room = width;
+      if (parent) {
+        const ps = getComputedStyle(parent);
+        room = parent.clientWidth
+             - parseFloat(ps.paddingLeft || 0) - parseFloat(ps.paddingRight || 0);
+      }
+      // Already as wide as it may be: a short line is the viewport's doing.
+      const bound = width >= room - 2;
+
+      if (cpl > 80 || (cpl < 45 && !bound)) notes.push({
+        selector: describe(p), charsPerLine: cpl, fontSize: cs.fontSize,
+        leading: cs.lineHeight,
+        ratio: +(parseFloat(cs.lineHeight) / parseFloat(cs.fontSize)).toFixed(2),
+        text: text.slice(0, 40),
+        why: cpl > 80 ? 'long for sustained reading'
+                      : 'short, and there is room to be wider'
+      });
+    });
+    counts.sort((a, b) => a - b);
+    return {
+      name: 'Measure (45-80 characters)',
+      checked: counts.length,
+      charsPerLine: counts.length
+        ? { min: counts[0], median: counts[counts.length >> 1], max: counts[counts.length - 1] }
+        : null,
+      fails: [], notes
+    };
+  }
+
   /* Doctrine, not WCAG: --vd-data is numerals only. A grade, a status or an
      asterisk in the data colour is a violation the eye will not catch. */
   function dataColourDiscipline() {
@@ -332,7 +408,7 @@
       || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light (system)' : 'dark (system)');
 
     const checks = [textContrast(), controlBorders(), targetSize(), reflow(),
-                    tableWrappers(), dataColourDiscipline()];
+                    tableWrappers(), dataColourDiscipline(), measure()];
     const failed = checks.reduce((n, c) => n + c.fails.length, 0);
     const result = {
       theme,
