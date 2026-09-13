@@ -251,6 +251,11 @@ not `PASS`. `vd-system-card` enforces this in code; the audit checks it everywhe
 **Wrap wide tables in `.vd-table-scroll`.** Without it a wide table scrolls the whole document
 sideways at 320px, which is a 1.4.10 failure. The audit checks this specifically.
 
+**Never write `href="#"` to mean "no destination".** Omit `href` and the card title renders as a
+`<span>`, the region stays inert and the hover treatment does not fire. `#` is a link to nowhere
+and release gate 1 fails the page for it. This is the supported way to ship sanitized work whose
+artifact cannot travel.
+
 **`.vd-prose` serves two registers. Never retune it globally.** It sets both a three-line card
 blurb and a long essay, so a change made for one silently resizes the other. Long-form has its
 own register — `--vd-size-read` and `--vd-measure-read`, applied by `.vd-article__body` above

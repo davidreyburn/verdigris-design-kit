@@ -60,11 +60,11 @@ catch(e){}
 <meta property="og:image:height" content="630">
 <meta property="og:site_name" content="David Reyburn">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="verdigris/verdigris.css?v=1.10.0">
-<link rel="stylesheet" href="verdigris/print.css?v=1.10.0">
-<script src="verdigris/topolang.js?v=1.10.0" defer></script>
-<script src="verdigris/verdigris.js?v=1.10.0" defer></script>
-<script src="verdigris/audit.js?v=1.10.0" defer></script>
+<link rel="stylesheet" href="verdigris/verdigris.css?v=1.11.0">
+<link rel="stylesheet" href="verdigris/print.css?v=1.11.0">
+<script src="verdigris/topolang.js?v=1.11.0" defer></script>
+<script src="verdigris/verdigris.js?v=1.11.0" defer></script>
+<script src="verdigris/audit.js?v=1.11.0" defer></script>
 </head>
 <body>
 
@@ -102,8 +102,17 @@ catch(e){}
   <vd-hero
     thesis="A short declarative line that says what you do."
     sub="One or two sentences of support. This is the only place a hero should carry prose."
-    seed="20260801"
-    caption="Drift, rendered in topolang v1.3.2.">
+    seed="20260801">
+    <!-- The caption has two forms. This child element is the one to copy: a
+         credit line usually wants markup, and this is what index.html does.
+         <cite> is for the title of the piece, not for emphasis — both render
+         italic, only one is true.
+
+         There is also a plain-text `caption` attribute for the case with no
+         markup in it. Either works; do not supply both. -->
+    <div class="vd-hero__caption">
+      <cite>Drift</cite>, rendered in <a href="docs/#topolang">topolang v1.3.2</a>.
+    </div>
   </vd-hero>
 
   <!-- ── SECTION + RAIL ──────────────────────────────────────────────────
@@ -117,14 +126,14 @@ catch(e){}
       <div class="vd-spread__rail">
         <!-- Readouts justify the rail existing. Numerals only in the value:
              --vd-data is the numeral colour and the audit checks it. -->
-        <div class="vd-readout">
+        <span class="vd-readout">
           <span class="vd-readout__value">04</span>
-          <span class="vd-readout__label">Systems</span>
-        </div>
-        <div class="vd-readout">
+          <span class="vd-readout__key">Systems</span>
+        </span>
+        <span class="vd-readout">
           <span class="vd-readout__value">2020</span>
-          <span class="vd-readout__label">Since</span>
-        </div>
+          <span class="vd-readout__key">Since</span>
+        </span>
       </div>
 
       <div class="vd-spread__body">
@@ -143,8 +152,15 @@ catch(e){}
             renders as emphasis rather than as data.
           </vd-system-card>
 
+          <!-- No href, deliberately. Work that is sanitized may have no
+               artifact that can travel, so the card has nowhere to point.
+               Omit the attribute and the title renders as a <span>, the
+               region stays inert, and the hover treatment does not fire —
+               a card that looks clickable and is not is worse than one that
+               never claimed to be. Do NOT write href="#" for this: it is a
+               link to nowhere, and the release gate fails the page for it. -->
           <vd-system-card index="02" kicker="Another category"
-            title="A second project" href="#"
+            title="A second project"
             proof="coverage:41/41|surfaces:3">
             Sanitized detail, with <vd-redact data-reason="client NDA">the
             confidential part</vd-redact> marked as a visible decision rather
@@ -159,10 +175,10 @@ catch(e){}
   <section id="writing" class="vd-page vd-section" aria-labelledby="writing-h">
     <div class="vd-spread">
       <div class="vd-spread__rail">
-        <div class="vd-readout">
+        <span class="vd-readout">
           <span class="vd-readout__value">02</span>
-          <span class="vd-readout__label">Published</span>
-        </div>
+          <span class="vd-readout__key">Published</span>
+        </span>
       </div>
       <div class="vd-spread__body">
         <span class="vd-label">Writing</span>
@@ -289,6 +305,13 @@ catch(e){}
 
         <vd-code file="example.css">
 <pre>.thing{color:var(--vd-text)}</pre>
+        </vd-code>
+
+        <!-- `wrap` for a code block holding prose rather than code: a quoted
+             text file, an instruction sheet, a log. Code wants the sideways
+             scrollbar; a sentence does not. -->
+        <vd-code file="notes.txt" wrap>
+<pre>A quoted paragraph from a text file, long enough that it would otherwise run past the column and make the reader drag it sideways to reach the end of the sentence.</pre>
         </vd-code>
 
         <!-- Live contrast readout, computed from the token. against defaults

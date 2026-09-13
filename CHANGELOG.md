@@ -295,6 +295,52 @@ A reading register. Long-form prose was set at the UI size.
 - **Two AGENTS.md invariants**: `.vd-prose` serves two registers, and `--vd-measure` in `ch`
   constrains nothing when applied to display type.
 
+## 1.11.0 — 2026-09-12
+
+Five defects found by the first outside consumer of the kit, reported in a build handoff. All
+five were verified against the source before being accepted.
+
+### Fixed
+
+- **`template.html` wrote `.vd-readout__label`, which the stylesheet does not define.** Three
+  times. `verdigris.css` defines `.vd-readout__key`; `index.html` and `reader.html` both use it
+  correctly. The failure is silent — the readout renders, it just loses the mono treatment — and
+  it mattered more than an ordinary typo because AGENTS.md sends every author to that file
+  first. The one file you are told to copy was the one propagating a dead class.
+
+- **`vd-hero`'s `caption` attribute was never read.** `template.html` set it; `VdHero.upgrade()`
+  only ever looked for a `.vd-hero__caption` child. **The starter template's hero rendered no
+  caption at all.** The attribute is now read as a plain-text fallback, and the template shows
+  the child-element form instead, which is what a real page uses because a credit line usually
+  wants markup.
+
+- **A card could not decline to be a link.** `href` defaulted to `'#'` on both card types, so a
+  card with no destination became a link to nowhere — and release gate 1 then failed the page
+  for carrying it. The case is real: sanitized work whose artifact cannot travel. Omitting
+  `href` now renders the title as a `<span>` and leaves the region inert. Applied to
+  `vd-note-card` as well; the case is not specific to system cards.
+
+- **Card hover was ungated while the cursor was not.** `vd-system-card:hover` painted the accent
+  border and the sunken fill on any card, clickable or not, while only `cursor:pointer` checked
+  `[data-clickable]`. The rule's own comment already stated the principle it was breaking: a
+  region that looks clickable and is not is worse than one that never claimed to be. Both card
+  types now gate hover the same way the cursor does. `:focus-within` stays ungated — it fires
+  only when something inside really is focused.
+
+### Added
+
+- **`vd-code[wrap]`** — `white-space:pre-wrap` for a code block holding prose rather than code: a
+  quoted text file, an instruction sheet, a log. Code wants the sideways scrollbar; a sentence
+  does not. Attribute selector, so it needs no JavaScript.
+- **`template.html` demonstrates both new cases** — card 02 has no `href`, and a second
+  `vd-code` carries `wrap`. The template is the file people copy, so the capability has to be
+  visible in it.
+
+### Changed
+
+- `template.html`'s readouts are `<span>`, matching `index.html`. Both worked; two exemplars
+  disagreeing is its own defect.
+
 ## The design record
 
 Moved here from `README.md`, which describes what works now rather than how it got that way.

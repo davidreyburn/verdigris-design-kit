@@ -1012,7 +1012,11 @@ vd-system-card{
    and the note-card dek is muted. Over sunken it is 7.36:1 dark and 9.13:1
    light. Sunken is the only surface where every text value the cards use
    clears AAA in both themes. */
-vd-system-card:hover,vd-system-card:focus-within{
+/* Gated, like the cursor two rules down. A card with no href is inert, and
+   the principle is already stated there: a region that looks clickable and
+   is not is worse than one that never claimed to be. :focus-within stays
+   ungated — it fires only when something inside really is focused. */
+vd-system-card[data-clickable]:hover,vd-system-card:focus-within{
   border-color:var(--vd-rule-accent);
   background:var(--vd-surface-sunken);
 }
@@ -1043,7 +1047,7 @@ vd-system-card[data-clickable],vd-note-card[data-clickable]{cursor:pointer}
   background:var(--vd-structure);transform:scaleX(0);transform-origin:left;
   transition:transform var(--vd-dur-slow) var(--vd-ease);
 }
-vd-system-card:hover .vd-system-card__title a::after,
+vd-system-card[data-clickable]:hover .vd-system-card__title a::after,
 .vd-system-card__title a:focus-visible::after{transform:scaleX(1)}
 .vd-system-card__body{margin:var(--vd-space-h) 0 0;font-size:var(--vd-size-s);
   line-height:var(--vd-lead-1);color:var(--vd-text)}
@@ -1103,7 +1107,11 @@ vd-note-card:last-of-type{border-bottom:var(--vd-hairline) solid var(--vd-rule)}
    NOTE the deliberate divergence: vd-system-card keeps its full-box border
    accent, because it IS a box and can be outlined without touching anything
    else. The shared signal between the two is the sunken fill, not the mark. */
-vd-note-card:hover,vd-note-card:focus-within{
+/* Gated, like the cursor two rules down. A card with no href is inert, and
+   the principle is already stated there: a region that looks clickable and
+   is not is worse than one that never claimed to be. :focus-within stays
+   ungated — it fires only when something inside really is focused. */
+vd-note-card[data-clickable]:hover,vd-note-card:focus-within{
   background:var(--vd-surface-sunken);
   box-shadow:inset 2px 0 0 var(--vd-rule-accent);
 }
@@ -1121,7 +1129,7 @@ vd-note-card:hover,vd-note-card:focus-within{
   content:"";position:absolute;left:0;right:0;bottom:-2px;height:1px;background:var(--vd-structure);
   transform:scaleX(0);transform-origin:left;transition:transform var(--vd-dur-slow) var(--vd-ease);
 }
-vd-note-card:hover .vd-note-card__title a::after,
+vd-note-card[data-clickable]:hover .vd-note-card__title a::after,
 .vd-note-card__title a:focus-visible::after{transform:scaleX(1)}
 .vd-note-card__len{font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
   color:var(--vd-text-muted);letter-spacing:.06em;margin-left:auto}
@@ -1321,6 +1329,11 @@ vd-code{display:block;margin:var(--vd-space-1) 0;border:var(--vd-hairline) solid
   font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);letter-spacing:var(--vd-track-label);
   text-transform:uppercase;color:var(--vd-text-muted);padding:var(--vd-space-q)}
 .vd-code__copy:hover{color:var(--vd-data)}
+/* `wrap` for the other thing that goes in a code block: a quoted text file,
+   an agent instruction sheet, a log. Code wants pre and a sideways scrollbar;
+   prose does not, and a reader should never drag a sentence horizontally to
+   finish it. Attribute selector, so it needs no JS and survives the upgrade. */
+vd-code[wrap] pre{white-space:pre-wrap;overflow-wrap:break-word;overflow-x:visible}
 vd-code pre{margin:0;padding:var(--vd-space-h);overflow-x:auto;
   font-family:var(--vd-face-mono);font-size:var(--vd-size-xs);line-height:var(--vd-lead-1);color:var(--vd-text)}
 code{font-family:var(--vd-face-mono);font-size:.92em}

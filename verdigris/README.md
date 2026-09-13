@@ -291,6 +291,42 @@ rest failed until this token existed. Do not collapse the two back together.
 **The skeleton does not shimmer.** A looping sweep on a block that may persist for seconds is
 what 2.2.2 exists to prevent, and a loading state has nowhere sensible to put a pause control.
 
+## A card may decline to be a link
+
+`vd-system-card` and `vd-note-card` used to default `href` to `'#'`, so a card with nothing to
+point at became a link to nowhere — which the release gate then failed the page for. There is a
+real case for it: sanitized work whose artifact cannot travel.
+
+**Omit `href` entirely.** The title renders as a `<span>`, `makeRegionClickable` does not run,
+`data-clickable` is not set, and the hover treatment does not fire. Never write `href="#"` to
+mean "no destination".
+
+```html
+<vd-system-card index="02" kicker="Enterprise, sanitized"
+  title="Work with no artifact that can travel"
+  proof="domain:regulated">
+  The boundary itself is part of the design.
+</vd-system-card>
+```
+
+The hover rules take the same gate the cursor does — `[data-clickable]` — because a region that
+looks clickable and is not is worse than one that never claimed to be. `:focus-within` stays
+ungated: it fires only when something inside really is focused.
+
+## `vd-code[wrap]` for prose in a code block
+
+`vd-code pre` is `white-space:pre` with a sideways scrollbar, which is right for code and wrong
+for the other thing that goes in a code block — a quoted text file, an instruction sheet, a log.
+A reader should not drag a sentence horizontally to finish it.
+
+```html
+<vd-code file="soul.md" wrap>
+<pre>A quoted paragraph that should wrap rather than scroll.</pre>
+</vd-code>
+```
+
+Attribute selector, so it needs no JavaScript and survives the upgrade.
+
 ## Reduced motion
 
 Not "everything stops". The field freezes to a single deterministic seeded frame, so it is
@@ -412,6 +448,7 @@ from the running CSS. To check this table has not gone stale, diff it against
 | `.vd-readout` `.vd-readout__key` `.vd-readout__value` | Rail readouts |
 | `.vd-readout__value--grade` | A readout holding a grade rather than a quantity — deliberately not the data colour |
 | `.vd-swatch__*` | Swatch internals, built by `vd-swatch` |
+| `vd-code[wrap]` | Soft-wraps a code block holding prose rather than code |
 | `.vd-code__bar` `.vd-code__copy` | Code block header and copy control |
 | `.vd-node` `.vd-node--active` | Diagram primitives |
 

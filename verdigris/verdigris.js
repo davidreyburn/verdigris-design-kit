@@ -137,8 +137,21 @@
       // Authored caption, if present, is relocated into the text column.
       // It must never sit over the field: the field's surface changes every
       // frame, so no contrast ratio against it can be guaranteed.
-      const caption = this.querySelector('.vd-hero__caption');
-      if (caption) caption.remove();
+      //
+      // Two forms. The child element is primary and is what index.html uses,
+      // because a credit line usually wants markup — a <cite> for the title,
+      // a link to the runtime. The `caption` attribute is the plain-text
+      // convenience, and it is read here because it previously was not: a
+      // page copied from template.html carried caption="..." and rendered no
+      // caption at all, silently, which is the worst way for an API to say no.
+      let caption = this.querySelector('.vd-hero__caption');
+      if (caption) {
+        caption.remove();
+      } else if (this.getAttribute('caption')) {
+        caption = document.createElement('div');
+        caption.className = 'vd-hero__caption';
+        caption.textContent = this.getAttribute('caption');
+      }
 
       if (thesis && !this.querySelector('h1')) {
         const inner = document.createElement('div');
@@ -295,7 +308,11 @@
       const index = this.getAttribute('index') || '';
       const kicker = this.getAttribute('kicker') || '';
       const title = this.getAttribute('title') || '';
-      const href = this.getAttribute('href') || '#';
+      /* No href, no anchor. A card with nothing to link to is a real case —
+         sanitized work whose artifact cannot travel — and defaulting to '#'
+         made it a link to nowhere, which the release gate then fails. The
+         title falls back to a <span> and the region stays inert. */
+      const href = this.getAttribute('href');
       const proof = (this.getAttribute('proof') || '').split('|').filter(Boolean);
       const body = this.innerHTML.trim();
 
@@ -307,8 +324,9 @@
 
       const t = document.createElement('h3');
       t.className = 'vd-system-card__title';
-      const a = document.createElement('a');
-      a.href = href; a.textContent = title;
+      const a = document.createElement(href ? 'a' : 'span');
+      if (href) a.href = href;
+      a.textContent = title;
       t.appendChild(a);
 
       const b = document.createElement('div');
@@ -352,7 +370,11 @@
       if (this.querySelector('.vd-note-card__title')) return;
       const date = this.getAttribute('date') || '';
       const title = this.getAttribute('title') || '';
-      const href = this.getAttribute('href') || '#';
+      /* No href, no anchor. A card with nothing to link to is a real case —
+         sanitized work whose artifact cannot travel — and defaulting to '#'
+         made it a link to nowhere, which the release gate then fails. The
+         title falls back to a <span> and the region stays inert. */
+      const href = this.getAttribute('href');
       const len = this.getAttribute('length') || '';
       const dek = this.getAttribute('dek') || this.textContent.trim();
 
@@ -366,8 +388,9 @@
 
       const t = document.createElement('h3');
       t.className = 'vd-note-card__title';
-      const a = document.createElement('a');
-      a.href = href; a.textContent = title;
+      const a = document.createElement(href ? 'a' : 'span');
+      if (href) a.href = href;
+      a.textContent = title;
       t.appendChild(a);
 
       row.appendChild(d); row.appendChild(t);
