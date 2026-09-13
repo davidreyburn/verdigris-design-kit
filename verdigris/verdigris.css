@@ -203,7 +203,7 @@
      which is exactly what this measure has to do. Derived once: 72ch at the
      18px reading size, about 76 characters. If --vd-size-read moves, this
      has to be re-derived by hand; that is the price of an edge that holds. */
-  --vd-measure-read:752px;
+  --vd-measure-read:790px;
   /* How far the mobile field is held back behind the display line. It is set
      by the LARGE-TEXT threshold, not the body one, and that is the whole
      reason the field can be vibrant here.
@@ -223,7 +223,15 @@
   --vd-hero-mask-a:1;
   /* The fallback when a sub is present: body-safe, 7:1 on the worst band. */
   --vd-hero-mask-dim:.48;
-  --vd-size-read:var(--vd-size-m);
+  /* 19px, not --vd-size-m's 18. A reading-only size, like --vd-size-section,
+     and the same reasoning: the general scale is for UI. 18px at 752px gave a
+     good measure inside a container that was visibly wider, and the fix is not
+     to run the line longer — filling 928px needs 21-22px, where 30px leading
+     falls to a 1.43 ratio and the next grid step of 45 is looser still. The
+     grid allows a good measure OR a full container, not both, so this closes
+     the gap from the other side: bigger type, same 76 characters, a wider
+     column, and the leading ratio stays at a comfortable 1.58. */
+  --vd-size-read:19px;
   --vd-rail:132px;
   --vd-gutter:var(--vd-space-2);
   --vd-page:1180px;
@@ -1075,7 +1083,12 @@ vd-hero{display:block;position:relative;padding:var(--vd-space-4) 0 var(--vd-spa
 
 /* ── vd-system-card · the four proof pillars ─────────────────────────── */
 vd-system-card{
-  display:block;position:relative;
+  /* Flex column so the proof line can be pinned to the bottom edge. Grid
+     items stretch by default, so cards in a row are already equal height —
+     but their CONTENT was top-aligned, which left the proof rules floating at
+     different heights across a row. In a system whose argument is
+     measurement, the measurements were the thing that would not line up. */
+  display:flex;flex-direction:column;position:relative;
   border:var(--vd-hairline) solid var(--vd-rule);   /* hairline box, no fill */
   border-radius:var(--vd-radius);
   padding:var(--vd-space-1);
@@ -1131,7 +1144,10 @@ vd-system-card[data-clickable]:hover .vd-system-card__title a::after,
 .vd-system-card__body{margin:var(--vd-space-h) 0 0;font-size:var(--vd-size-s);
   line-height:var(--vd-lead-1);color:var(--vd-text)}
 .vd-system-card__proof{
-  margin-top:var(--vd-space-1);padding-top:var(--vd-space-h);
+  /* auto, not a fixed step: pushes the proof to the foot of the card
+     whatever the body above it does, so every proof rule in a row sits on one
+     line. margin-top:auto is the whole fix. */
+  margin-top:auto;padding-top:var(--vd-space-h);
   border-top:var(--vd-hairline) solid var(--vd-rule);
   font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);line-height:var(--vd-lead-half);
   letter-spacing:.05em;color:var(--vd-text-muted);
@@ -1141,16 +1157,28 @@ vd-system-card[data-clickable]:hover .vd-system-card__title a::after,
 .vd-system-card__proof b{color:var(--vd-text-strong);font-weight:500}
 .vd-system-card__proof b.vd-is-data{color:var(--vd-data);font-variant-numeric:tabular-nums}
 
-/* --vd-grid-min is the knob, not a new component. auto-fit lands on two
-   columns inside .vd-spread__body at 320px minimum, so three cards leave one
-   orphaned on its own row — the grid tiles at 2 or 4 and taxes 3. That is a
-   content decision the grid should not be making, so the magic number is
-   exposed: 280px gives three columns in a 928px body, 220px gives four.
-   Set it on the .vd-grid element, not on :root, or it moves every grid. */
+/* TWO COLUMNS, and that is the system's position rather than a side effect.
+   This was auto-fit over a --vd-grid-min, which meant the column count fell
+   out of whatever minimum a consumer happened to set — 280px quietly produced
+   three, and three cards at this measure are narrow enough that the body copy
+   stops being comfortable. An explicit count says what is intended and cannot
+   drift.
+
+   --vd-grid-cols is still the escape hatch, but it now names the thing being
+   chosen instead of a width that implies it. Set it on the element, never on
+   :root, or it moves every grid on the page.
+
+   The cap is a reading measure, not a layout one: two cards at 420px plus the
+   gutter. Past that the body copy inside a card runs longer than a card wants
+   to be read at, and the grid would keep stretching to whatever the container
+   allowed. */
 .vd-grid{
-  --vd-grid-min:320px;
+  --vd-grid-cols:2;
+  --vd-grid-card-max:420px;
   display:grid;gap:var(--vd-space-1);
-  grid-template-columns:repeat(auto-fit,minmax(min(100%,var(--vd-grid-min)),1fr));
+  grid-template-columns:repeat(var(--vd-grid-cols),minmax(0,1fr));
+  max-width:calc(var(--vd-grid-card-max) * var(--vd-grid-cols)
+                 + var(--vd-space-1) * (var(--vd-grid-cols) - 1));
 }
 
 /* ── vd-note-card · field notes ──────────────────────────────────────── */
@@ -1757,6 +1785,17 @@ legend{
    Element, not descendant: the reader page puts both classes on one div
    (`class="vd-article__body vd-prose"`). Equal specificity, so this wins on
    source order — keep it after .vd-prose. */
+/* THE READING COLUMN. .vd-article on <main> narrows the body cell so the
+   container stops being visibly wider than everything inside it — the same
+   hook .vd-resume uses for print, and the same reason: a page-scoped rule
+   needs a page-scoped selector.
+
+   850, against a 790 measure: one baseline of slack. Without the class every
+   element still shares the 790 measure, because the title, masthead, prose,
+   endnotes and endmatter are each capped — so a page that has not adopted it
+   is coherent, just sitting in a wider cell. The class closes the last 78px. */
+.vd-article .vd-spread__body{max-width:850px}
+
 /* ── .vd-article__meta · the masthead block ──────────────────────────────
    A definition list in .vd-prose renders its values in the reading face at
    the reading size, which is right for a glossary and wrong for metadata:
@@ -1841,6 +1880,7 @@ legend{
    already carries the metadata, and below 860px they would have to become
    endnotes anyway — so that option was two patterns wearing one name. */
 .vd-notes{
+  max-width:var(--vd-measure-read);
   margin:var(--vd-space-3) 0 0;padding-top:var(--vd-space-1);
   border-top:var(--vd-hairline) solid var(--vd-rule);
   counter-reset:vd-note;
@@ -1869,6 +1909,7 @@ legend{
    date — the three things chosen. Kept as one block so the article ends
    once rather than trailing off through three separate sections. */
 .vd-endmatter{
+  max-width:var(--vd-measure-read);
   margin-top:var(--vd-space-3);padding-top:var(--vd-space-1);
   border-top:var(--vd-hairline) solid var(--vd-rule);
 }
@@ -2272,6 +2313,10 @@ a.vd-tag{display:inline-flex;align-items:center;min-height:44px}
     /* 140, not 44. The target should match what the eye reads as the control,
        and a centred label with a trailing glyph reads as one object. */
     min-height:44px;min-width:140px;margin-top:var(--vd-space-h);
+    /* --vd-face-mono is load-bearing, not a style choice. The glyph below is
+       U+2193, which PlexMono carries and Chivo does not, so switching this to
+       the display face replaces the arrow with a fallback at a different
+       weight and width — silently, because a substituted glyph still draws. */
     font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
     letter-spacing:var(--vd-track-label);text-transform:uppercase;
     color:var(--vd-text);text-decoration:none;
@@ -2296,6 +2341,11 @@ a.vd-tag{display:inline-flex;align-items:center;min-height:44px}
   @media(prefers-reduced-motion:reduce){
     .vd-hero__cue::after{animation:none}
   }
+
+  /* One column, and the max-width cap comes off: below 860 the container IS
+     narrower than the cap, and leaving it on would centre-shrink the grid
+     against a column that is already the measure. */
+  .vd-grid{--vd-grid-cols:1;max-width:none}
 
   /* the rail is a strip above the content; it needs to read as a strip */
   .vd-spread__rail{gap:var(--vd-space-2);margin-bottom:var(--vd-space-h)}

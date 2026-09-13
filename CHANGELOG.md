@@ -540,6 +540,60 @@ consumer reports.
 - **AGENTS.md, Shipping:** a downstream subset is lost on every pull, since a fresh `verdigris/`
   copy overwrites both the `.woff2` files and the `@font-face` rules naming them.
 
+## 1.16.0 — 2026-09-13
+
+### Changed
+
+- **The reading column was visibly narrower than the container it sat in**, and the instinct —
+  run the line longer — is the wrong fix. Filling a 928px body needs 21–22px type, where 30px
+  leading falls to a **1.43** ratio, and the next grid step of 45px is looser still. The grid
+  allows a good measure *or* a full container, never both.
+
+  So the gap closes from the other side. `--vd-size-read` is **19px** and `--vd-measure-read`
+  **790px**: the same 76 characters as before, bigger type, a wider column, and the leading ratio
+  stays at a comfortable **1.58**. `.vd-article` on `<main>` narrows the body cell to 850 — one
+  baseline of slack — using the same page-scoped hook `.vd-resume` uses for print.
+
+  `.vd-notes` and `.vd-endmatter` are capped at the measure too. They were the elements still
+  running the full 928px, which is what made the prose look short by comparison: endnotes and
+  end matter are prose, and belong on the reading measure. A page that has not adopted
+  `.vd-article` is therefore still coherent — every element shares the 790 measure, it just sits
+  in a wider cell.
+
+### Fixed
+
+- **The card grid produced whatever column count a consumer's `--vd-grid-min` implied.** 1.15.0
+  exposed that minimum as an escape hatch and it promptly did what a width-that-implies-a-count
+  does: `280px` gave three columns, and three cards at this measure make the body copy inside
+  them uncomfortably narrow. `.vd-grid` is now **two columns above 860px and one below**, stated
+  rather than derived. `--vd-grid-cols` replaces `--vd-grid-min` — it names the thing being
+  chosen instead of a number that implies it.
+- **Card proof lines did not share a baseline across a row.** Reported long ago and never fixed.
+  Grid items already stretch to equal height, but their content was top-aligned, so the proof
+  rules floated at different heights depending on how long the body copy ran. In a system whose
+  argument is measurement, the measurements were the thing that would not line up.
+  `vd-system-card` is a flex column and the proof takes `margin-top:auto`. Verified: four cards,
+  heights 423/423/423/423, every proof rule 31px off the bottom edge.
+- **`--vd-grid-card-max`** caps the grid at two 420px cards plus the gutter. Past that the body
+  copy inside a card runs longer than a card wants to be read at.
+
+### Corrected
+
+- **`verdigris/fonts/LICENSES.md` claimed `≈ ≡ █ ‖` were present in the shipped faces. They are
+  not.** That claim came from an advance-width probe in a browser, which cannot tell a present
+  glyph from a substituted one: the fallback for a monospace face is another monospace face,
+  landing within hundredths of a pixel of the same advance. The authority is the font's `cmap`,
+  and the check that settles it is that adding those four codepoints to a subset range produces a
+  **byte-identical file** — nothing was there to keep. Reported by the build agent, who had the
+  toolchain to read it directly.
+
+  Consequence, now stated: **STRATA and RELIEF are not usable with these faces.** Their glyphs
+  fall back at a different advance and the cell grid comes apart. SHADE is pure ASCII and is what
+  the site ships, so nothing is broken today.
+- **`U+2193` is carried by PlexMono only; Chivo does not have it.** `.vd-hero__cue` now says so
+  beside the `--vd-face-mono` declaration, because changing that family would replace the arrow
+  with a fallback silently — a substituted glyph still draws.
+
 ## The design record
 
 Moved here from `README.md`, which describes what works now rather than how it got that way.

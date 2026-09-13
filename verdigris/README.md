@@ -123,11 +123,11 @@ right for the blurb, thin for the essay, because 538px of 16px type in a 928px c
 390px of empty space beside every line. Long-form therefore has its own register:
 
 ```css
---vd-size-read:var(--vd-size-m);   /* 18px */
---vd-measure-read:66ch;            /* ~70 characters */
+--vd-size-read:19px;      /* a reading-only size, like --vd-size-section */
+--vd-measure-read:790px;  /* ~76 characters. px, not ch — see below */
 ```
 
-applied by `.vd-article__body`, and **only above 860px**. Three things improve together and
+applied by `.vd-article__body`, and **only above 860px**. The reading size is 19px and the measure 790px — about 76 characters at a 1.58 leading ratio. Three things improve together and
 nothing is traded: 70 characters instead of 61, leading from 16/30 (1.88, loose) to 18/30
 (1.67), and the 30px baseline untouched. Below 860px the column is the viewport, so there is no
 empty space to reclaim and the larger size only costs characters — 29 a line at 320px against
@@ -354,7 +354,7 @@ from the running CSS. To check this table has not gone stale, diff it against
 | `.vd-spread` | Rail-plus-body grid. Collapses to one column below 860px |
 | `.vd-spread__rail` | The sticky left rail. Offsets itself by `--vd-nav-h` to clear the nav |
 | `.vd-spread__body` | The content column |
-| `.vd-grid` | Auto-fitting card grid. `auto-fit` lands on **two columns** inside `.vd-spread__body` at desktop width, so it tiles at 2 or 4 and orphans a third card. Set `--vd-grid-min` **on the element** to change it: `280px` gives three columns in a 928px body, `220px` gives four |
+| `.vd-grid` | Card grid, **two columns** above 860px and one below. Two is the system's position, not a side effect of an auto-fit minimum: three cards at this measure make the body copy inside them uncomfortably narrow. Cards stretch to equal height and their proof line pins to the foot, so every proof rule in a row shares one line. `--vd-grid-cols` and `--vd-grid-card-max` are the escape hatches — set them **on the element**, never on `:root` |
 | `.vd-stack` | Vertical flow with consistent spacing |
 | `.vd-rule` | A horizontal hairline. Decorative, exempt from 1.4.11 |
 

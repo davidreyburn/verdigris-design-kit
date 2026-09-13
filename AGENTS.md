@@ -127,8 +127,9 @@ fonts do not — the edge keeps serving the old file until the query string chan
 copy overwrites both the `.woff2` files and the `@font-face` sources that name them — leaving a
 page that references thirteen files which are not there. The kit does not subset further itself:
 it ships no build step and no `fonttools`. If you do it downstream, read
-`verdigris/fonts/LICENSES.md` first — the glyph range is not the obvious one, because
-`topolang.js` paints from arrays that appear in no stylesheet and no markup.
+`verdigris/fonts/LICENSES.md` first — `topolang.js` paints from arrays that appear in no
+stylesheet and no markup, and **four of those glyphs are in none of the shipped faces**, so
+STRATA and RELIEF are unusable until someone adds faces that carry them.
 
 Documentation under `verdigris/` is not served, so it does not count. Fonts are cached
 `immutable` and content-addressed by filename: a changed face is a new file, never an edit in
@@ -276,9 +277,17 @@ above always exceeds space below — that is what binds a heading to the section
 than the one it closes.
 
 **`--vd-measure-read` is a px length, not `ch`, and that is deliberate.** `ch` resolves against
-each element's own font-size, so the same token is 752px on 18px prose and 2340px on a 56px
-title — it cannot make two elements share an edge, which is its job. It is derived by hand (72ch
-at the 18px reading size, ~76 characters); if `--vd-size-read` moves, re-derive it.
+each element's own font-size, so the same token is 790px on 19px prose and 2340px on a 56px
+title — it cannot make two elements share an edge, which is its job. It is derived by hand (790px
+at the 19px reading size, ~76 characters); if `--vd-size-read` moves, re-derive it.
+
+**The reading column cannot fill its container, and that is arithmetic, not an oversight.**
+Filling a 928px body needs 21–22px type, where 30px leading falls to a 1.43 ratio and the next
+grid step of 45 is looser still — the grid allows a good measure *or* a full container, never
+both. So the gap is closed from the other side: 19px at 790px keeps 76 characters and a 1.58
+ratio, `.vd-article` narrows the body cell to 850, and the title, masthead, prose, endnotes and
+endmatter are each capped at the measure so nothing renders wider than anything else. Do not
+"fix" a visible gap by lengthening the line.
 
 **Do not add `-webkit-font-smoothing:antialiased`.** It was in `body` and cost 26% of the ink on
 screen: measured on an 18px paragraph in ink, coverage 13.22% with it against 16.68% without.

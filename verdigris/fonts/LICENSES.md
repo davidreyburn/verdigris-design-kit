@@ -41,12 +41,18 @@ redistribution, and publishing this repository is redistribution.
 
 ## Before you subset these further
 
-They are already subset, but broadly — `literata-400-normal.woff2` alone is 86 KB. Cutting them
-tighter is a real saving and the kit has not done it, because it ships no build step and no
-`fonttools`. If you do it in a consumer, **the range is not "Latin-1 plus punctuation".**
+They are already subset, but broadly. Cutting them tighter is a real saving and the kit has not
+done it, because it ships no build step and no `fonttools`.
 
-`topolang.js` paints glyphs chosen from a mode's `fill` and `cfn` arrays, so they appear nowhere
-in the CSS and nothing greps them out of the markup. Across the three shipped modes that is:
+**`≈ ≡ █ ‖` are in none of the shipped faces.** An earlier version of this file claimed the
+opposite, on the strength of an advance-width probe in the browser — which cannot tell a present
+glyph from a substituted one, because the fallback for a monospace face is another monospace face
+landing within hundredths of a pixel of the same advance. The authority is the font's `cmap`, and
+the check that settles it is that adding those four codepoints to a subset range produces a
+byte-identical file: nothing was there to keep.
+
+This matters because `topolang.js` picks glyphs from a mode's `fill` and `cfn` arrays, which
+appear in no stylesheet and in no markup, so nothing greps them out of a page:
 
 ```
 STRATA  fill  . _ - = ≈ ≡ █      cfn  # = ‖ #
@@ -54,13 +60,13 @@ RELIEF  fill  . ° o O 0 @ █      cfn  + - ¦ +
 SHADE   fill  . + # @            cfn  none
 ```
 
-`≈ ≡ █ ‖` are U+2248, U+2261, U+2588 and U+2016 — none of them Latin-1. A Latin-1 subset drops
-all four, and the field silently falls back to a system face for those cells, at a different
-advance width, which breaks the grid the whole renderer assumes. The site ships SHADE, whose set
-is pure ASCII, so the damage would not appear until someone changed mode.
+**SHADE is pure ASCII and is the mode the site ships, so nothing is broken today.** STRATA and
+RELIEF are not usable with these faces as they stand: those four glyphs fall back to a system
+font at a different advance, and the cell grid the renderer assumes comes apart. Either add faces
+that carry them, or treat the two unshipped modes as unsupported until someone does.
 
-Also required and easy to miss: **U+2193 (↓)** for `.vd-hero__cue`, and `° · — ’ é` across the
-mono and text faces. Verified present in the shipped faces by advance-width probe — in a
-monospace face every glyph shares one advance, so a substituted glyph measures differently.
+`U+2193 (↓)` for `.vd-hero__cue` is carried by **PlexMono only** — Chivo does not have it. That
+is why the cue sets `--vd-face-mono` explicitly, and why changing that family would silently
+replace the glyph with a fallback.
 
-If you subset, re-run that probe afterwards rather than trusting the range.
+If you subset, verify afterwards by reading the `cmap`, not by measuring advances in a browser.
