@@ -284,12 +284,21 @@ collisions. See docs §10.
 decorative hairline is exempt from 1.4.11; the boundary of an input or a button is not, and
 needs 3:1. The rule tokens measure 1.28–1.64:1 against the page.
 
-**The mobile hero runs text over the field, so its mask is load-bearing.** Two nested masks:
-the wrapper clears the field behind the nav and the scroll cue, the canvas holds the centre back
-to `--vd-hero-mask-a`. Anything added to that hero must be measured against the rendered page,
-not against the token — `audit.js` reads `--vd-surface` and cannot see a canvas. The measured
-worst cases are thesis 13.05 / 12.56, sub 8.42 / 8.80, caption 7.16 / 7.41, cue 9.51 / 10.08
-(ink / paper). Do not change the mask stops without re-measuring all four.
+**The mobile hero splits its text by size, and that split is the design.** The display line is
+large text, so it sits on the field at full strength. Everything small — caption, cue, nav — is
+*cleared* of the field by the wrapper mask, not attenuated, because no usable field alpha reaches
+7:1 for small text. Two problems, two tools. Measured on the rendered page (ink / paper): thesis
+9.53 / 9.75, caption 10.20 / 11.82, cue 7.89 / 8.97.
+
+**A hero with a `sub` cannot run the vibrant field, and the component enforces it.** A sub is
+body text at 7:1 sitting directly under the display line, and no mask clears one without clearing
+the other. `VdHero` sets `data-hero-sub`, which drops the field to `--vd-hero-mask-dim`. Measured
+there: sub 7.53 / 7.79. Set from JS rather than `:has()` so an engine without `:has()` cannot
+silently ship the sub under-measured.
+
+**Measure the rendered page, never the token.** `audit.js` computes contrast against
+`--vd-surface` and cannot see a canvas, so it passes hero text that is failing. Screenshot with
+the text blanked and sample the pixels under each element's box.
 
 **`--vd-nav-h` is measured at runtime, not declared.** The token says 60px, which is true only
 while the nav fits one row; it wraps below 860 and measures 134, and 178 at 320. A ResizeObserver

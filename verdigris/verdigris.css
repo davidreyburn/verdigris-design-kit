@@ -181,14 +181,25 @@
      538px at 16px and 1997px at 56px. See .vd-article__body, and the note in
      verdigris/README.md before reaching for either of these. */
   --vd-measure-read:66ch;
-  /* The mobile hero runs the field UNDER centred text, so the AAA guarantee
-     is arithmetic, not geometric. Effective alpha = canvas opacity x this,
-     and 0.30 effective is where the mobile grid's brightest band clears 7:1
-     against --vd-text: 9.03 in ink, 7.53 on paper. Ink canvas runs 0.62, so
-     .48 lands it; paper runs 1.0, so .30 does. Measured on the 390px grid —
-     do NOT copy the desktop figure, autoRange calibrates per grid and the
-     narrow field's worst band is relatively brighter. */
-  --vd-hero-mask-a:.48;
+  /* How far the mobile field is held back behind the display line. It is set
+     by the LARGE-TEXT threshold, not the body one, and that is the whole
+     reason the field can be vibrant here.
+
+     WCAG 1.4.6 Enhanced is 7:1 for normal text and 4.5:1 for large. The hero
+     thesis is 32-40px bold, which is large by any reading of the rule, so
+     4.5 is its actual AAA bar rather than a concession. Measured on the
+     mobile grid against the worst painted band:
+
+       ink    canvas .62, no further attenuation -> 6.79:1   (needs 4.5)
+       paper  canvas 1.0 held to .50 by this     -> 5.16:1   (needs 4.5)
+
+     Full strength in ink, half on paper, where subtractive marks on bone
+     have far less room. Everything SMALL in the hero -- caption, cue, nav --
+     needs 7:1 and is therefore masked clear of the field entirely, not
+     attenuated. Two different problems, two different tools. */
+  --vd-hero-mask-a:1;
+  /* The fallback when a sub is present: body-safe, 7:1 on the worst band. */
+  --vd-hero-mask-dim:.48;
   --vd-size-read:var(--vd-size-m);
   --vd-rail:132px;
   --vd-gutter:var(--vd-space-2);
@@ -385,7 +396,8 @@
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     --vd-surface:var(--vd-paper-000);
-  --vd-hero-mask-a:.30;   /* paper canvas runs 1.0, so the mask alone holds 0.30 */
+  --vd-hero-mask-a:.5;    /* paper: 1.0 canvas held to .50 -> 5.16:1 on the thesis */
+  --vd-hero-mask-dim:.3;
     --vd-surface-sunken:var(--vd-paper-050);
     --vd-surface-raised:var(--vd-paper-100);
     --vd-surface-selected:var(--vd-paper-200);
@@ -425,7 +437,8 @@
 /* Manual override. Keep in step with the block above. */
 :root[data-theme="light"] {
   --vd-surface:var(--vd-paper-000);
-  --vd-hero-mask-a:.30;   /* paper canvas runs 1.0, so the mask alone holds 0.30 */
+  --vd-hero-mask-a:.5;    /* paper: 1.0 canvas held to .50 -> 5.16:1 on the thesis */
+  --vd-hero-mask-dim:.3;
   --vd-surface-sunken:var(--vd-paper-050);
   --vd-surface-raised:var(--vd-paper-100);
   --vd-surface-selected:var(--vd-paper-200);
@@ -1242,9 +1255,24 @@ vd-theme-toggle:empty{display:none}   /* no JS, no control */
 
      The 44px box also stops being square here — it keeps its height for the
      target but sheds the fixed width, so the auto margin can do its job. */
-  vd-theme-toggle{order:1;margin-left:auto}
-  .vd-nav__list{order:2}
-  .vd-theme-toggle{margin-left:0}
+  /* REVISED. The toggle used to ride the mark's row because the links row
+     had no spare width. That put identity and a control on one line and the
+     destinations on another, which reads as a wrap accident rather than a
+     decision. Now the split says what it means: row one is who this is, row
+     two is everything you can do. It also lets row one retract on scroll
+     while the controls stay, which row one could not do while it carried
+     the only theme switch on the page. */
+  .vd-nav__mark{flex:1 1 100%}
+  /* flex-basis 0 with min-width 0, not a reserved max-width. Reserving
+     `100% - 44px - gap` is exactly the space available, and sub-pixel
+     rounding tipped it over — the toggle took a third row, which is the wrap
+     accident this change exists to remove. Basis 0 makes the list take what
+     is left AFTER the toggle by construction, so it cannot overflow, and the
+     links wrap inside their own box. */
+  .vd-nav__list{order:2;flex:1 1 0;min-width:0}
+  /* Top of the row, so a wrapped second line of links grows downward and the
+     control stays level with the first. */
+  vd-theme-toggle{order:3;margin-left:auto;flex:0 0 auto;align-self:flex-start}
 }
 
 /* ── vd-footer · carries the Chives signature, footer only ───────────── */
@@ -1867,13 +1895,43 @@ vd-redact[aria-expanded="true"]{color:var(--vd-text);background:var(--vd-surface
    iframe, because constraining an element does not fire media queries and
    a hand-resized window on a scaled display does not either. */
 @media(max-width:640px){
+  /* Half-step gaps. A full 30px between the links and again before the
+     toggle costs 45px of a 320px row, which is the difference between three
+     destinations on one line and three on two. */
   .vd-nav__inner{
-    height:auto;flex-wrap:wrap;row-gap:var(--vd-space-h);column-gap:var(--vd-space-1);
+    height:auto;flex-wrap:wrap;row-gap:var(--vd-space-h);column-gap:var(--vd-space-h);
     padding-top:var(--vd-space-h);padding-bottom:var(--vd-space-h);
   }
   .vd-nav__list{
-    margin-left:0;width:100%;flex-wrap:wrap;
-    row-gap:0;column-gap:var(--vd-space-1);
+    margin-left:0;width:auto;flex-wrap:wrap;
+    row-gap:0;column-gap:var(--vd-space-h);
+  }
+
+  /* THE RETRACT. Identity is wanted when you are working out where you are,
+     and in the way while you are reading. It leaves on the way down and
+     comes back on the way up.
+
+     A translate, not a height animation: the nav is sticky, so the row it
+     vacates is at the top of a document already scrolled past, and nothing
+     below it reflows. Animating height would relayout the page on every
+     scroll reversal.
+
+     --vd-nav-peek is measured (mark height + row gap), never assumed: the
+     mark's height is a 44px target floor and the gap is a token, and either
+     can move without this rule knowing. */
+  vd-nav{
+    transition:transform .22s var(--vd-ease),
+               background-color .2s linear, border-color .2s linear;
+    will-change:transform;
+  }
+  html[data-scroll-dir="down"] vd-nav{
+    transform:translateY(calc(-1 * var(--vd-nav-peek, 59px)));
+  }
+  /* Focus wins over scroll state, always. Belt and braces with the focusin
+     handler in verdigris.js: if script is gone, focus still reveals the row. */
+  vd-nav:focus-within{transform:none !important}
+  @media(prefers-reduced-motion:reduce){
+    vd-nav{transition:none}
   }
 }
 
@@ -1915,18 +1973,21 @@ a.vd-tag{display:inline-flex;align-items:center;min-height:44px}
    the content height. The thing that made the old mask fragile is the thing
    this layout removes.
 
-   The guarantee is therefore arithmetic again, as on desktop. Nested masks,
-   never mask-composite: the WRAPPER fades the top and bottom edges, the
-   CANVAS holds the centre back to --vd-hero-mask-a. Browsers multiply nested
-   masks natively, so the held alpha cannot be lifted to 1.0 by an engine
-   that ignores `intersect`.
+   Two sizes of text, two different tools, and that split is the design:
 
-   Measured on the mobile grid, worst painted band over --vd-text:
-     ink    canvas .62 x mask .48 = .30 effective -> 9.03:1
-     paper  canvas 1.0 x mask .30 = .30 effective -> 7.53:1
-   Nothing here may use --vd-text-muted: it peaks at 6.22 over this field at
-   an alpha low enough to make the field invisible. That is why the nav links
-   change colour while they overlay the hero.
+     The THESIS is large text, so its AAA bar is 4.5:1, not 7:1, and it sits
+     on the field at FULL strength -- 6.79:1 in ink, 5.16:1 on paper. Dimming
+     the field for it was protecting type that never needed protecting.
+
+     Everything SMALL -- the caption, the cue, the nav -- needs 7:1, which no
+     usable field alpha reaches; muted peaks at 6.22 even where the field has
+     gone invisible. So they are not attenuated, they are CLEARED. The
+     wrapper masks the field out entirely behind the top and bottom bands
+     where they sit, and they measure against flat ground.
+
+   One mask, on the wrapper, doing the clearing. The canvas carries a flat
+   per-theme attenuation as plain opacity. No nesting, so no mask-composite
+   and none of the risk described at .vd-hero__field on desktop.
    ═══════════════════════════════════════════════════════════════════════ */
 @media(max-width:860px){
   /* min-height, never height. Where the stack does not fit — 320x568 is the
@@ -1949,10 +2010,14 @@ a.vd-tag{display:inline-flex;align-items:center;min-height:44px}
     min-height:100vh;min-height:100svh;
     /* Padding clears the nav, which is overlaid. --vd-nav-h is measured at
        runtime, so this holds when the nav wraps to two rows. */
-    padding:calc(var(--vd-nav-h) + var(--vd-space-1)) 0 var(--vd-space-2);
+    padding:calc(var(--vd-nav-h) + var(--vd-space-1)) 0 calc(var(--vd-space-2) + var(--vd-space-1));
     margin-top:calc(-1 * var(--vd-nav-h));
   }
-  .vd-hero__inner{position:relative;z-index:1;align-self:center}
+  /* static, not relative: the colophon below is absolute against the HERO,
+     and a positioned ancestor here would capture it — which it did, pinning
+     the caption to the bottom of the text block instead of the viewport.
+     z-index still applies, because this is a grid item. */
+  .vd-hero__inner{position:static;z-index:1;align-self:center}
   /* The display line takes the full measure once the layout stacks. */
   .vd-hero__thesis{max-width:none}
   /* Band, not background: its own grid row, so text can never be over it.
@@ -2000,24 +2065,44 @@ a.vd-tag{display:inline-flex;align-items:center;min-height:44px}
       #000 calc(100% - var(--vd-space-5) - var(--vd-space-2)),
       transparent calc(100% - var(--vd-space-2)));
   }
-  /* LAYER TWO — the canvas holds the centre back to --vd-hero-mask-a, which
-     is where the text sits. Generous ellipse: at 320x568 the text stack is
-     410px of a 568px box, so anything tighter lets a descender land on an
-     unattenuated band. Full strength survives at the top and bottom, which
-     is the part of the field a reader actually sees as texture. */
+  /* LAYER TWO is gone. It was a centred ellipse holding the field back to
+     0.30 everywhere the text might land, which dimmed the whole field to
+     protect four words of micro type. The small text is now cleared by the
+     wrapper instead, so the canvas carries one flat attenuation and the
+     terrain keeps its character. */
   .vd-hero__field{
-    -webkit-mask-image:radial-gradient(ellipse 130% 64% at 50% 47%,
-      rgba(0,0,0,var(--vd-hero-mask-a)) 0%,
-      rgba(0,0,0,var(--vd-hero-mask-a)) 66%, #000 100%);
-    mask-image:radial-gradient(ellipse 130% 64% at 50% 47%,
-      rgba(0,0,0,var(--vd-hero-mask-a)) 0%,
-      rgba(0,0,0,var(--vd-hero-mask-a)) 66%, #000 100%);
+    -webkit-mask-image:none;mask-image:none;
+    opacity:var(--vd-hero-mask-a);
   }
-  /* The caption leaves the text column and pins to the bottom-left corner.
-     It keeps --vd-text: muted is unavailable anywhere over this field. */
+  /* A hero carrying a SUB cannot run the vibrant field, and the component
+     says so rather than leaving it to whoever writes the page. The sub is
+     body text at 7:1, it sits directly under the display line, and no mask
+     can clear one without clearing the other — they are adjacent. So the
+     field drops to the body-safe attenuation whenever a sub is present.
+
+     Set from JS, not :has(), so it is deterministic: on an engine without
+     :has() the guard would silently not apply and the sub would ship
+     under-measured, which is the failure mode this whole file exists to
+     avoid. */
+  vd-hero[data-hero-sub] .vd-hero__field{opacity:var(--vd-hero-mask-dim)}
+  /* THE COLOPHON. On desktop VdHero.upgrade() appends the caption INSIDE
+     .vd-hero__inner -- "relocated into the text column" -- which is the
+     desktop design and stays. It is also why align-self could never move it
+     here: it is not a child of this grid, it is a grandchild. That is a real
+     bug in the version that claimed to pin it to the bottom and did not.
+
+     Taken out of flow instead: absolute against the hero, pinned to the
+     bottom edge, centred under the cue. No JS change, desktop untouched.
+
+     The left rule comes off. That rule is what made it read as attached to
+     the display line -- it looks like a quote marker tied to the line above.
+     What it is, is provenance for the background: a colophon, and colophons
+     sit at the foot. */
   .vd-hero__caption{
-    position:relative;z-index:1;align-self:end;
-    margin:var(--vd-space-1) 0 0;max-width:none;
+    position:absolute;z-index:1;
+    left:var(--vd-space-h);right:var(--vd-space-h);bottom:var(--vd-space-h);
+    margin:0;max-width:none;border-left:0;padding-left:0;
+    text-align:center;
   }
   /* The nav floats over the field. It reclaims its own height for the hero,
      which matters most at 320 where it wraps to two rows and costs 178px of
@@ -2043,17 +2128,36 @@ a.vd-tag{display:inline-flex;align-items:center;min-height:44px}
      region to enlarge, so the hit box cannot be inherited from a card.
      --vd-text, never muted, for the same reason as the nav. */
   .vd-hero__cue{
-    position:relative;z-index:1;justify-self:start;align-self:end;
-    display:inline-flex;align-items:center;gap:var(--vd-space-h);
-    min-height:44px;min-width:44px;margin-top:var(--vd-space-h);
+    position:relative;z-index:1;justify-self:center;align-self:end;
+    display:inline-flex;align-items:center;justify-content:center;
+    gap:var(--vd-space-h);
+    /* 140, not 44. The target should match what the eye reads as the control,
+       and a centred label with a trailing glyph reads as one object. */
+    min-height:44px;min-width:140px;margin-top:var(--vd-space-h);
     font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
     letter-spacing:var(--vd-track-label);text-transform:uppercase;
     color:var(--vd-text);text-decoration:none;
   }
-  /* The glyph is a real character, not a background image: it inherits the
-     text colour, so it can never drift out of the measured ratio. */
-  .vd-hero__cue::before{content:"\2193";font-size:var(--vd-size-xs)}
+  /* AFTER the label, not before. "SEE WORK v" is an instruction with a
+     direction; "v SEE WORK" is a label wearing an ornament.
+
+     A real character, not a background image: it inherits the text colour, so
+     it can never drift out of the measured ratio. */
+  .vd-hero__cue::after{
+    content:"\2193";font-size:var(--vd-size-xs);
+    animation:vd-cue-bob 2.4s var(--vd-ease) infinite;
+  }
   .vd-hero__cue:hover{color:var(--vd-text-max)}
+  /* 3px, on the glyph alone. The one movement on this site that earns itself:
+     it says the page continues, which is the single thing a full-viewport
+     hero fails to say on its own. */
+  @keyframes vd-cue-bob{
+    0%,70%,100%{transform:translateY(0)}
+    85%{transform:translateY(3px)}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .vd-hero__cue::after{animation:none}
+  }
 
   /* the rail is a strip above the content; it needs to read as a strip */
   .vd-spread__rail{gap:var(--vd-space-2);margin-bottom:var(--vd-space-h)}

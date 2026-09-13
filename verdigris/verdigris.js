@@ -163,7 +163,13 @@
           '<h1 class="vd-hero__thesis"></h1>' +
           (sub ? '<p class="vd-hero__sub"></p>' : '');
         inner.querySelector('h1').textContent = thesis;
-        if (sub) inner.querySelector('.vd-hero__sub').textContent = sub;
+        if (sub) {
+          inner.querySelector('.vd-hero__sub').textContent = sub;
+          /* Flags the mobile field down to the body-safe attenuation. A sub
+             is body text at 7:1 sitting directly under the display line, and
+             no mask clears one without clearing the other. */
+          this.dataset.heroSub = '';
+        }
         if (caption) inner.appendChild(caption);
         this.appendChild(inner);
       } else if (caption) {
@@ -828,9 +834,20 @@
   (function () {
     const nav = document.querySelector('vd-nav');
     if (!nav || !window.ResizeObserver) return;
+    const root = document.documentElement;
     new ResizeObserver(function (entries) {
       const h = Math.round(entries[0].contentRect.height);
-      if (h > 0) document.documentElement.style.setProperty('--vd-nav-h', h + 'px');
+      if (h > 0) root.style.setProperty('--vd-nav-h', h + 'px');
+      /* How far the retract moves: the identity row plus the row gap. Measured
+         rather than assumed, because the mark's height is a 44px target
+         minimum and the gap is a token — either can change without this. */
+      const mark = nav.querySelector('.vd-nav__mark');
+      const inner = nav.querySelector('.vd-nav__inner');
+      if (mark && inner) {
+        const gap = parseFloat(getComputedStyle(inner).rowGap) || 0;
+        const peek = Math.round(mark.getBoundingClientRect().height + gap);
+        if (peek > 0) root.style.setProperty('--vd-nav-peek', peek + 'px');
+      }
     }).observe(nav);
   })();
 
@@ -843,19 +860,45 @@
      page whether or not it has a hero. */
   (function () {
     const root = document.documentElement;
-    let queued = false;
+    let queued = false, last = 0;
+    /* Direction, not just position. The mobile nav keeps its controls and
+       retracts its identity row while the reader moves down the page, and
+       brings it back the moment they move up — the row is wanted when you
+       are looking for where you are, and in the way when you are reading.
+
+       The threshold is deliberate. Without it, a 1px scroll jitter or the
+       rubber-band at the top of iOS flickers the row on and off. 12px is
+       under a single line of body text, so it never feels laggy. */
     function read() {
       queued = false;
-      const past = (window.scrollY || window.pageYOffset || 0) > 8;
-      if (past === root.hasAttribute('data-scrolled')) return;
-      if (past) root.setAttribute('data-scrolled', '');
-      else root.removeAttribute('data-scrolled');
+      const y = Math.max(0, window.scrollY || window.pageYOffset || 0);
+      const past = y > 8;
+      if (past !== root.hasAttribute('data-scrolled')) {
+        if (past) root.setAttribute('data-scrolled', '');
+        else root.removeAttribute('data-scrolled');
+      }
+      if (Math.abs(y - last) > 12) {
+        /* Never retract while the nav holds focus: a keyboard reader tabbing
+           through the links would lose the one they were on. */
+        const navHasFocus = document.activeElement &&
+          document.activeElement.closest && document.activeElement.closest('vd-nav');
+        const dir = (y > last && past && !navHasFocus) ? 'down' : 'up';
+        if (root.getAttribute('data-scroll-dir') !== dir)
+          root.setAttribute('data-scroll-dir', dir);
+        last = y;
+      }
     }
     window.addEventListener('scroll', function () {
       if (queued) return;
       queued = true;
       requestAnimationFrame(read);
     }, { passive: true });
+    /* Tabbing into the nav restores it, so focus can never land on a row
+       that is translated off the top of the screen. */
+    document.addEventListener('focusin', function (e) {
+      if (e.target.closest && e.target.closest('vd-nav'))
+        root.setAttribute('data-scroll-dir', 'up');
+    });
     read();
   })();
 

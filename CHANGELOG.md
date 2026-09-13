@@ -400,6 +400,49 @@ Worst case under every hero element, taken from the rendered page rather than th
 | caption | 7.16 | 7.41 |
 | cue | 9.51 | 10.08 |
 
+## 1.13.0 — 2026-09-13
+
+Four fixes to the mobile hero, all from looking at it on a real phone.
+
+### Changed
+
+- **The nav's two rows now say what they mean.** The toggle rode the mark's row because the
+  links row had no spare width, which put identity and a control on one line and destinations on
+  another — a wrap accident, not a decision. Row one is who this is; row two is everything you
+  can do. Gaps drop to the half-step so three destinations and a control fit one line at 390.
+- **The identity row retracts on scroll down and returns on scroll up.** 134px to 75 at 390 —
+  wanted when you are working out where you are, in the way while you are reading. A transform,
+  not a height animation: the nav is sticky, so the row it vacates is already scrolled past and
+  nothing below reflows. Focus always wins over scroll state, in CSS *and* in script, so a
+  keyboard reader can never land on a row translated off the top.
+- **The field is vibrant again.** It was held to 0.30 everywhere the text might land, which
+  dimmed the whole field to protect four words of micro type. The display line is large text —
+  4.5:1 is its actual AAA bar — so it now sits on the field at full strength, and the small text
+  is cleared outright instead. Measured under the thesis: **9.53 ink, 9.75 paper**, so it clears
+  7:1 anyway and the large-text allowance is headroom rather than the argument.
+- **The caption is a colophon at the foot**, centred under the cue, with no left rule. The rule
+  is what made it read as attached to the display line; what it is, is provenance for the
+  background, and that belongs at the bottom.
+- **The cue is centred, says SEE WORK, and the arrow trails the label.** "SEE WORK ↓" is an
+  instruction with a direction; "↓ SEE WORK" is a label wearing an ornament. 140×44, because the
+  target should match what the eye reads as the control. The glyph carries a 3px bob, off under
+  `prefers-reduced-motion` — the one movement on this site that earns itself, since saying the
+  page continues is the single thing a full-viewport hero cannot do on its own.
+
+### Fixed
+
+- **The caption was never pinned to the bottom, despite 1.12.0 saying it was.**
+  `VdHero.upgrade()` appends it *inside* `.vd-hero__inner`, so it is a grandchild of the hero
+  grid and `align-self` could never reach it. It is absolutely positioned against the hero now.
+  The gate did not catch this because it measures ratios, not positions.
+- **`.vd-hero__inner` was `position:relative`**, which captured that absolute caption and pinned
+  it to the bottom of the text block instead of the viewport. It is a grid item, so `z-index`
+  works without it.
+
+### Added
+
+- **`--vd-hero-mask-dim`** and `data-hero-sub`, the guard above.
+
 ## The design record
 
 Moved here from `README.md`, which describes what works now rather than how it got that way.
