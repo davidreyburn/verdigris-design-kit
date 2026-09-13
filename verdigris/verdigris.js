@@ -170,6 +170,19 @@
         this.appendChild(caption);
       }
 
+      /* The scroll cue is opt-in, because a hero that does not fill the
+         viewport does not need one and docs section 09 is a list of things
+         not built speculatively. `cue` is the target, `cue-label` the word.
+         CSS hides it above 860px, where the next section is already visible. */
+      const cue = this.getAttribute('cue');
+      if (cue && !this.querySelector('.vd-hero__cue')) {
+        const link = document.createElement('a');
+        link.className = 'vd-hero__cue';
+        link.href = cue;
+        link.textContent = this.getAttribute('cue-label') || 'Scroll';
+        this.appendChild(link);
+      }
+
       if (!wantField || !window.topolang) return;
 
       const canvas = document.createElement('canvas');
@@ -281,6 +294,16 @@
         }, 150);
       };
       window.addEventListener('resize', this._onResize);
+      /* A window resize is not the only way this canvas changes size. The
+         mobile hero is min-height:100svh with content-dependent growth, so
+         the box settles AFTER first layout — fonts land, the thesis rewraps,
+         the hero gets taller — with no window event at all. Without this the
+         field keeps whatever size it had at upgrade() and paints a band in
+         the top of a full-bleed box. */
+      if (window.ResizeObserver) {
+        this._ro = new ResizeObserver(this._onResize);
+        this._ro.observe(wrap);
+      }
 
       // Respond live if the user flips the OS setting mid-session.
       this._onMotion = (e) => {
@@ -795,6 +818,46 @@
       });
     }
   }
+
+  /* --vd-nav-h is the height everything clears the nav by: the sticky rail
+     offsets itself by it, and the mobile hero pulls itself up under it. The
+     token declares 60px, which is true only while the nav fits one row. It
+     wraps to two below 860 and measures 134, and at 320 it measures 178, so
+     the value was wrong on exactly the screens that most need it right.
+     Measured here and written back, so the token stops being a guess. */
+  (function () {
+    const nav = document.querySelector('vd-nav');
+    if (!nav || !window.ResizeObserver) return;
+    new ResizeObserver(function (entries) {
+      const h = Math.round(entries[0].contentRect.height);
+      if (h > 0) document.documentElement.style.setProperty('--vd-nav-h', h + 'px');
+    }).observe(nav);
+  })();
+
+  /* The mobile hero puts the nav over the field, so the nav has no ground of
+     its own until the reader leaves the top. One boolean attribute, set from
+     scroll position, and the CSS does the rest — a class toggled here rather
+     than a style written here, so the appearance stays in the stylesheet.
+
+     rAF-coalesced: scroll fires far faster than paint, and this runs on every
+     page whether or not it has a hero. */
+  (function () {
+    const root = document.documentElement;
+    let queued = false;
+    function read() {
+      queued = false;
+      const past = (window.scrollY || window.pageYOffset || 0) > 8;
+      if (past === root.hasAttribute('data-scrolled')) return;
+      if (past) root.setAttribute('data-scrolled', '');
+      else root.removeAttribute('data-scrolled');
+    }
+    window.addEventListener('scroll', function () {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(read);
+    }, { passive: true });
+    read();
+  })();
 
   const defs = [
     ['vd-hero', VdHero], ['vd-system-card', VdSystemCard], ['vd-note-card', VdNoteCard],

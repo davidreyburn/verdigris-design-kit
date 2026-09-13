@@ -181,6 +181,14 @@
      538px at 16px and 1997px at 56px. See .vd-article__body, and the note in
      verdigris/README.md before reaching for either of these. */
   --vd-measure-read:66ch;
+  /* The mobile hero runs the field UNDER centred text, so the AAA guarantee
+     is arithmetic, not geometric. Effective alpha = canvas opacity x this,
+     and 0.30 effective is where the mobile grid's brightest band clears 7:1
+     against --vd-text: 9.03 in ink, 7.53 on paper. Ink canvas runs 0.62, so
+     .48 lands it; paper runs 1.0, so .30 does. Measured on the 390px grid —
+     do NOT copy the desktop figure, autoRange calibrates per grid and the
+     narrow field's worst band is relatively brighter. */
+  --vd-hero-mask-a:.48;
   --vd-size-read:var(--vd-size-m);
   --vd-rail:132px;
   --vd-gutter:var(--vd-space-2);
@@ -377,6 +385,7 @@
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     --vd-surface:var(--vd-paper-000);
+  --vd-hero-mask-a:.30;   /* paper canvas runs 1.0, so the mask alone holds 0.30 */
     --vd-surface-sunken:var(--vd-paper-050);
     --vd-surface-raised:var(--vd-paper-100);
     --vd-surface-selected:var(--vd-paper-200);
@@ -416,6 +425,7 @@
 /* Manual override. Keep in step with the block above. */
 :root[data-theme="light"] {
   --vd-surface:var(--vd-paper-000);
+  --vd-hero-mask-a:.30;   /* paper canvas runs 1.0, so the mask alone holds 0.30 */
   --vd-surface-sunken:var(--vd-paper-050);
   --vd-surface-raised:var(--vd-paper-100);
   --vd-surface-selected:var(--vd-paper-200);
@@ -960,6 +970,7 @@ vd-hero{display:block;position:relative;padding:var(--vd-space-4) 0 var(--vd-spa
    there; a text value that changes with viewport is a worse rule than one
    that does not, so the promotion is unconditional. The caption stays quiet
    through size, the mono face and letter-spacing, not a lower value. */
+.vd-hero__cue{display:none}   /* mobile only; see the MOBILE block */
 .vd-hero__caption{
   position:relative;z-index:1;margin-top:var(--vd-space-2);
   padding-left:var(--vd-space-h);border-left:1px solid var(--vd-rule);
@@ -1892,28 +1903,56 @@ a.vd-tag{display:inline-flex;align-items:center;min-height:44px}
 
 
 /* ═══ MOBILE ═══════════════════════════════════════════════════════════
-   Below 860 the hero column is narrow and tall. A percentage mask cannot
-   keep a full-bleed field clear of text at an unknown content height: the
-   fade line lands wherever the paragraph happens to end. Masking is the
-   wrong tool once the layout stacks.
+   The hero fills the viewport and the field runs full-bleed behind centred
+   text. This replaces a BAND — the field in its own grid row above the
+   display line, no mask, overlap structurally impossible.
 
-   So the field stops being a background and becomes a BAND: its own grid
-   row under the text, no mask at all. Overlap is then structurally
-   impossible rather than approximately avoided, which is the only version
-   of the AAA claim worth publishing.
+   The band existed because "a percentage mask cannot keep a full-bleed field
+   clear of text at an unknown content height: the fade line lands wherever
+   the paragraph happens to end." That objection was correct and no longer
+   applies: the text is flex-centred in the hero box, so its centre IS the
+   box's centre at every width, and a centred mask tracks it without knowing
+   the content height. The thing that made the old mask fragile is the thing
+   this layout removes.
+
+   The guarantee is therefore arithmetic again, as on desktop. Nested masks,
+   never mask-composite: the WRAPPER fades the top and bottom edges, the
+   CANVAS holds the centre back to --vd-hero-mask-a. Browsers multiply nested
+   masks natively, so the held alpha cannot be lifted to 1.0 by an engine
+   that ignores `intersect`.
+
+   Measured on the mobile grid, worst painted band over --vd-text:
+     ink    canvas .62 x mask .48 = .30 effective -> 9.03:1
+     paper  canvas 1.0 x mask .30 = .30 effective -> 7.53:1
+   Nothing here may use --vd-text-muted: it peaks at 6.22 over this field at
+   an alpha low enough to make the field invisible. That is why the nav links
+   change colour while they overlay the hero.
    ═══════════════════════════════════════════════════════════════════════ */
 @media(max-width:860px){
-  /* Field FIRST, flush to the nav. No top padding: the band is full-bleed and
-     reads as a header plate, so a gap above it would leave it floating. The
-     30px grid gap does the separating below it instead. */
+  /* min-height, never height. Where the stack does not fit — 320x568 is the
+     one realistic case, the nav wraps to two rows there and the text needs
+     410px of 390 — the hero grows and the page scrolls. Nothing is clipped,
+     which also keeps WCAG 1.4.10 safe at 400% zoom, where the viewport is
+     about 256px tall and NOTHING fits one screen.
+
+     svh, not vh: vh is the large viewport, so a hero sized to it is taller
+     than the screen until the URL bar retracts. svh is the small viewport
+     and is stable from first paint. dvh would resize mid-scroll. */
   vd-hero{
-    display:grid;grid-template-columns:100%;gap:var(--vd-space-1);
-    padding:0 0 var(--vd-space-1);
+    position:relative;
+    /* Grid, not flex: three rows say the intent directly. Row one takes every
+       spare pixel and centres the text in it; the caption and the cue sit at
+       the bottom whatever the text does. Auto margins on a flex column split
+       free space between every auto edge, which put the caption a third of
+       the way up — correct arithmetic, wrong picture. */
+    display:grid;grid-template-rows:1fr auto auto;
+    min-height:100vh;min-height:100svh;
+    /* Padding clears the nav, which is overlaid. --vd-nav-h is measured at
+       runtime, so this holds when the nav wraps to two rows. */
+    padding:calc(var(--vd-nav-h) + var(--vd-space-1)) 0 var(--vd-space-2);
+    margin-top:calc(-1 * var(--vd-nav-h));
   }
-  /* Text SECOND, below the field. max-width MUST stay — it now carries the
-     page measure that .vd-page used to provide, since the hero is full-bleed.
-     Setting it to none here would run the text to the screen edge. */
-  .vd-hero__inner{order:2}
+  .vd-hero__inner{position:relative;z-index:1;align-self:center}
   /* The display line takes the full measure once the layout stacks. */
   .vd-hero__thesis{max-width:none}
   /* Band, not background: its own grid row, so text can never be over it.
@@ -1935,12 +1974,87 @@ a.vd-tag{display:inline-flex;align-items:center;min-height:44px}
 
      The canvas drops its horizontal mask entirely: that mask was calibrated
      against a text column, and no text overlaps the band. */
+  /* LAYER ONE — the wrapper fades the top and bottom edges so the field
+     dissolves into the page rather than stopping at a line. Absolute, not a
+     grid row: it is a background again. */
+  /* The stops are not decoration. The field is cleared where the two
+     smallest pieces of text sit, because neither can be protected by the
+     centre mask: the nav is above it and the cue is below it, and both
+     measured under 7:1 on full-strength field — 2.13 and 6.21 in ink.
+
+     Clearing the top also buys back the nav's own colour. With no field
+     behind it the links can stay --vd-text-muted, which is what the nav is
+     supposed to be: chrome, not content. */
   .vd-hero__fieldwrap{
-    order:1;position:relative;inset:auto;width:100%;height:200px;
-    -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 52%,transparent 94%);
-    mask-image:linear-gradient(180deg,#000 0%,#000 52%,transparent 94%);
+    position:absolute;inset:0;width:auto;height:auto;z-index:0;
+    -webkit-mask-image:linear-gradient(180deg,
+      transparent 0,
+      transparent var(--vd-nav-h),
+      #000 calc(var(--vd-nav-h) + var(--vd-space-1)),
+      #000 calc(100% - var(--vd-space-5) - var(--vd-space-2)),
+      transparent calc(100% - var(--vd-space-2)));
+    mask-image:linear-gradient(180deg,
+      transparent 0,
+      transparent var(--vd-nav-h),
+      #000 calc(var(--vd-nav-h) + var(--vd-space-1)),
+      #000 calc(100% - var(--vd-space-5) - var(--vd-space-2)),
+      transparent calc(100% - var(--vd-space-2)));
   }
-  .vd-hero__field{-webkit-mask-image:none;mask-image:none}
+  /* LAYER TWO — the canvas holds the centre back to --vd-hero-mask-a, which
+     is where the text sits. Generous ellipse: at 320x568 the text stack is
+     410px of a 568px box, so anything tighter lets a descender land on an
+     unattenuated band. Full strength survives at the top and bottom, which
+     is the part of the field a reader actually sees as texture. */
+  .vd-hero__field{
+    -webkit-mask-image:radial-gradient(ellipse 130% 64% at 50% 47%,
+      rgba(0,0,0,var(--vd-hero-mask-a)) 0%,
+      rgba(0,0,0,var(--vd-hero-mask-a)) 66%, #000 100%);
+    mask-image:radial-gradient(ellipse 130% 64% at 50% 47%,
+      rgba(0,0,0,var(--vd-hero-mask-a)) 0%,
+      rgba(0,0,0,var(--vd-hero-mask-a)) 66%, #000 100%);
+  }
+  /* The caption leaves the text column and pins to the bottom-left corner.
+     It keeps --vd-text: muted is unavailable anywhere over this field. */
+  .vd-hero__caption{
+    position:relative;z-index:1;align-self:end;
+    margin:var(--vd-space-1) 0 0;max-width:none;
+  }
+  /* The nav floats over the field. It reclaims its own height for the hero,
+     which matters most at 320 where it wraps to two rows and costs 178px of
+     a 568px screen. Solid again the moment the reader leaves the top. */
+  vd-nav{background:transparent;border-bottom-color:transparent;
+    transition:background-color .2s linear,border-color .2s linear}
+  html[data-scrolled] vd-nav{
+    background:var(--vd-surface);border-bottom-color:var(--vd-rule);
+  }
+  /* No colour override. The field is masked out behind the nav, so the links
+     sit on flat ground and --vd-text-muted holds at 7.06:1. Had the field run
+     under them they would have needed --vd-text: muted peaks at 6.22 over
+     this field even at an alpha low enough to make it invisible. */
+  @media(prefers-reduced-motion:reduce){
+    vd-nav{transition:none}
+  }
+  /* THE SCROLL CUE. A full-viewport hero puts every other section below the
+     fold with nothing to say so. It exists only here: above 860 the next
+     section is already visible and a cue would be noise.
+
+     A real anchor, so it works without JS and keyboard-focuses in order.
+     44px min on both axes for 2.5.5 AAA — it is a standalone control with no
+     region to enlarge, so the hit box cannot be inherited from a card.
+     --vd-text, never muted, for the same reason as the nav. */
+  .vd-hero__cue{
+    position:relative;z-index:1;justify-self:start;align-self:end;
+    display:inline-flex;align-items:center;gap:var(--vd-space-h);
+    min-height:44px;min-width:44px;margin-top:var(--vd-space-h);
+    font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+    letter-spacing:var(--vd-track-label);text-transform:uppercase;
+    color:var(--vd-text);text-decoration:none;
+  }
+  /* The glyph is a real character, not a background image: it inherits the
+     text colour, so it can never drift out of the measured ratio. */
+  .vd-hero__cue::before{content:"\2193";font-size:var(--vd-size-xs)}
+  .vd-hero__cue:hover{color:var(--vd-text-max)}
+
   /* the rail is a strip above the content; it needs to read as a strip */
   .vd-spread__rail{gap:var(--vd-space-2);margin-bottom:var(--vd-space-h)}
   .vd-section{padding-block:var(--vd-space-2)}
@@ -1974,8 +2088,6 @@ a.vd-tag{display:inline-flex;align-items:center;min-height:44px}
   .vd-hero__inner{padding-inline:var(--vd-space-h)}
   .vd-nav__inner{padding-left:var(--vd-space-h);padding-right:var(--vd-space-h)}
   .vd-footer__inner{padding-left:var(--vd-space-h);padding-right:var(--vd-space-h)}
-  /* The wrapper is the band, so the band height lives on it, not the canvas. */
-  .vd-hero__fieldwrap{height:160px}
   .vd-spread__rail{gap:var(--vd-space-1)}
   /* A 140px term column leaves nothing for the definition at this width, so
      the grid collapses to a single stacked column. The term keeps its label

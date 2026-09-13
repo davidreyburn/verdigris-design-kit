@@ -341,6 +341,65 @@ five were verified against the source before being accepted.
 - `template.html`'s readouts are `<span>`, matching `index.html`. Both worked; two exemplars
   disagreeing is its own defect.
 
+## 1.12.0 — 2026-09-12
+
+The mobile hero fills the viewport, with the field behind the text rather than beside it.
+
+### Changed
+
+- **The mobile hero was a BAND** — the field in its own grid row above the display line, no mask,
+  overlap structurally impossible. It is now full-bleed behind text centred in `min-height:100svh`,
+  with the caption and a scroll cue at the bottom.
+
+  The band existed for a stated reason: *"a percentage mask cannot keep a full-bleed field clear
+  of text at an unknown content height."* That was correct and no longer applies. The text is
+  centred in the hero box, so its centre is the box's centre at every width and a centred mask
+  tracks it without knowing the content height. The thing that made the old mask fragile is the
+  thing this layout removes.
+
+  `min-height`, never `height`: at 320×568 the stack needs more room than the screen has, so the
+  hero grows and the page scrolls rather than clipping. That also keeps 1.4.10 safe at 400% zoom,
+  where the viewport is about 256px tall and nothing fits one screen. `svh`, not `vh` — `vh` is
+  the large viewport, so a hero sized to it is taller than the screen until the URL bar retracts.
+
+- **Two nested masks, never `mask-composite`.** The wrapper clears the field behind the nav and
+  the cue; the canvas holds the centre back to the new `--vd-hero-mask-a`. Clearing the top also
+  bought back the nav's own colour: with no field behind it the links stay `--vd-text-muted`,
+  which is what the nav is meant to be.
+
+- **The nav overlays the hero** and goes solid once the reader leaves the top, via a
+  `data-scrolled` attribute set from scroll position.
+
+### Added
+
+- **`--vd-hero-mask-a`**, per theme: `.48` in ink against a `.62` canvas, `.30` on paper against
+  a `1.0` canvas. Both land 0.30 effective, measured on the mobile grid. Do not copy the desktop
+  figure — `autoRange` calibrates per grid and the narrow field's worst band is brighter.
+- **`vd-hero[cue]`** — an opt-in scroll cue, mobile only, 44×44, `--vd-text`, hidden in print.
+  A full-viewport hero puts every other section below the fold with nothing to say so.
+- **A ResizeObserver on the field.** A window resize was not the only way the canvas changes
+  size: the hero settles after first layout with no window event, and the field kept whatever
+  size it had at `upgrade()` — painting a band in the top of a full-bleed box.
+
+### Fixed
+
+- **`--vd-nav-h` was a guess.** Declared 60px and read by the sticky rail and now the hero, while
+  the real nav is 134 below 860 and 178 at 320. Measured at runtime and written back.
+- **A `@media(max-width:480px)` rule pinned the field wrapper to 160px**, overriding the
+  full-bleed geometry at exactly the widths this change is for.
+
+### Measured
+
+Worst case under every hero element, taken from the rendered page rather than the token, because
+`audit.js` computes against `--vd-surface` and cannot see a canvas:
+
+| Element | Ink | Paper |
+|---|---|---|
+| thesis | 13.05 | 12.56 |
+| sub | 8.42 | 8.80 |
+| caption | 7.16 | 7.41 |
+| cue | 9.51 | 10.08 |
+
 ## The design record
 
 Moved here from `README.md`, which describes what works now rather than how it got that way.
