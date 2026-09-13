@@ -357,7 +357,7 @@ writes the real height back. Anything clearing the nav must read the property, n
 capped alpha across the text column, and muted measures below 7:1 against the worst composite.
 
 **Never `opacity` a disabled control.** It composites the text toward the surface and destroys
-the measured ratio. Use the muted text colour, which is still legal at 7.06:1 / 8.50:1.
+the measured ratio. Use the muted text colour, which is still legal at 7.25:1 / 8.50:1.
 
 **A bare `<img>` must keep its `max-width`.** That rule is a 1.4.10 fix, not a style: without it a
 wide screenshot scrolls the whole document sideways at 320px. Do not tidy it away.

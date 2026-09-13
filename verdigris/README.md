@@ -150,7 +150,7 @@ Every text token clears 7:1 against `--vd-ink-000`. Measured in-browser, not by 
 | `--vd-blue-400` | 7.31:1 | AAA |
 | `--vd-teal-500` | 7.60:1 | AAA, the editorial voice |
 | `--vd-green-400` | 7.28:1 | AAA |
-| `--vd-bone-400` | 7.06:1 | AAA, the lowest legal text value |
+| `--vd-bone-400` | 7.25:1 | AAA, the lowest legal text value. Measured against the **grained** ground, not the token — see the note beside it in `verdigris.css` |
 | `--vd-orange-400` | 5.77:1 | non-text only |
 | `--vd-red-300` | 4.31:1 | borders only |
 | `--vd-purple-400` | 3.51:1 | non-text only |
@@ -281,7 +281,7 @@ be orange without breaking the AAA commitment. `--vd-warn` resolves to the ordin
 the glyph and the wording do the work.
 
 **Disabled is muted, never faded.** `opacity:.5` composites text toward the surface and destroys
-the measured ratio. Muted text is 7.06:1 in ink and 8.50:1 on paper, so a disabled control is
+the measured ratio. Muted text is 7.25:1 in ink and 8.50:1 on paper, so a disabled control is
 still readable — which is the point, since a control you cannot use is still one you must read.
 
 **`--vd-control-border` is not `--vd-rule-strong`.** A decorative hairline is exempt from

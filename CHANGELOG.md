@@ -709,6 +709,41 @@ None of these require a markup change. All of them change what renders.
   dependency. Still true of this site, so the row stays — but it now records that the kit carries
   the lifecycle, since a lifecycle is not an endpoint and the row would otherwise read as false.
 
+## 2.0.1 — 2026-09-13
+
+PATCH: nothing a consumer depends on changes. Published numbers that a value change had
+invalidated, and the palette document's rewrite.
+
+### Fixed
+
+- **Four stale contrast figures.** `--vd-bone-400` moved to `#B2AB9C` in 1.15.0 and four places
+  still published its old 7.06:1: the token table and the disabled-control note in
+  `verdigris/README.md`, the muted invariant in `AGENTS.md`, and the colour constant in
+  `tools/og.html`. All now 7.25:1. `docs/` regenerates its swatch table from the running tokens
+  and was already correct, which is what made the prose the only place still wrong.
+- **`--vd-measure-read`'s comment still described it as 752px** after 2.0.0 moved it to 790.
+- **`og.png` regenerated** against the corrected muted colour, and the specimen figure
+  placeholder in `reader.html` with it.
+
+### Documented
+
+- **`verdigris.md` rewritten from the voice corpus.** The Concept section is gone — its work is
+  done by the two paragraphs that now open the document. The correction section leads with the
+  failure, in the first person, and closes on what fixing it required. A new **Where it stands**
+  section dates the document and says which artifact is ready, which is the thing a design
+  document should do and this one did not. Mechanically: no em dashes, one spelling convention,
+  and the two kill-list phrases gone.
+
+### Verified, not changed
+
+- **Print.** Untested all session and now checked on four pages: nav, footer, skip link, hero
+  field, scroll cue, form result and buttons are all correctly hidden under the print media type,
+  and every page renders a valid PDF.
+- **The résumé runs 1192px against Letter's 1056.** Measured against the **pre-session kit** as
+  well, which gives an identical 1192 — so this is not a regression from anything in 1.9.0–2.0.1.
+  It is the length of what is written, which is exactly where `resume.html` says the one-page
+  constraint is enforced. Recorded rather than fixed.
+
 ## The design record
 
 Moved here from `README.md`, which describes what works now rather than how it got that way.

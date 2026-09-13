@@ -197,12 +197,12 @@
      element's own font-size, so one token cannot serve two registers: 58ch is
      538px at 16px and 1997px at 56px. See .vd-article__body, and the note in
      verdigris/README.md before reaching for either of these. */
-  /* 752px, NOT 72ch, and the unit is the point. `ch` resolves against the
-     element's own font-size, so the same token is 752px on 18px prose and
+  /* px, NOT ch, and the unit is the point. `ch` resolves against the
+     element's own font-size, so the same token is 790px on 19px prose and
      2340px on a 56px title — it cannot make two elements share an edge,
-     which is exactly what this measure has to do. Derived once: 72ch at the
-     18px reading size, about 76 characters. If --vd-size-read moves, this
-     has to be re-derived by hand; that is the price of an edge that holds. */
+     which is exactly what this measure has to do. Derived by hand at the 19px
+     reading size, about 76 characters. If --vd-size-read moves, this has to be
+     re-derived; that is the price of an edge that holds. */
   --vd-measure-read:790px;
   /* How far the mobile field is held back behind the display line. It is set
      by the LARGE-TEXT threshold, not the body one, and that is the whole
