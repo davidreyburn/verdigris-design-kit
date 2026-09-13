@@ -43,10 +43,10 @@ catch(e){}
 <meta property="og:image:height" content="630">
 <meta property="og:site_name" content="David Reyburn">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="verdigris/verdigris.css?v=2.0.2">
-<link rel="stylesheet" href="verdigris/print.css?v=2.0.2">
-<script src="verdigris/verdigris.js?v=2.0.2" defer></script>
-<script src="verdigris/audit.js?v=2.0.2" defer></script>
+<link rel="stylesheet" href="verdigris/verdigris.css?v=2.1.0">
+<link rel="stylesheet" href="verdigris/print.css?v=2.1.0">
+<script src="verdigris/verdigris.js?v=2.1.0" defer></script>
+<script src="verdigris/audit.js?v=2.1.0" defer></script>
 </head>
 <body>
 <a class="vd-skip" href="#main">Skip to content</a>
@@ -82,7 +82,20 @@ catch(e){}
           <li><a class="vd-tag" href="https://www.linkedin.com/in/davidreyburn">LinkedIn</a></li>
           <li><a class="vd-tag" href="docs/">Design system</a></li>
         </ul>
-        <p class="vd-endmatter__note" style="margin-top:var(--vd-space-1)">
+        <!-- The button is authored `hidden` and verdigris.js unhides it, so
+             script-off gets the instruction rather than a dead control. The
+             instruction carries data-vd-print-alt, which the same handler
+             hides once the real button exists. Only one ever shows.
+
+             Labelled "Print", not "Print / Save PDF": the rail's content box
+             is 117px and the longer label wrapped to three lines, making a
+             147px-tall button. A rail is a narrow column and it is the wrong
+             place for a control with a sentence on it — an action row in the
+             content column is the better home, and is where this one belongs
+             on a real résumé. -->
+        <button class="vd-btn" type="button" data-vd-print hidden
+                style="margin-top:var(--vd-space-1)">Print</button>
+        <p class="vd-endmatter__note" data-vd-print-alt style="margin-top:var(--vd-space-1)">
           Print or save as PDF with Ctrl&thinsp;+&thinsp;P.
         </p>
       </div>

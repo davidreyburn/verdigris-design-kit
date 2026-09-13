@@ -755,6 +755,59 @@ historical sense — and these two read as history but are live claims about the
 remaining three occurrences are genuinely historical and stay: two describe what the value *was*,
 and one is a field-band measurement that has nothing to do with muted text.
 
+## 2.1.0 — 2026-09-13
+
+The résumé, from a visual assessment of the live page.
+
+**MINOR.** Two of these are defect fixes — a component escaping its container, and a control
+stretched by a flex default — and the rest are scoped to `.vd-resume`, one page type. Nothing
+that a consumer builds on changes shape unless they have a résumé page. The table below is still
+here, because what matters to someone pulling this is knowing what moves, not which digit did.
+
+### What changes visually
+
+| Change | What it does to an existing page |
+|---|---|
+| `.vd-resume h2` takes `--vd-size-section` | Résumé section heads drop 56px → 32px |
+| `.vd-resume .vd-spread__body` capped at 850px, `h2` at the measure | The résumé column narrows to one edge |
+| `.vd-tag` is bounded and wraps | A tag that was overflowing its container now wraps instead |
+| `.vd-spread__rail` gets `align-items:flex-start` below 860px | A block child of a mobile rail is no longer stretched |
+
+### Fixed
+
+- **`.vd-tag` escaped the rail's hairline by 7px.** `dreyburn.com` measures **139px** in a rail
+  whose content box is **117px**, so it crossed the border and read as broken. No label length
+  makes 139 fit in 117, so the fix could not be wording: the box is bounded and the label wraps
+  inside it. A tag that is too long for its column now gets taller, never wider. If the wrap looks
+  wrong, the label is wrong for the column — which is the signal, not a defect.
+
+- **A control in a mobile rail was stretched to the strip's full height.** Below 860px the rail
+  becomes a flex strip, and a flex container defaults to `stretch` — so a 50px button measured
+  **114×147**, a target three times the size of the thing it looked like. Readouts and labels
+  never showed it; the first control put in a rail did.
+
+- **Résumé section heads matched the name.** Both `h1` and `h2` were `--vd-size-xl`, which inverts
+  the hierarchy on a document whose job is a seven-second scan. And three right edges ran down one
+  page — `h1` 790, summary 543, `h2` **928**. One edge now, the same fix `.vd-article` got.
+
+- **A print regression I introduced and caught.** `.vd-resume h2` at (0,1,1) outranks `print.css`'s
+  bare `h2` at (0,0,1), so the first version of this change made the résumé print **larger** heads
+  than before — 1231px against Letter's 1056, worse than the 1192 it started at. `print.css` now
+  sets the size as well as the margin, and print is back to 1192.
+
+### Added
+
+- **`[data-vd-print]`**, a print control. `window.print()` is one line, so the line is not what
+  the kit is for: the 44px target, hiding the button on paper, and a fallback that survives with
+  script off. The button is authored `hidden` and unhidden by script; `[data-vd-print-alt]` marks
+  the instruction that script then hides. Only one ever shows.
+
+### Not fixed, and deliberately
+
+**The résumé still prints 1192px against Letter's 1056.** Verified against the pre-session kit in
+2.0.1 — identical then, identical now — so nothing here caused it and nothing here can fix it.
+It is the length of what is written, which is where `resume.html` says the constraint lives.
+
 ## The design record
 
 Moved here from `README.md`, which describes what works now rather than how it got that way.

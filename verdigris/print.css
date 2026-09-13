@@ -152,7 +152,12 @@
      spending vertical space the content needs. */
   .vd-resume .vd-section{padding-block:0}
   .vd-resume .vd-section::before{display:none}
-  .vd-resume h2{margin-top:12pt}
+  /* font-size too, not just the margin. The screen rule .vd-resume h2 sets
+     --vd-size-section at (0,1,1) and outranks the bare h2 at (0,0,1) above,
+     so without this the résumé printed LARGER section heads than before the
+     reading register was applied to it — measured 1231px against Letter's
+     1056, worse than the 1192 it started at. */
+  .vd-resume h2{font-size:16pt;line-height:1.2;margin-top:12pt}
   /* End matter is navigation. On paper there is nothing to navigate to. */
   .vd-endmatter__nav{display:none !important}
 }

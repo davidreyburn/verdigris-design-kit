@@ -864,10 +864,16 @@ details>*:not(summary){margin-top:var(--vd-space-h)}
 @media(max-width:860px){
   :root{--vd-size-2xl:40px;--vd-size-xl:32px;--vd-lead-hero:45px;--vd-lead-2:40px;--vd-gutter:var(--vd-space-1)}
   .vd-spread{grid-template-columns:1fr}
+  /* align-items:flex-start is not cosmetic. A flex container defaults to
+     stretch, so once the rail becomes a strip every block child is pulled to
+     the height of the tallest one — a 50px button in a 147px strip measured
+     114x147, which is a target three times the size of the thing it looks
+     like. Readouts and labels are inline-ish and never showed it; the first
+     control put in a rail did. */
   .vd-spread__rail{
     position:static;border-right:0;padding-right:0;padding-bottom:var(--vd-space-h);
     border-bottom:var(--vd-hairline) solid var(--vd-rule);
-    display:flex;gap:var(--vd-space-1);flex-wrap:wrap;
+    display:flex;gap:var(--vd-space-1);flex-wrap:wrap;align-items:flex-start;
   }
   .vd-readout,.vd-spread__rail>.vd-label{margin-bottom:0}
 }
@@ -1414,8 +1420,20 @@ vd-meta b.vd-is-data{color:var(--vd-data);font-variant-numeric:tabular-nums}
 vd-meta b.vd-is-grade{color:var(--vd-text-strong);letter-spacing:.04em}
 
 /* ── vd-tag ──────────────────────────────────────────────────────────── */
+/* max-width is not defensive. A --vd-rail is 132px with 15px of padding, so
+   its content box is 117 — and a tag reading "dreyburn.com" measures 139 at
+   this size with this tracking. It escaped the rail's hairline by 7px on the
+   live résumé, which reads as broken rather than as a long label.
+
+   No label length makes 139 fit in 117, so the fix cannot be wording. The box
+   is bounded instead and the label wraps inside it: a tag that is too long for
+   its container gets taller, never wider. `anywhere` rather than `break-word`
+   because these are often domains and handles, which carry no spaces to break
+   at — the choice is an ugly wrap or an overflow, and an overflow is worse. */
 .vd-tag{
-  display:inline-block;font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  display:inline-block;max-width:100%;box-sizing:border-box;
+  overflow-wrap:anywhere;
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
   line-height:var(--vd-lead-half);text-transform:uppercase;letter-spacing:var(--vd-track-label);
   color:var(--vd-text-muted);border:var(--vd-hairline) solid var(--vd-rule);
   border-radius:var(--vd-radius);padding:var(--vd-space-q) var(--vd-space-h);
@@ -1503,6 +1521,23 @@ vd-quote blockquote{margin:0;max-width:var(--vd-measure-read);
   color:var(--vd-text-strong)}
 vd-quote figcaption{margin-top:var(--vd-space-h);font-family:var(--vd-face-mono);
   font-size:var(--vd-size-micro);letter-spacing:.06em;color:var(--vd-text-muted)}
+
+/* ── the résumé ──────────────────────────────────────────────────────────
+   A titled document, so its section heads take the reading register for the
+   same reason an article's do: at --vd-size-xl they matched the person's name
+   exactly, which inverts the hierarchy on a page whose whole job is a
+   seven-second scan. It also buys back vertical space on a document that
+   prints 136px over Letter.
+
+   And one edge. The h1 is capped at the measure by .vd-article__title, the
+   summary is deliberately shorter as a dek, and the h2s ran the full 928px of
+   the spread body — three right edges down one page, the same fault .vd-article
+   fixed for the reading view. */
+.vd-resume h2{
+  font-size:var(--vd-size-section);line-height:var(--vd-lead-1h);
+  font-weight:600;max-width:var(--vd-measure-read);
+}
+.vd-resume .vd-spread__body{max-width:850px}
 
 /* ── vd-cite · marginalia, uses the rail ─────────────────────────────── */
 /* Inline superscript — no box to hang a rule on, so this one takes the

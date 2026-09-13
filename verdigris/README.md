@@ -382,6 +382,24 @@ Author it. The kit fills it and moves focus to it, and generates one only if you
 element here upgrades markup that is already complete. `role="status"` and `tabindex="-1"` are set
 by the kit. Focus is what announces the outcome, the same reasoning as the absent error summary.
 
+## The print control
+
+`window.print()` is one line, so the line is not what this is for. The kit carries the 44px
+target, hiding the control on the printed page, and a fallback that survives with script off:
+
+```html
+<button class="vd-btn" type="button" data-vd-print hidden>Print</button>
+<p data-vd-print-alt>Print or save as PDF with Ctrl&thinsp;+&thinsp;P.</p>
+```
+
+The button is authored **`hidden`** and `verdigris.js` unhides it. Script off gets the
+instruction rather than a dead control; script on hides the instruction and shows the button.
+Only one ever appears, and `print.css` hides both on paper.
+
+Keep the label short if it lives in a rail. A `--vd-rail` content box is 117px, and
+"Print / Save PDF" wraps to three lines there — an action row in the content column is the better
+home for anything longer than a word.
+
 ## Reduced motion
 
 Not "everything stops". The field freezes to a single deterministic seeded frame, so it is

@@ -939,6 +939,28 @@
     }
   }
 
+  /* ── the print control ────────────────────────────────────────────────
+     window.print() is one line, so the line is not what the kit is for. What
+     it is for: the 44px target, being hidden on the printed page itself, and
+     a fallback that survives with script off.
+
+     The button is authored `hidden` and unhidden here. That way no-JS gets
+     nothing rather than a dead control — and whatever the author wrote as the
+     manual instruction, marked data-vd-print-alt, is hidden once the real
+     button exists. Progressive enhancement in the same direction as every
+     other element here: the markup is complete and correct before this runs. */
+  (function () {
+    const btns = document.querySelectorAll('[data-vd-print]');
+    if (!btns.length) return;
+    btns.forEach(function (b) {
+      b.hidden = false;
+      b.addEventListener('click', function () { window.print(); });
+    });
+    document.querySelectorAll('[data-vd-print-alt]').forEach(function (alt) {
+      alt.hidden = true;
+    });
+  })();
+
   /* --vd-nav-h is the height everything clears the nav by: the sticky rail
      offsets itself by it, and the mobile hero pulls itself up under it. The
      token declares 60px, which is true only while the nav fits one row. It
