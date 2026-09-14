@@ -900,6 +900,29 @@ reproduce and did anyway, because the risk behind it is structural.
   inconsistency to settle first is `.vd-role__title` at 500/18px against `.vd-system-card__title`
   at 600/18px — two title-alikes at one size in two weights.
 
+## 2.2.1 — 2026-09-14
+
+PATCH: the printed résumé had no reachable contact on it.
+
+### Fixed
+
+- **`print.css` suppressed every URL on `.vd-resume`, including the contact links.** The blanket
+  rule was right about bullets — a printed résumé dragging a URL behind each achievement is
+  unreadable — and it also caught the action row. The result: no email by policy, no printed URLs,
+  and a contact form that cannot be filled in on paper. **The one document on this site whose
+  entire purpose is being acted on was the one nobody could act on.**
+
+  Scoped to `:not(.vd-tag)`. `.vd-tag` is the right seam because it already *is* what a standalone
+  link in this kit is — bare anchors failed 2.5.8 and the résumé was moved onto tags for exactly
+  that reason, so "is a tag" and "is an action" are the same set.
+
+  Verified both directions against the live markup: a bullet link's `::after` is `""`, a tag's
+  prints ` <https://…>`.
+
+- **Tags are flattened on paper** — no border, no padding. On screen those make a target; on a
+  sheet they read as empty boxes drawn around text, and the URL now following each label needs the
+  room.
+
 ## The design record
 
 Moved here from `README.md`, which describes what works now rather than how it got that way.

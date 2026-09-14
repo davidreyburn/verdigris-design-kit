@@ -146,7 +146,26 @@
      that reasoning still holds for an article's citations. On a resume every
      bullet would carry a URL and the page becomes unreadable, which is the
      opposite of the goal. Articles keep theirs; this page does not. */
-  .vd-resume a[href^="http"]::after{content:"" !important}
+  /* :not(.vd-tag) is the whole fix. The blanket rule was right about bullets —
+     a printed résumé whose every achievement drags a URL behind it is
+     unreadable — and wrong about the contact links, which it also caught. The
+     result was a printed résumé carrying no reachable address at all: no email
+     by policy, no URLs here, and a contact form that cannot be filled in on
+     paper. The one document on this site whose whole purpose is being acted on
+     was the one nobody could act on.
+
+     .vd-tag is the right seam because it is already what a standalone link in
+     this kit is: bare anchors failed 2.5.8 and the résumé was moved onto tags
+     for that reason, so "is a tag" and "is an action" are the same set. */
+  .vd-resume a[href^="http"]:not(.vd-tag)::after{content:"" !important}
+
+  /* Flattened on paper. The border and padding make a target on screen; on
+     a sheet they read as empty boxes around text, and the URL that now
+     follows each one has to sit on the same line as the label. */
+  .vd-resume a.vd-tag{
+    border:0;padding:0;margin-right:var(--vd-space-h);
+    display:inline;min-height:0;
+  }
   /* One page is a content constraint, not a CSS one — nothing here can make
      too much text fit. What this does is stop the page furniture from
      spending vertical space the content needs. */
