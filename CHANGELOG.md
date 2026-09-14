@@ -808,6 +808,31 @@ here, because what matters to someone pulling this is knowing what moves, not wh
 2.0.1 — identical then, identical now — so nothing here caused it and nothing here can fix it.
 It is the length of what is written, which is where `resume.html` says the constraint lives.
 
+## 2.1.1 — 2026-09-14
+
+PATCH: a layout fault 2.1.0 introduced, found once the build dropped the rail.
+
+### Fixed
+
+- **The résumé column hugged the left.** 2.1.0 capped `.vd-resume .vd-spread__body` at 850px to
+  close the gap between 790px content and a 928px cell — correct while the page still had a
+  132px rail, which balanced the composition. The build then removed the rail *and* the
+  `.vd-spread` grid, leaving the cap to left-align an 850px column in a 1120px page: **160px of
+  margin on the left against 430 on the right.** It read as content that had slid off centre.
+
+  `margin-inline:auto`. The column now sits 295→1145 at 1440 and 215→1065 at 1280, symmetric at
+  both.
+
+  Two alternatives measured and rejected. Letting the body fill the page changed nothing, because
+  the text inside is capped at the measure and nothing painted in the space it gained. Narrowing
+  `--vd-page` on the résumé put the content in exactly the same place as the auto margins, for a
+  token override and a wider blast radius.
+
+  **The nav mark stays at the page's left edge and deliberately does not follow.** The nav is
+  chrome and is identical on every page; a mark that jumped position between the homepage and the
+  résumé would be a worse inconsistency than a static offset. A full-width bar over a centred
+  sheet is what a document viewer looks like, and a résumé is a sheet.
+
 ## The design record
 
 Moved here from `README.md`, which describes what works now rather than how it got that way.

@@ -1537,7 +1537,19 @@ vd-quote figcaption{margin-top:var(--vd-space-h);font-family:var(--vd-face-mono)
   font-size:var(--vd-size-section);line-height:var(--vd-lead-1h);
   font-weight:600;max-width:var(--vd-measure-read);
 }
-.vd-resume .vd-spread__body{max-width:850px}
+/* Centred, and the auto margins are the whole point of this line. The cap
+   above was written while the résumé still had a rail: a 850px column sat in
+   a 1120px spread beside a 132px rail, and the rail balanced it. With the rail
+   gone the same cap left-aligns the column in a full-width page — 160px of
+   margin on the left against 430 on the right, which reads as content that
+   slid off centre rather than as a composition.
+
+   The nav mark stays at the page's left edge and does NOT follow. That is
+   deliberate: the nav is chrome and is identical on every page, and a mark
+   that jumped position between the homepage and the résumé would be a worse
+   inconsistency than a static offset. A full-width bar over a centred sheet
+   is what a document viewer looks like, and a résumé is a sheet. */
+.vd-resume .vd-spread__body{max-width:850px;margin-inline:auto}
 
 /* ── vd-cite · marginalia, uses the rail ─────────────────────────────── */
 /* Inline superscript — no box to hang a rule on, so this one takes the
