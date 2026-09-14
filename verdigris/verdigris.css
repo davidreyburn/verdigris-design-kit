@@ -1076,8 +1076,17 @@ vd-hero{display:block;position:relative;padding:var(--vd-space-4) 0 var(--vd-spa
    the default: PlexMono ships a real 400 italic, so this is a drawn italic
    and not a synthesised slant. Tracking is eased slightly — mono italic at
    12px inside .06em already crowds, and the letterforms lean into it. */
+/* NOT italic, and the reason is a font file. This <cite> was the only mono
+   italic anywhere in the kit — one word, "Drift", pulling plex-mono-400-italic
+   onto every page carrying a hero, for 10 KB. A citation does not need a slope
+   to be a citation: the colour step to --vd-text-strong and the wider tracking
+   already separate it from the credit line around it, and they are the same
+   two channels the system uses to mark emphasis everywhere else.
+
+   Do not add `font-style:italic` back without also deciding to ship the face.
+   A synthesised oblique on a monospace design is worse than neither. */
 .vd-hero__caption cite{
-  font-style:italic;letter-spacing:.03em;color:var(--vd-text-strong);
+  font-style:normal;letter-spacing:.06em;color:var(--vd-text-strong);
 }
 @media(max-width:860px){
   /* The 58% cap exists to keep the caption inside the field's guaranteed
@@ -2065,6 +2074,12 @@ legend{
 .vd-table td.vd-is-num{font-family:var(--vd-face-mono);color:var(--vd-data);
   font-variant-numeric:tabular-nums;white-space:nowrap}
 .vd-table-scroll{overflow-x:auto}
+/* The same containment, named for everything that is not a table. A
+   third-party widget with a min-width larger than its column — a captcha is
+   the usual one, around 300px — pushes the whole document sideways rather
+   than overflowing quietly, which is a 1.4.10 failure on a site that
+   publishes its reflow numbers. Contain it here instead. */
+.vd-scroll-x{overflow-x:auto}
 
 /* ── vd-figure ───────────────────────────────────────────────────────── */
 vd-figure{display:block;margin:var(--vd-space-2) 0}

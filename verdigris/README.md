@@ -37,6 +37,8 @@ Nothing uses shadow DOM.
 | Baseline-derived rhythm | 30px unit forces half-steps (15px, 7.5px) for tight spacing. Embeds must be forced onto the grid. |
 | Light DOM, no shadow roots | No style encapsulation. Component CSS must stay namespaced by hand. |
 | The hero field is masked, not luminance-capped | The mask carries the AAA guarantee under the text column, so the field's own alpha can be tuned for legibility instead of for contrast. |
+| Chivo 500 **and** 600, both shipped | Asked twice whether they can collapse, and the answer is no. Rendered side by side at 56px they are plainly different weights, not interchangeable — 500 carries the display sizes, 600 the text ones. The saving is real, ~30 KB, and it costs the display voice. Settle `.vd-role__title` (500 at 18px) against `.vd-system-card__title` (600 at 18px) before asking again: two title-alikes at one size in two weights is the inconsistency to fix first |
+| No mono italic | `plex-mono-400-italic` was loading for the single word *Drift* in the hero caption. The `<cite>` uses colour and tracking instead, and the face comes out of the payload |
 | No Tailwind | Slower to write. The point is that the system is authored. |
 
 ## Convention: no padding/margin shorthands on composable classes
@@ -101,6 +103,26 @@ keeps them apart.
 **Rationing green.** It is the signature, which means it works by restraint. Green belongs on
 rules and marks, never on fills or large text. Thin green on near-black reads as
 instrumentation; thick green reads as hacker cosplay, which is a named anti-goal.
+
+## Each topolang mode has a font requirement
+
+A mode paints glyphs chosen from its `fill` and `cfn` arrays. Those appear in no stylesheet and
+no markup, so nothing greps them out of a page — and the faces this kit ships **do not carry all
+of them**:
+
+| Mode | Needs beyond ASCII | Usable with the shipped faces |
+|---|---|---|
+| **SHADE** | nothing — `. + # @` | **yes**, and it is what the site runs |
+| STRATA | `≈ ≡ █ ‖` | **no** |
+| RELIEF | `° ¦ █` | **no** — `█` is missing |
+
+The runtime keeps all three, because it implements `spec-topolang v1.3.2` and `selfTest()` asserts
+conformance against the spec's own vector — dropping a mode would make that claim false. What is
+constrained is the *fonts*, not the renderer. A consumer wanting STRATA or RELIEF supplies a face
+carrying those codepoints; `tools/subset.sh` keeps them in range so such a face will work.
+
+A missing glyph here fails silently and badly: the substitute comes from a different family at a
+different advance, and the cell grid the renderer assumes comes apart.
 
 ## Two measures, because `ch` is not a unit of width
 
@@ -355,6 +377,20 @@ form. If that is the channel, use a link and no form.
 **With script off the form posts natively.** That path is the platform's, not a fallback this kit
 maintains.
 
+### What the endpoint has to satisfy
+
+Four things, and the first one is a silent `400` if you get it wrong:
+
+| | |
+|---|---|
+| **Body** | `FormData`, **not JSON**. Sent as `multipart/form-data`, so parse it as a form. There is no `Content-Type: application/json` |
+| **Success** | Any `2xx`. The response body is **ignored** — returning JSON the kit will read is wasted work |
+| **Honeypot** | Arrives as a normal field under whatever `honeypot` names, `company` by default. **The endpoint must reject it when non-empty** |
+| **Timing floor** | Enforced client-side only and **never reaches you**. A bot that ignores script is invisible to it |
+
+The last two are the same warning twice: the kit's traps protect against scripted form-fillers,
+not against a POST straight to your URL. Everything you actually rely on has to be on your side.
+
 ### Spam, and what the kit can and cannot promise
 
 `honeypot` adds an off-screen trap field; `min-seconds` rejects anything submitted faster than a
@@ -370,6 +406,23 @@ name, and the endpoint must reject it when non-empty. Server-side enforcement is
 stylesheet and a custom element can promise, and it would be dishonest to imply otherwise.
 
 ### A challenge widget
+
+Drop it in the form body as ordinary markup, **inside `.vd-scroll-x`**. Turnstile and its
+equivalents carry a min-width around 300px, and a form column narrower than that pushes the whole
+document sideways — a 1.4.10 reflow failure on a site that publishes its reflow measurements. The
+wrapper is the same idiom `.vd-table-scroll` uses for wide tables: the overflow is contained
+rather than propagated.
+
+```html
+<div class="vd-scroll-x"><div class="cf-turnstile" data-sitekey="…"></div></div>
+```
+
+**A challenge widget also ends "no external requests."** That claim is load-bearing on a site
+built from this kit, and it is worth knowing which features cost it: a captcha, a hosted form
+endpoint, an analytics beacon and a webfont CDN each do. The kit itself makes none — every byte
+it ships is served from the same origin — but it cannot make that true of what you add.
+
+### How the widget rides along
 
 Drop it in the form body as ordinary markup. The kit submits with `FormData` over the whole form,
 so the widget's hidden input rides along — no vendor branch, no script, no key in the kit. This is

@@ -833,6 +833,73 @@ PATCH: a layout fault 2.1.0 introduced, found once the build dropped the rail.
   résumé would be a worse inconsistency than a static offset. A full-width bar over a centred
   sheet is what a document viewer looks like, and a résumé is a sheet.
 
+## 2.2.0 — 2026-09-14
+
+Seven items from the build agent. Six verified against source and acted on; one I could not
+reproduce and did anyway, because the risk behind it is structural.
+
+### Fixed
+
+- **A hand-authored card lost four behaviours silently.** `VdSystemCard` and `VdNoteCard` opened
+  with an early `return` when the author had written the internals — which protected the markup
+  and threw away `makeRegionClickable` with it. No `data-clickable`, and since 2.1.0 gated the
+  hover treatment on that attribute, the card lost its accent border, its sunken fill, its title
+  underline and its click target at once. Nothing warned.
+
+  Construction is what must not clobber authored markup; behaviour is not construction. Only the
+  building is skipped now, and the region is wired either way. Verified: an authored card keeps
+  its markup, gains `data-clickable`, and matches the hover gate. A card with no `href` still ends
+  up inert, because `makeRegionClickable` checks for one.
+
+- **`og.png` was the one versioned artifact with no cache key.** No query string on `og:image`,
+  and `.htaccess` caches images for 30 days — so when 2.0.1 regenerated the card the edge kept
+  serving the old one and there was nothing to change. Now `og.png?v=<version>`.
+
+- **The hero `<cite>` was pulling a whole font face for one word.** `plex-mono-400-italic`, 10 KB,
+  loaded on every page with a hero, for *Drift*. A citation does not need a slope: the step to
+  `--vd-text-strong` and wider tracking already separate it, and they are the channels the system
+  uses for emphasis everywhere else. Verified: the homepage now loads **five** faces, not six.
+
+### Added
+
+- **`.vd-scroll-x`**, the containment `.vd-table-scroll` provides, named for everything that is
+  not a table. A third-party widget with a min-width larger than its column — a captcha, usually
+  around 300px — pushes the document sideways rather than overflowing quietly, which is a 1.4.10
+  failure on a site that publishes its reflow numbers.
+
+  **I could not reproduce the specific break.** At 320px the live form measures 290px wide and a
+  300px child produced zero document overflow, because it starts at x=15 and ends inside the
+  viewport. The reported 245px column implies a narrower container than I can find. The utility
+  ships anyway: the risk does not depend on that one instance.
+
+- **The endpoint contract, in `verdigris/README.md`.** Four things `vd-form` requires that were
+  only discoverable by reading `verdigris.js`: the body is `FormData` and not JSON, any `2xx` is
+  success and the response is ignored, the honeypot arrives as a normal field, and the timing
+  floor never reaches the server. Getting the first wrong is a silent `400`.
+
+- **A note that a challenge widget ends "no external requests."** That claim is load-bearing on a
+  site built from this kit, so the kit now says which features cost it.
+
+- **`tools/subset.sh`.** The kit still cannot subset — no build step, no `fonttools` — but it can
+  stop consumers guessing at the range. Six of the glyphs in it are painted from JavaScript or CSS
+  `content` and appear in no markup: `✓` and `‼` (form states), `…` (pending), `−` (details
+  marker), `—` (list marker), `↓` (scroll cue). A Latin-1 subset drops every one, and each fails
+  silently because a substituted glyph still draws.
+
+### Documented
+
+- **Each topolang mode's font requirement**, as an obligation rather than a fact. SHADE is pure
+  ASCII and works; STRATA needs `≈ ≡ █ ‖` and RELIEF needs `█`, none of which the shipped faces
+  carry. The runtime keeps all three — it implements `spec-topolang v1.3.2` and `selfTest()`
+  asserts conformance against the spec's own vector, so dropping a mode would make that claim
+  false. What is constrained is the fonts, not the renderer.
+
+- **Chivo 500 and 600 stay, and why.** This was asked twice. It was answered the first time and
+  **never written down**, which is the same as not answering: rendered side by side at 56px they
+  are plainly different weights. The saving is real and it costs the display voice. The
+  inconsistency to settle first is `.vd-role__title` at 500/18px against `.vd-system-card__title`
+  at 600/18px — two title-alikes at one size in two weights.
+
 ## The design record
 
 Moved here from `README.md`, which describes what works now rather than how it got that way.

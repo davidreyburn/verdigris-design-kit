@@ -333,7 +333,21 @@
   */
   class VdSystemCard extends VdElement {
     upgrade() {
-      if (this.querySelector('.vd-system-card__title')) return;
+      /* AUTHORED MARKUP IS LEFT ALONE, BUT STILL WIRED. This used to be an
+         early `return`, which protected what the author wrote and threw away
+         everything that has no markup equivalent with it: makeRegionClickable
+         never ran, so the card got no data-clickable — and since 2.1.0 gated
+         the hover treatment on that attribute, a hand-authored card silently
+         lost its accent border, its sunken fill, its title underline and its
+         click target, all four at once.
+
+         Construction is what must not clobber authored markup. Behaviour is
+         not construction. So only the building is skipped now, and the region
+         is wired either way. A card with no href still ends up inert, because
+         makeRegionClickable checks for one. */
+      if (this.querySelector('.vd-system-card__title')) {
+        return makeRegionClickable(this, this.querySelector('.vd-system-card__title a'));
+      }
       const index = this.getAttribute('index') || '';
       const kicker = this.getAttribute('kicker') || '';
       const title = this.getAttribute('title') || '';
@@ -396,7 +410,11 @@
   */
   class VdNoteCard extends VdElement {
     upgrade() {
-      if (this.querySelector('.vd-note-card__title')) return;
+      /* Same as vd-system-card above: skip the construction, keep the
+         wiring. An authored note card was losing the identical four things. */
+      if (this.querySelector('.vd-note-card__title')) {
+        return makeRegionClickable(this, this.querySelector('.vd-note-card__title a'));
+      }
       const date = this.getAttribute('date') || '';
       const title = this.getAttribute('title') || '';
       /* No href, no anchor. A card with nothing to link to is a real case —
