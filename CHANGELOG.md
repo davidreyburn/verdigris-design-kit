@@ -923,6 +923,65 @@ PATCH: the printed résumé had no reachable contact on it.
   sheet they read as empty boxes drawn around text, and the URL now following each label needs the
   room.
 
+## 2.4.0 — 2026-09-15
+
+MINOR: a portrait, opt-in, and the discovery that no image on this site has ever carried the
+page's grain.
+
+### Added
+
+- **`.vd-portrait`** — a photograph of a person at rail scale. 120px square desktop (four
+  baselines, and very nearly the 132px rail, which is not itself on the grid), 90px below 860
+  where the rail is a horizontal strip and 120 pushes it to a third row at 320px. Grayscale,
+  `--vd-radius`, `object-position` defaulting to `50% 30%` because in a portrait the face is in
+  the upper third and a centre crop takes the chin.
+
+  **It goes in the rail**, which already means *facts about this section*, so a face there reads
+  as a credential rather than a feature — and it is off the measure entirely, so nothing in the
+  reading column moves. A band across the top of the section would be a 300px picture of a face;
+  a float beside the first paragraph fights both the measure and the baseline.
+
+  Not a link, deliberately: a clickable face invites *click for bio*, and an inert image raises
+  no 2.5.8 question at all. Sticky travel on `#about` measured at 459px before the portrait and
+  about 324px after — roughly a third of a viewport, brief enough that a non-sticky variant was
+  not needed.
+
+- **`.vd-portrait--colour`** keeps the photograph as shot. **`.vd-portrait--cutout`** expects a
+  background-removed source and drops the box, the radius and the surface, so the figure stands
+  in the ground the way the type does.
+
+### Found
+
+- **`body::before` is under the content, so no image on a Verdigris page has ever carried the
+  page's grain.** The noise is at `z-index:0` and `body>*` at `z-index:1`. Every photograph and
+  screenshot this system has ever shown has been the one surface on the page with no tooth,
+  which is most of what makes an image look pasted on rather than printed on.
+
+  `.vd-portrait::after` puts the same noise at the same frequency back over the image. 8%, not
+  the page's 5%, because a photograph has its own high-frequency detail to compete with —
+  calibrated against a continuous-tone source in both themes: 4% invisible, 14% reads as noise
+  added to a photo, 8% reads as tooth. `--vd-portrait-grain` overrides it.
+
+  Not generalised to `vd-figure` or `.vd-article__hero` in this release. It probably should be,
+  but that would change every existing page without its markup changing, which is a MAJOR by
+  this changelog's own rule and deserves its own pass.
+
+### Changed
+
+- **`.vd-portrait` does not print**, joining the hero and the thumbnail — but for a different
+  reason, which is worth stating because the others' reason does not apply: paper has *not*
+  already answered *who is this*. It comes off because a 90px halftone of a face is a grey
+  smudge on a laser printer, and because the documents this system prints are ones being
+  trimmed. `AGENTS.md` now says explicitly not to reintroduce it on a résumé.
+
+### Not done
+
+- **The kit cannot promise a photograph's contrast.** `audit.js` measures tokens; a photograph
+  is not one. The same file serves both themes, and a portrait shot bright reads as a lightbox
+  on ink while a dark one recedes into it — both observed in the two-theme lab. The guidance is
+  therefore concrete rather than aesthetic: pick a source whose background sits near mid-value,
+  or use `--cutout`, which makes the question go away.
+
 ## 2.3.0 — 2026-09-15
 
 MINOR: an article can carry one picture, and that picture reaches the share card. All three

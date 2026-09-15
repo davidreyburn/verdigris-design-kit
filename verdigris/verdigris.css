@@ -2156,6 +2156,80 @@ img.vd-article__hero{
 }
 img.vd-article__hero{margin:var(--vd-space-2) 0 0;max-width:var(--vd-measure-read)}
 
+/* ── .vd-portrait · a photograph of a person, at rail scale ────────────
+   A face is the loudest thing on a page to a human visual system, before
+   any design decision is made about it. Everything here is an attempt to
+   spend that attention once rather than continuously.
+
+   WHERE IT GOES. The rail, under the section label. That column already
+   means "facts about this section" — a label and two readouts — so a
+   portrait there reads as a credential rather than as a feature. It is also
+   modest structurally rather than by restraint: it is off the measure
+   entirely, so nothing about the reading column changes. A band across the
+   top of the section would be a 300px picture of a face, and a float beside
+   the first paragraph fights both the measure and the baseline.
+
+   120px is four baselines and very nearly the 132px rail, so it fills the
+   column to its hairline and still lands on the grid. 132 itself does not.
+
+   SQUARE, at --vd-radius. A circular avatar is a product-UI convention and
+   would be the roundest thing on this site by a wide margin. The note-card
+   thumbnail already set the square at this radius; this matches it.
+
+   THE GRAIN IS THE POINT. body::before lays 5% noise at z-index 0 and
+   body>* sits at z-index 1, so the page's grain is UNDER the content and no
+   image on this site has ever carried it. That is most of what makes a
+   photograph look pasted onto this page rather than printed on it. The
+   overlay below is the same noise at the same frequency, slightly stronger
+   because a photograph has its own high-frequency detail to compete with.
+
+   GRAYSCALE by default. The palette is ink, bone and three accents used
+   sparingly; a full-colour photograph is a fourth voice arriving at volume.
+   .vd-portrait--colour opts out.
+
+   Default focus is 50% 30%, not centre — in a portrait the face is in the
+   upper third, and a centre crop takes the chin and the collar.
+
+   NOT A LINK, deliberately. A clickable face invites "click for bio", and
+   an inert image raises no 2.5.8 target question at all.
+
+   WHAT THIS CANNOT PROMISE: a photograph is not a token, and audit.js
+   measures tokens. The same file serves ink and paper, so a portrait shot
+   against a dark ground disappears in one theme and a bright one disappears
+   in the other. Choose a mid-value background, or use --cutout, which makes
+   the question go away. */
+.vd-portrait{
+  display:block;position:relative;overflow:hidden;
+  width:var(--vd-portrait-size,120px);aspect-ratio:1;
+  margin:var(--vd-space-h) 0;
+  border-radius:var(--vd-radius);
+  /* A floor under a transparent or letterboxed source, so the box is never
+     a hole in the page. --cutout turns it off, which is the whole variant. */
+  background:var(--vd-surface);
+}
+.vd-portrait img{
+  display:block;width:100%;height:100%;
+  object-fit:cover;object-position:var(--vd-portrait-focus,50% 30%);
+  filter:grayscale(1);
+}
+.vd-portrait::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  opacity:var(--vd-portrait-grain,.08);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.vd-portrait--colour img{filter:none}
+
+/* A background-removed portrait, standing in the ink the way the type does.
+   No box, no edge, no floor — and because the transparent pixels are not
+   painted, body::before shows through them, so the ground keeps its grain
+   and only the figure sits on top of it. That also means the overlay has to
+   go: a square of noise over transparency would draw the box back. */
+.vd-portrait--cutout{
+  background:none;border-radius:0;overflow:visible;
+}
+.vd-portrait--cutout img{object-fit:contain}
+.vd-portrait--cutout::after{content:none}
+
 /* ── vd-redact · turns the IP constraint into a visible design decision ─ */
 vd-redact{
   display:inline-block;background:var(--vd-surface-selected);color:transparent;
@@ -2523,6 +2597,13 @@ a.vd-tag{display:inline-flex;align-items:center;min-height:44px}
   .vd-note-card__thumb{
     grid-row:auto;width:100%;height:160px;margin-bottom:var(--vd-space-h);
   }
+
+  /* Three baselines instead of four. The rail is a horizontal strip here,
+     and a 120px portrait beside a label and two readouts pushes the strip
+     to a third row at 320px. 90px also matches the note-card thumbnail,
+     which is the other small picture in this system. */
+  .vd-portrait{--vd-portrait-size:90px}
+  .vd-spread__rail>.vd-portrait{margin:0}
 
   /* the rail is a strip above the content; it needs to read as a strip */
   .vd-spread__rail{gap:var(--vd-space-2);margin-bottom:var(--vd-space-h)}

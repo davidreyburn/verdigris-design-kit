@@ -55,16 +55,16 @@ catch(e){}
 <meta property="og:url" content="https://dreyburn.com/&lt;slug&gt;.html">
 <meta property="og:title" content="The page title, without the — David Reyburn suffix">
 <meta property="og:description" content="The same sentence as meta name=description above.">
-<meta property="og:image" content="https://dreyburn.com/og.png?v=2.3.0">
+<meta property="og:image" content="https://dreyburn.com/og.png?v=2.4.0">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:site_name" content="David Reyburn">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="verdigris/verdigris.css?v=2.3.0">
-<link rel="stylesheet" href="verdigris/print.css?v=2.3.0">
-<script src="verdigris/topolang.js?v=2.3.0" defer></script>
-<script src="verdigris/verdigris.js?v=2.3.0" defer></script>
-<script src="verdigris/audit.js?v=2.3.0" defer></script>
+<link rel="stylesheet" href="verdigris/verdigris.css?v=2.4.0">
+<link rel="stylesheet" href="verdigris/print.css?v=2.4.0">
+<script src="verdigris/topolang.js?v=2.4.0" defer></script>
+<script src="verdigris/verdigris.js?v=2.4.0" defer></script>
+<script src="verdigris/audit.js?v=2.4.0" defer></script>
 </head>
 <body>
 
@@ -216,6 +216,32 @@ catch(e){}
     <div class="vd-spread">
       <div class="vd-spread__rail">
         <span class="vd-label">Contents</span>
+
+        <!-- A PORTRAIT. Optional, and the rail is where it belongs: that
+             column already holds facts about the section, so a face there
+             reads as a credential rather than as a feature. It is off the
+             measure entirely, so the reading column is untouched.
+
+             Grayscale and a 5%-plus grain overlay by default. The grain is
+             the load-bearing part — body::before puts the page's noise
+             UNDER the content, so without this an image is the one surface
+             on the page with no tooth, and it looks pasted on.
+
+             The alt is the person's NAME, not empty. Compare the note-card
+             thumbnail, whose alt defaults to empty because the link beside
+             it already names the piece. The rule is whether something
+             adjacent already says this — nothing in a rail does.
+
+             No link around it: a clickable face invites "click for bio",
+             and an inert image raises no target-size question.
+
+             Variants: --colour keeps the photograph as shot, --cutout
+             expects a background-removed source and drops the box entirely
+             so the figure stands in the ground like the type does. -->
+        <span class="vd-portrait">
+          <img alt="Your Name" width="480" height="480" loading="lazy" decoding="async"
+               src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'480'%20height%3D'480'%3E%3Crect%20width%3D'480'%20height%3D'480'%20fill%3D'%233a3833'%2F%3E%3Ccircle%20cx%3D'240'%20cy%3D'186'%20r%3D'86'%20fill%3D'%235d594f'%2F%3E%3Cellipse%20cx%3D'240'%20cy%3D'452'%20rx%3D'156'%20ry%3D'132'%20fill%3D'%235d594f'%2F%3E%3Ctext%20x%3D'50%25'%20y%3D'95%25'%20fill%3D'%23B2AB9C'%20text-anchor%3D'middle'%20font-family%3D'monospace'%20font-size%3D'30'%3Eportrait%20placeholder%3C%2Ftext%3E%3C%2Fsvg%3E">
+        </span>
       </div>
       <div class="vd-spread__body">
         <span class="vd-label">About</span>

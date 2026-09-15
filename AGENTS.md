@@ -77,7 +77,7 @@ rather than leaving the placeholder in it.
 <meta property="og:url"   content="https://dreyburn.com/work/<slug>.html">
 <meta property="og:title" content="...">   <!-- the <title>, without the site suffix -->
 <meta property="og:description" content="...">  <!-- the same text as <meta name=description> -->
-<meta property="og:image" content="https://dreyburn.com/notes/og-<slug>.png?v=2.3.0">
+<meta property="og:image" content="https://dreyburn.com/notes/og-<slug>.png?v=2.4.0">
 ```
 
 Absolute URLs, every time — a relative `og:image` is ignored by every crawler that reads it.
@@ -117,6 +117,25 @@ lands. No `loading="lazy"` on a hero — it is above the fold by definition.
 **Name image files by what they are, with the right extension.** A WebP called `.jpeg` is served
 with the wrong `Content-Type` by some hosts and confuses every tool that reads the name instead
 of the bytes.
+
+### A portrait goes in the About rail, and nowhere else
+
+`.vd-portrait` is optional. If there is one, it goes in `#about`'s
+`.vd-spread__rail`, under the label — 120px, grayscale, grained, inert.
+Full reasoning in `verdigris/README.md`.
+
+Two site-level consequences:
+
+- **Add `"image"` to the `Person` object in `index.html`'s JSON-LD**, absolute
+  URL, same file. A portrait the page shows and the structured data omits is a
+  knowledge-panel left on the table.
+- **Not on `resume.html`.** In US hiring practice a photograph on a CV is a
+  liability rather than a courtesy, and the résumé is already being trimmed to
+  one printed page. `print.css` hides the component everywhere, so this is
+  about the screen.
+
+Source file: WebP or AVIF at twice the rendered box — 240px for the 120px slot
+— named with the extension it actually is.
 
 ### Never put an email address on this site
 
@@ -188,7 +207,7 @@ and are not checked.
 grep -rn 'href="#"' index.html resume.html 404.html work notes 2>/dev/null
 
 # 2 — no template scaffolding survived a copy
-grep -rEn 'figure placeholder|hero placeholder' work notes 2>/dev/null
+grep -rEn 'figure placeholder|hero placeholder|portrait placeholder' work notes 2>/dev/null
 
 # 3 — one asset version across the site, and it moved if verdigris/ did
 grep -rho '?v=[0-9.]*' --include='*.html' . | sort -u   # exactly one line

@@ -579,6 +579,8 @@ from the running CSS. To check this table has not gone stale, diff it against
 | `.vd-swatch__*` | Swatch internals, built by `vd-swatch` |
 | `vd-code[wrap]` | Soft-wraps a code block holding prose rather than code |
 | `.vd-code__bar` `.vd-code__copy` | Code block header and copy control |
+| `.vd-portrait` | A photograph of a person, at rail scale. Grayscale, square, grained. Optional |
+| `.vd-portrait--colour` `.vd-portrait--cutout` | Keep the photograph as shot; or drop the box for a background-removed source |
 | `.vd-node` `.vd-node--active` | Diagram primitives |
 
 Classes marked `__` are internals written by a custom element. You will rarely author them by
@@ -708,6 +710,89 @@ long one does not overrun. `image` is optional.
 **Bump `?v=` on `og:image` when the file changes.** Crawlers cache social
 images harder than browsers cache anything, and a card that 200s from cache
 after you replaced the file is the most common way a share looks stale.
+
+## A portrait, without the ostentation
+
+A face is the loudest thing on a page to a human visual system before anyone
+makes a design decision about it. `.vd-portrait` is an attempt to spend that
+attention once rather than continuously.
+
+```html
+<div class="vd-spread__rail">
+  <span class="vd-label">About</span>
+  <span class="vd-portrait">
+    <img src="/images/portrait.webp" alt="Ada Lovelace"
+         width="480" height="480" loading="lazy" decoding="async">
+  </span>
+  <span class="vd-readout">…</span>
+</div>
+```
+
+**It goes in the rail.** That column already means *facts about this section*
+— a label and a readout or two — so a portrait there reads as a credential
+rather than as a feature, and it is off the measure entirely, so nothing in
+the reading column moves. 120px is four baselines and very nearly the 132px
+rail, so it fills the column to its hairline; 132 itself is not on the grid.
+90px below 860, where the rail is a horizontal strip and 120 pushes it to a
+third row at 320px.
+
+**A wrapper is required.** Unlike `.vd-article__hero`, which also works on a
+bare `<img>`, the grain overlay is a pseudo-element and an `<img>` cannot
+carry one.
+
+**The grain is the load-bearing part.** `body::before` lays the page's 5%
+noise at `z-index:0` and `body>*` sits at `z-index:1`, so **the grain is
+under the content and no image on a Verdigris page has ever carried it**.
+That is most of what makes a photograph look pasted onto the page rather than
+printed on it. `.vd-portrait::after` puts the same noise at the same
+frequency back over the image, at 8% rather than 5% because a photograph has
+its own high-frequency detail to compete with. Measured against a
+continuous-tone source in both themes: 4% is invisible, 14% reads as noise
+added to a photo, 8% reads as tooth. Override with `--vd-portrait-grain`.
+
+**Grayscale by default.** The palette is ink, bone and three accents used
+sparingly; a full-colour photograph is a fourth voice arriving at volume.
+`.vd-portrait--colour` opts out.
+
+**Default focus is `50% 30%`, not centre**, because in a portrait the face is
+in the upper third and a centre crop takes the chin and the collar. Override
+with `--vd-portrait-focus`.
+
+**Not a link, deliberately.** A clickable face invites *click for bio*, and an
+inert image raises no 2.5.8 target-size question at all.
+
+**The alt is the person's name, and it is required here.** This is the
+opposite of the call on `vd-note-card`, whose thumbnail defaults to empty alt.
+The rule is not *is it a picture of a person* — it is **does something
+adjacent already say this**. Beside a note card the link names the piece;
+nothing in a rail names anybody.
+
+### What this cannot promise
+
+A photograph is not a token and `audit.js` measures tokens, so the
+conformance guarantee does not extend to it. The same file serves both
+themes: a portrait shot against a dark ground recedes into ink, and one shot
+bright reads as a lightbox on it — measurably so, which is why the guidance is
+concrete rather than aesthetic. **Choose a source whose background sits near
+mid-value** and it holds in both, or use the cutout below, which makes the
+question go away.
+
+```html
+<span class="vd-portrait vd-portrait--cutout">
+```
+
+`--cutout` expects a background-removed source. It drops the box, the radius
+and the surface, so the figure stands in the ground the way the type does —
+and because transparent pixels are never painted, `body::before` shows
+through them and the ground keeps its own grain. The overlay comes off with
+the box: a square of noise over transparency would draw the box back.
+
+**It does not print,** like the hero and the thumbnail but for a different
+reason — paper has not already answered *who is this*. It comes off because a
+90px halftone of a face is a grey smudge on a laser printer, and because the
+documents this system prints are ones being trimmed. **Do not reintroduce it
+on a résumé**; in US hiring practice a photograph on a CV is a liability, and
+the component existing is not an argument for putting it there.
 
 ## Verify it yourself
 
