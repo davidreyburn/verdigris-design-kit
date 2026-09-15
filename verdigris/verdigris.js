@@ -424,6 +424,7 @@
       const href = this.getAttribute('href');
       const len = this.getAttribute('length') || '';
       const dek = this.getAttribute('dek') || this.textContent.trim();
+      const image = this.getAttribute('image');
 
       const row = document.createElement('div');
       row.className = 'vd-note-card__row';
@@ -449,6 +450,24 @@
       }
 
       this.innerHTML = '';
+      /* The thumbnail goes FIRST in the DOM, which is what puts it in the
+         grid's first column and lets it span both rows. It is also the right
+         reading order: on a narrow screen the image is above the text, and
+         the DOM already says so without an order property.
+
+         alt defaults to "" rather than to the title. The link beside it names
+         the piece, so a thumbnail repeating that is announced twice by a
+         screen reader — decorative is the honest default here. An author who
+         means it to carry information passes image-alt. */
+      if (image) {
+        const img = document.createElement('img');
+        img.className = 'vd-note-card__thumb';
+        img.src = image;
+        img.alt = this.getAttribute('image-alt') || '';
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        this.appendChild(img);
+      }
       this.appendChild(row);
       if (dek) {
         const p = document.createElement('p');

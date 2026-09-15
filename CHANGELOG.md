@@ -923,6 +923,70 @@ PATCH: the printed résumé had no reachable contact on it.
   sheet they read as empty boxes drawn around text, and the URL now following each label needs the
   room.
 
+## 2.3.0 — 2026-09-15
+
+MINOR: an article can carry one picture, and that picture reaches the share card. All three
+pieces are opt-in — a piece with no image renders an article, a listing row and a card exactly
+as before.
+
+### Added
+
+- **`.vd-article__hero`** — the one image that represents a piece. 300px desktop, 210px below
+  860, `object-fit:cover` with the crop set by `--vd-hero-focus`. Works on `vd-figure` (a hero
+  with a caption is a figure) or a bare `<img>` (one without is decoration).
+
+  A fixed band rather than an intrinsic ratio because a listing of articles with 3:2, 16:9 and
+  square heroes reads as four different templates. The band is the constant; the crop absorbs
+  the variance, and `--vd-hero-focus` is where the author says which part survives it.
+
+- **`image` and `image-alt` on `vd-note-card`** — the same picture at 90px square, turning the
+  card into two columns. 90px is three baselines and square, the one shape no source ratio
+  makes look like a mistake at that size. Below 860 it becomes a 160px band above the text: 90px
+  beside a title at that width leaves about twelve characters, which wraps to four lines and
+  reads worse than no image at all.
+
+  `image-alt` defaults to empty. The link is beside the thumbnail and already names the piece,
+  so a screen reader would otherwise announce it twice.
+
+- **`tools/og.html` takes `?title=&meta=&image=&focus=`** — the site card and an article card
+  are now the same harness with a different payload. The title is measured and stepped down
+  through 62/52/44px until it fits; the picture takes the right panel with its left edge
+  dissolved into the ground over 90px; `focus` is the canvas equivalent of `--vd-hero-focus`.
+
+  **With no `image` the field fills the panel**, which is the reason the whole thing is optional
+  rather than conditional — an article without a picture still gets a branded card.
+
+  The saved filename follows the title, so a folder of these stays sortable.
+
+### Changed
+
+- **Neither the hero nor the thumbnail prints.** Both answer *which piece is this*, and paper
+  has already answered it; the hero costs a third of the first page and a thumbnail column
+  prints as grey squares. `display:none` alone was not enough — `:has()` matches a hidden
+  element, so the card kept an empty 90px column and indented every row. The grid template is
+  reset alongside.
+
+- **The hero stops at `--vd-measure-read`, not at the container.** Caught by measuring rather
+  than by looking: the title, the masthead and the body all end at 790px and the hero was
+  running to 850. A shared right edge is the reason that token is px rather than ch, and 60px
+  past it reads as a layout error — a full bleed has to leave the column entirely to be legible
+  as one, and inside a spread it cannot.
+
+- **Release gate 2 also greps `hero placeholder`**, and `AGENTS.md` now says to delete the hero
+  block from a copy rather than leave the placeholder in it.
+
+### Not done
+
+- **Nothing deduplicates the three declarations.** The path appears in the article, in the
+  listing card and in the harness invocation, and there is no build step to collapse them. A
+  manifest would fix it and would also be the first thing in this repository that has to be
+  compiled before it renders. Documented as a hazard instead, in `verdigris/README.md` under
+  *One picture, declared three times*.
+
+- **Cross-origin images taint the canvas** and `toDataURL()` then throws, which presents as the
+  Save button doing nothing. The harness reports a failed load in a status line, but a *tainted*
+  canvas cannot be detected before the export attempt. Serve the repository and pass a path.
+
 ## The design record
 
 Moved here from `README.md`, which describes what works now rather than how it got that way.

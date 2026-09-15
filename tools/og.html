@@ -6,15 +6,37 @@
 <meta name="robots" content="noindex,nofollow">
 <title>OG card — Verdigris</title>
 
-<!-- Draws the social card at 1200×630 using the SAME topolang runtime the
-     hero uses, so the card is the field rather than a picture of it.
-     Open it on the dev server, click Save, and put og.png at the repo root.
+<!-- Draws a social card at 1200×630 using the SAME topolang runtime the hero
+     uses, so the card is the field rather than a picture of it.
+
+     WITH NO PARAMETERS it draws the site card. Put that at og.png.
+
+     WITH PARAMETERS it draws an article card:
+
+       tools/og.html?title=The+GM%27s+Assistant
+                    &meta=Field+Note+%C2%B7+2,740+words
+                    &image=/images/bookshelf.jpeg
+                    &focus=50,30
+
+     `image` is optional and that is the point — without one the field fills
+     the right panel exactly as it does on the site card, so an article with
+     no picture still gets a branded card rather than no card.
+
+     `focus` is the object-position of the crop, as two percentages. The card
+     is 1.91:1 and a source rarely is, so something has to be decided; this
+     is where. Defaults to the centre.
+
+     ── RUN IT AGAINST THE LOCAL DEV SERVER ──────────────────────────────
+     canvas.toDataURL() throws on a tainted canvas, and ANY cross-origin
+     image taints it. Pointing `image` at https://dreyburn.com/... will draw
+     on screen and then fail to export, which looks like the save button
+     being broken. Serve the repo and use a path, not a URL.
 
      Not part of the site. It is excluded from the sitemap and carries
      noindex. It is here rather than in .private because regenerating the
      card must be reproducible by whoever holds the repo next. -->
 
-<link rel="stylesheet" href="../verdigris/verdigris.css?v=2.2.1">
+<link rel="stylesheet" href="../verdigris/verdigris.css?v=2.3.0">
 <style>
   body{padding:var(--vd-space-2);max-width:1240px;margin:0 auto}
   /* Laid out at true size: Field.resize() reads getBoundingClientRect, so
@@ -32,16 +54,31 @@
 <h1>Social card</h1>
 <p class="vd-prose">1200×630, drawn from topolang <code>SHADE</code> on seed
   <span class="vd-is-data">20260801</span> — the same mode, palette and seed as the homepage
-  hero. Save it to the repository root as <code>og.png</code>.</p>
+  hero. With no query string this is the site card; save it to the repository root as
+  <code>og.png</code>.</p>
+
+<p class="vd-prose">For a per-article card, pass the article’s own details.
+  <code>image</code> and <code>focus</code> are optional — with no image the field fills the
+  panel, so an article without a picture still gets a card:</p>
+
+<pre class="vd-scroll-x"><code>?title=The%20GM%E2%80%99s%20Assistant&amp;meta=Field%20Note%20%C2%B7%202,740%20words
+?title=…&amp;image=/images/bookshelf.jpeg&amp;focus=50,30</code></pre>
+
+<p class="vd-prose"><small><code>focus</code> is the crop centre as two percentages — the
+  canvas equivalent of <code>--vd-hero-focus</code>. Serve the repository and use a path: a
+  cross-origin <code>image</code> taints the canvas and <code>toDataURL</code> then throws,
+  which looks exactly like a broken Save button.</small></p>
 
 <p style="margin:var(--vd-space-1) 0">
-  <button class="vd-btn vd-btn--primary" id="save" type="button">Save og.png</button>
+  <button class="vd-btn vd-btn--primary" id="save" type="button">Save PNG</button>
   <button class="vd-btn" id="redraw" type="button">Redraw</button>
 </p>
 
+<p class="vd-prose" id="note" role="status"><small></small></p>
+
 <img id="preview" alt="Preview of the generated card">
 
-<script src="../verdigris/topolang.js?v=2.2.1"></script>
+<script src="../verdigris/topolang.js?v=2.3.0"></script>
 <script>
 (function () {
   const W = 1200, H = 630, SEED = 20260801;
@@ -53,7 +90,64 @@
   const canvas = document.getElementById('card');
   const ctx = canvas.getContext('2d');
 
-  function draw() {
+  /* Everything below the fold of this block is layout constants. They are
+     here rather than inline because the site card and the article card share
+     them — the two cards are the same card with a different payload, and
+     that is the whole reason an article card is worth drawing at all. */
+  const q     = new URLSearchParams(location.search);
+  const TITLE = q.get('title');                       // absent ⇒ the site card
+  const META  = q.get('meta') || 'Product designer · human-AI systems';
+  const IMAGE = q.get('image');
+  const FOCUS = (q.get('focus') || '50,50').split(',').map(Number);
+
+  const PAD    = 80;      // left margin, and the text column's left edge
+  const IMG_X  = 660;     // where the picture panel starts
+  const FADE   = 90;      // how far the panel's left edge dissolves into ink
+  const COL_W  = IMG_X - PAD - 40;
+
+  /* Draws `src` into the rect at cover scale — the same crop rule as the
+     article hero's object-fit:cover, so the card and the page agree about
+     what part of the picture matters. */
+  function cover(img, dx, dy, dw, dh, fx, fy) {
+    const scale = Math.max(dw / img.width, dh / img.height);
+    const sw = dw / scale, sh = dh / scale;
+    const sx = (img.width  - sw) * (fx / 100);
+    const sy = (img.height - sh) * (fy / 100);
+    ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+  }
+
+  /* Wraps on measured width, not on a guess at characters per line. Returns
+     the lines so the caller can pick a size that fits before committing. */
+  function lines(text, maxW) {
+    const out = [];
+    let line = '';
+    text.split(/\s+/).forEach(function (word) {
+      const next = line ? line + ' ' + word : word;
+      if (line && ctx.measureText(next).width > maxW) { out.push(line); line = word; }
+      else { line = next; }
+    });
+    if (line) out.push(line);
+    return out;
+  }
+
+  function loadImage(src) {
+    return new Promise(function (resolve) {
+      if (!src) { return resolve(null); }
+      const img = new Image();
+      /* Same-origin only in practice — see the note at the top of the file.
+         A failed load resolves null rather than rejecting, because a missing
+         picture should degrade to the field card, not to a blank harness. */
+      img.onload = function () { resolve(img); };
+      img.onerror = function () {
+        document.getElementById('note').firstElementChild.textContent =
+          'Could not load ' + src + ' — drawing the field instead.';
+        resolve(null);
+      };
+      img.src = src;
+    });
+  }
+
+  async function draw() {
     const T = window.topolang;
 
     /* The field first, full bleed. Same mode/palette/opacity pair the hero
@@ -82,12 +176,26 @@
     ctx.fillRect(0, 0, W, H);
     ctx.globalCompositeOperation = 'source-over';
 
+    /* The picture, when there is one, takes the right panel and the field
+       keeps the rest. Its left edge dissolves into the ground over FADE px
+       rather than butting against the text — a hard vertical seam next to a
+       ragged-right text column reads as a mistake at thumbnail size. */
+    const img = await loadImage(IMAGE);
+    if (img) {
+      cover(img, IMG_X, 0, W - IMG_X, H, FOCUS[0], FOCUS[1]);
+      const edge = ctx.createLinearGradient(IMG_X, 0, IMG_X + FADE, 0);
+      edge.addColorStop(0, GROUND);
+      edge.addColorStop(1, 'rgba(22,22,20,0)');
+      ctx.fillStyle = edge;
+      ctx.fillRect(IMG_X, 0, FADE, H);
+    }
+
     /* The hero holds the field clear of text with a CSS mask. A canvas has
        no masks, so the same guarantee is made by painting the ground back
        over the text column at full opacity — the text is then on GROUND
        exactly, and the published token ratios hold unmodified rather than
        against a composite that would have to be re-measured. */
-    const col = 700;
+    const col = IMG_X;
     const g = ctx.createLinearGradient(0, 0, col, 0);
     g.addColorStop(0, GROUND);
     g.addColorStop(0.72, GROUND);
@@ -95,35 +203,51 @@
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, col, H);
 
-    const x = 80;
-
     ctx.fillStyle = GREEN;
-    ctx.fillRect(x, 96, 64, 2);
+    ctx.fillRect(PAD, 96, 64, 2);
 
     ctx.fillStyle = MUTED;
     ctx.font = '500 22px PlexMono, ui-monospace, monospace';
-    ctx.fillText('DAVID REYBURN', x, 152);
+    ctx.fillText('DAVID REYBURN', PAD, 152);
 
+    /* The site card's headline is three hand-set lines and stays that way.
+       An article title is whatever the author wrote, so it is measured and
+       stepped down through three sizes until it fits the space between the
+       byline and the meta line. Below 44 it would stop looking like the site
+       card, so the smallest size just takes as many lines as it needs. */
     ctx.fillStyle = TEXT;
-    ctx.font = '700 62px Chivo, system-ui, sans-serif';
-    wrap(['Designing instruments for', 'cognition, creativity,', 'and complex systems.'], x, 248, 78);
+    let head, lead;
+    if (TITLE) {
+      const SIZES = [62, 52, 44];
+      for (let i = 0; i < SIZES.length; i++) {
+        ctx.font = '700 ' + SIZES[i] + 'px Chivo, system-ui, sans-serif';
+        head = lines(TITLE, COL_W);
+        lead = Math.round(SIZES[i] * 1.24);
+        if (head.length * lead <= 300) { break; }
+      }
+    } else {
+      ctx.font = '700 62px Chivo, system-ui, sans-serif';
+      head = ['Designing instruments for', 'cognition, creativity,', 'and complex systems.'];
+      lead = 78;
+    }
+    head.forEach(function (line, i) { ctx.fillText(line, PAD, 248 + i * lead); });
 
     ctx.fillStyle = MUTED;
     ctx.font = '400 24px PlexMono, ui-monospace, monospace';
-    ctx.fillText('Product designer · human-AI systems', x, 530);
+    ctx.fillText(META, PAD, 530);
 
     document.getElementById('preview').src = canvas.toDataURL('image/png');
-  }
-
-  function wrap(lines, x, y, lead) {
-    lines.forEach(function (line, i) { ctx.fillText(line, x, y + i * lead); });
   }
 
   document.getElementById('save').addEventListener('click', function () {
     canvas.toBlob(function (b) {
       const a = document.createElement('a');
       a.href = URL.createObjectURL(b);
-      a.download = 'og.png';
+      /* Named for the article so a folder of these stays sortable. The
+         build step that copies it is a human, and og(1).png helps nobody. */
+      a.download = TITLE
+        ? 'og-' + TITLE.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.png'
+        : 'og.png';
       a.click();
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
     }, 'image/png');

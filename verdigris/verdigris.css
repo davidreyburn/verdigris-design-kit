@@ -1247,6 +1247,29 @@ vd-note-card[data-clickable]:hover,vd-note-card:focus-within{
   background:var(--vd-surface-sunken);
   box-shadow:inset 2px 0 0 var(--vd-rule-accent);
 }
+/* A THUMBNAIL turns the card into two columns. 90px is three baselines and
+   square, which is the one shape that survives any source ratio at this size
+   — a portrait crops to its middle, a landscape to its centre, and neither
+   looks like a mistake.
+
+   grid, not flex, because the row and the dek both have to clear the image
+   and stay aligned with each other. Without a thumb the template collapses to
+   one column and nothing about the card changes, which is what keeps the
+   image optional.
+
+   alt is usually "" here: the link beside it already names the piece, so the
+   thumbnail is decorative and announcing it twice is noise. That is a
+   judgement for the author, not a rule the kit can enforce. */
+vd-note-card:has(.vd-note-card__thumb){
+  display:grid;grid-template-columns:90px minmax(0,1fr);
+  gap:0 var(--vd-space-1);align-items:start;
+}
+.vd-note-card__thumb{
+  grid-row:1 / span 2;
+  display:block;width:90px;height:90px;object-fit:cover;
+  object-position:var(--vd-thumb-focus,50% 50%);
+  border-radius:var(--vd-radius);
+}
 .vd-note-card__row{display:flex;gap:var(--vd-space-1);align-items:baseline;flex-wrap:wrap}
 .vd-note-card__date{
   font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);letter-spacing:.08em;
@@ -2100,6 +2123,39 @@ vd-figure img,vd-figure svg{max-width:100%;height:auto;display:block}
 vd-figure figcaption{margin-top:var(--vd-space-h);font-family:var(--vd-face-mono);
   font-size:var(--vd-size-micro);line-height:var(--vd-lead-half);color:var(--vd-text-muted)}
 
+/* ── .vd-article__hero · the one image that represents a piece ──────────
+   Sits between the dek and the masthead: the words arrive first, and the
+   image introduces the piece rather than fronting it.
+
+   object-fit:cover with a focal point, because the source ratio is not the
+   kit's to dictate. A 750x1400 portrait and a 2:1 landscape both crop to the
+   same band without distorting, and --vd-hero-focus moves which part of the
+   frame survives:
+
+     <vd-figure class="vd-article__hero" style="--vd-hero-focus:50% 30%">
+
+   Heights are whole baselines, 10 and 7. A fixed height is what makes the
+   crop predictable — height:auto would let every article's header be a
+   different length, which is the thing a masthead exists to stop.
+
+   The caption is optional, and its absence is meaningful: vd-figure's own
+   rule is that the caption is what makes a figure a figure. An uncaptioned
+   hero is a bare <img class="vd-article__hero"> and styles identically. */
+/* The read measure, not the container. The title, the masthead and the body
+   all stop at --vd-measure-read, and that shared right edge is the reason
+   the token is px rather than ch. A hero running 60px past it reads as a
+   layout error, not as a full bleed — a full bleed has to leave the column
+   entirely to be legible as one, and this one cannot. */
+.vd-article__hero{margin:var(--vd-space-2) 0 0;max-width:var(--vd-measure-read)}
+.vd-article__hero img,
+img.vd-article__hero{
+  display:block;width:100%;max-width:100%;
+  height:300px;object-fit:cover;
+  object-position:var(--vd-hero-focus,50% 50%);
+  border-radius:var(--vd-radius);
+}
+img.vd-article__hero{margin:var(--vd-space-2) 0 0;max-width:var(--vd-measure-read)}
+
 /* ── vd-redact · turns the IP constraint into a visible design decision ─ */
 vd-redact{
   display:inline-block;background:var(--vd-surface-selected);color:transparent;
@@ -2454,6 +2510,19 @@ a.vd-tag{display:inline-flex;align-items:center;min-height:44px}
      narrower than the cap, and leaving it on would centre-shrink the grid
      against a column that is already the measure. */
   .vd-grid{--vd-grid-cols:1;max-width:none}
+
+  /* The hero loses a third of its height below 860 — 7 baselines against 10.
+     A 300px band on a 568px screen is half the viewport before a word. */
+  .vd-article__hero img,
+  img.vd-article__hero{height:210px}
+
+  /* The thumbnail stops being a column and becomes a band above the text.
+     90px beside a title at this width leaves the title about 12 characters,
+     which wraps to four lines and reads worse than no image at all. */
+  vd-note-card:has(.vd-note-card__thumb){grid-template-columns:minmax(0,1fr)}
+  .vd-note-card__thumb{
+    grid-row:auto;width:100%;height:160px;margin-bottom:var(--vd-space-h);
+  }
 
   /* the rail is a strip above the content; it needs to read as a strip */
   .vd-spread__rail{gap:var(--vd-space-2);margin-bottom:var(--vd-space-h)}

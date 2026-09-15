@@ -66,8 +66,9 @@ sends every reader to a 404.
 
 **`reader.html` and `template.html` are specimens, not pages.** They stay at the root, stay
 generic, and keep their placeholders — that is what makes them copyable. A *copy* is not
-finished while it still holds `href="#"`, the `figure placeholder` data-URI, or previous/next
-links pointing nowhere.
+finished while it still holds `href="#"`, a `figure placeholder` or `hero placeholder` data-URI,
+or previous/next links pointing nowhere. If the piece has no picture, **delete** the hero block
+rather than leaving the placeholder in it.
 
 ### Every page carries
 
@@ -76,7 +77,7 @@ links pointing nowhere.
 <meta property="og:url"   content="https://dreyburn.com/work/<slug>.html">
 <meta property="og:title" content="...">   <!-- the <title>, without the site suffix -->
 <meta property="og:description" content="...">  <!-- the same text as <meta name=description> -->
-<meta property="og:image" content="https://dreyburn.com/og.png">
+<meta property="og:image" content="https://dreyburn.com/notes/og-<slug>.png?v=2.3.0">
 ```
 
 Absolute URLs, every time — a relative `og:image` is ignored by every crawler that reads it.
@@ -87,6 +88,35 @@ favicon — is already correct in both templates. Copy it, do not retype it. A r
 
 `audit.js` ships on every page. It is deferred and inert until called, and a system that
 publishes its own conformance does not hide the instrument that measures it.
+
+### A piece with a picture declares it three times
+
+Optional throughout. A piece with no picture is a complete page, a complete listing row and a
+complete share card — the card falls back to the field. Do not go looking for an image to
+satisfy the pattern.
+
+When there is one, it is the *same* picture and the *same* crop in all three places:
+
+| Where | What to write |
+|---|---|
+| The article | `<vd-figure class="vd-article__hero" style="--vd-hero-focus:50% 35%">` after the dek |
+| `index.html` | `image="/images/<name>.webp"` on that piece's `vd-note-card` |
+| The share card | `tools/og.html?title=…&meta=…&image=/images/<name>.webp&focus=50,35` |
+
+Nothing deduplicates these. Changing the picture or the focus means changing three files, and
+the share card is the one that will be forgotten, because it is a binary nobody re-reads.
+
+**Drawing the card.** Serve the repo, open the harness with those parameters, press Save, put
+the PNG beside the article, and bump its `?v=` in `og:image`. Use a *path* for `image=` — a
+cross-origin URL taints the canvas and the Save button silently stops working.
+
+**The hero `<img>` keeps its `width` and `height`** even though the CSS overrides both. They are
+the aspect ratio the browser reserves space from; without them the article jumps when the file
+lands. No `loading="lazy"` on a hero — it is above the fold by definition.
+
+**Name image files by what they are, with the right extension.** A WebP called `.jpeg` is served
+with the wrong `Content-Type` by some hosts and confuses every tool that reads the name instead
+of the bytes.
 
 ### Never put an email address on this site
 
@@ -158,7 +188,7 @@ and are not checked.
 grep -rn 'href="#"' index.html resume.html 404.html work notes 2>/dev/null
 
 # 2 — no template scaffolding survived a copy
-grep -rn 'figure placeholder' work notes 2>/dev/null
+grep -rEn 'figure placeholder|hero placeholder' work notes 2>/dev/null
 
 # 3 — one asset version across the site, and it moved if verdigris/ did
 grep -rho '?v=[0-9.]*' --include='*.html' . | sort -u   # exactly one line

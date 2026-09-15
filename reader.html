@@ -42,15 +42,28 @@ catch(e){}
 <meta property="og:url" content="https://dreyburn.com/notes/&lt;slug&gt;.html">
 <meta property="og:title" content="The page title, without the — David Reyburn suffix">
 <meta property="og:description" content="The same sentence as meta name=description above.">
-<meta property="og:image" content="https://dreyburn.com/og.png?v=2.2.1">
+<!-- A PER-ARTICLE CARD. Every piece points at its own og:image; the site
+     card is the fallback, not the default. Draw one with tools/og.html —
+     ?title=&meta=&image=&focus= — and save it beside the article. The
+     harness takes the same picture and the same focus as the hero below,
+     so the card and the page crop it the same way.
+
+     An article with no picture still passes image= nothing: the harness
+     fills the panel with the field and the card is still branded.
+
+     The version query string must move with the image. Cloudflare caches this, crawlers
+     cache it harder, and an og:image that 200s from cache after you have
+     replaced the file is the single most common way a share looks stale. -->
+<meta property="og:image" content="https://dreyburn.com/notes/og-&lt;slug&gt;.png?v=2.3.0">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The article title, set over its hero image.">
 <meta property="og:site_name" content="David Reyburn">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="verdigris/verdigris.css?v=2.2.1">
-<link rel="stylesheet" href="verdigris/print.css?v=2.2.1">
-<script src="verdigris/verdigris.js?v=2.2.1" defer></script>
-<script src="verdigris/audit.js?v=2.2.1" defer></script>
+<link rel="stylesheet" href="verdigris/verdigris.css?v=2.3.0">
+<link rel="stylesheet" href="verdigris/print.css?v=2.3.0">
+<script src="verdigris/verdigris.js?v=2.3.0" defer></script>
+<script src="verdigris/audit.js?v=2.3.0" defer></script>
 </head>
 <body>
 <a class="vd-skip" href="#main">Skip to content</a>
@@ -96,6 +109,33 @@ catch(e){}
         <p class="vd-article__dek">Accessibility has always been machine legibility. The screen
           reader was the first agent, and everything we learned making interfaces legible to it
           applies directly to the agents arriving now.</p>
+
+        <!-- THE HERO. OPTIONAL — delete the block and the article is correct
+             without it. It sits after the dek so the piece still opens on
+             words: a reader who followed a link wants to know they are in
+             the right place before they are shown a picture.
+
+             .vd-article__hero fixes the height and crops with object-fit,
+             so a portrait source and a panorama produce the same band and
+             the page below does not move. --vd-hero-focus is where you say
+             what part of the picture survives that crop; it takes the same
+             two values as object-position, and the same pair goes to
+             tools/og.html as ?focus= so the card agrees with the page.
+
+             width and height are on the img despite the CSS overriding
+             both. They are the aspect ratio the browser reserves space
+             from, and without them the hero lands as a 0px band and shoves
+             the essay down when the file arrives.
+
+             No loading="lazy" here — the hero is above the fold by
+             definition, and lazy on an LCP element delays the thing the
+             score is measured against. -->
+        <vd-figure class="vd-article__hero" style="--vd-hero-focus:50% 35%">
+          <img alt="" width="1600" height="900"
+               src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'1600'%20height%3D'900'%3E%3Crect%20width%3D'1600'%20height%3D'900'%20fill%3D'%232c2b28'%2F%3E%3Ctext%20x%3D'50%25'%20y%3D'52%25'%20fill%3D'%23B2AB9C'%20text-anchor%3D'middle'%20font-family%3D'monospace'%20font-size%3D'34'%3Ehero%20placeholder%2016%3A9%3C%2Ftext%3E%3C%2Fsvg%3E">
+          <figcaption>Optional. A hero with a caption is a figure; one without is
+            decoration, and then a bare &lt;img class="vd-article__hero"&gt; is enough.</figcaption>
+        </vd-figure>
 
         <!-- THE MASTHEAD. A plain <dl> in .vd-prose renders its values in the
              reading face at reading size, which is right for a glossary and

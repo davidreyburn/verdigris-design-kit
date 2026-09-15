@@ -550,6 +550,7 @@ from the running CSS. To check this table has not gone stale, diff it against
 | `.vd-notes__list` `.vd-notes__back` | The list, and the back-link that makes an endnote usable |
 | `.vd-endmatter` | End of an article: previous/next, contact line, last-updated |
 | `.vd-endmatter__nav` `.vd-endmatter__dir` `.vd-endmatter__note` | Its parts. Hidden in print — on paper there is nothing to navigate to |
+| `.vd-article__hero` | The one image that represents a piece. Optional. On `vd-figure` or a bare `<img>` |
 | `.vd-role` | A resume entry. Date column, content column, so every date lands on one edge |
 | `.vd-role__when` `.vd-role__head` `.vd-role__title` `.vd-role__org` `.vd-role__body` | Its parts |
 | `.vd-resume` | On `<main>`. **Do not remove** — `print.css` targets it for the page-scoped print exceptions |
@@ -572,7 +573,7 @@ from the running CSS. To check this table has not gone stale, diff it against
 | `.vd-footer__inner` `.vd-footer__sig` | Footer internals |
 | `.vd-hero__*` | Hero internals: `thesis`, `sub`, `caption`, `inner`, `field`, `fieldwrap` |
 | `.vd-system-card__*` | Work card internals: `index`, `title`, `body`, `proof` |
-| `.vd-note-card__*` | Note card internals: `row`, `date`, `title`, `len`, `dek` |
+| `.vd-note-card__*` | Note card internals: `row`, `date`, `title`, `len`, `dek`, `thumb` |
 | `.vd-readout` `.vd-readout__key` `.vd-readout__value` | Rail readouts |
 | `.vd-readout__value--grade` | A readout holding a grade rather than a quantity — deliberately not the data colour |
 | `.vd-swatch__*` | Swatch internals, built by `vd-swatch` |
@@ -630,6 +631,83 @@ Use `.vd-rule` when a visible hairline is the point.
 A bare `<blockquote>` is someone else's words: indent and a hairline, no teal. `vd-quote` is a
 pull-quote — your own line, lifted out, in the editorial colour. Two devices, deliberately
 different, because if they matched teal would stop being rare.
+
+## One picture, declared three times
+
+An article's picture appears in three places, and there is no build step to
+deduplicate them:
+
+| Where | What renders it |
+|---|---|
+| The article | `.vd-article__hero` on a `vd-figure` or a bare `<img>` |
+| The listing | `image=` on `vd-note-card`, drawn at 90px square |
+| The share card | `tools/og.html?image=…`, saved as a PNG and pointed at by `og:image` |
+
+All three are optional and independently so. A piece with no picture renders a
+correct article, a correct listing row, and a card where the topolang field
+fills the panel — which is the point. **Nothing in the kit degrades when the
+image is absent**; it degrades when the image is mandatory, because then every
+piece needs one.
+
+**The crop is declared once and copied twice.** A 1.91:1 card and a 300px band
+and a 90px square cannot all show the whole picture, so something has to
+choose. `--vd-hero-focus` is that choice, in `object-position` terms:
+
+```html
+<vd-figure class="vd-article__hero" style="--vd-hero-focus:50% 35%">
+  <img src="/images/thing.webp" alt="" width="1600" height="900">
+</vd-figure>
+```
+
+`--vd-thumb-focus` does the same for the listing thumbnail and defaults to
+centre, and `tools/og.html?focus=50,35` takes the same pair as percentages. If
+you change one, change all three or the share card will show a different part
+of the picture than the page it links to.
+
+**`width` and `height` belong on the hero `<img>` even though CSS overrides
+both.** They are what the browser reserves space from. Without them the hero is
+a zero-height band until the file arrives and then shoves the article down —
+the layout shift lands precisely on the first thing a reader is looking at.
+
+**A mixed list is the normal case and it is slightly ragged.** Rows with a
+thumbnail indent their text by 90px; rows without it do not, so the left edge
+of the text steps. The alternative — reserving the column on every row — puts
+an empty 90px gutter beside every article that has no picture, which reads as
+an image that failed to load rather than as a piece that never had one. The
+step is the better of the two, and the word count still lands on a shared
+right edge, which is the alignment a scanner actually uses.
+
+Hand-authoring the card instead of using attributes? The thumbnail is
+`<img class="vd-note-card__thumb">` and it must be the **first** child — that
+is what puts it in the grid's first column, and it is also the right reading
+order on a narrow screen, where the image stacks above the text.
+
+**Neither the hero nor the thumbnail prints.** Both answer *which piece is
+this* and paper has already answered it. `print.css` hides them and resets the
+card's grid, because `:has()` matches a hidden element and would otherwise
+leave an empty 90px column indenting every row.
+
+### Per-article share cards
+
+`og:image` is per-article; the site card is the fallback, not the default.
+Serve the repository, open `tools/og.html` with the article's details, and save
+the PNG beside the article:
+
+```
+tools/og.html?title=The%20GM%E2%80%99s%20Assistant
+             &meta=Field%20Note%20%C2%B7%202,740%20words
+             &image=/images/thing.webp&focus=50,35
+```
+
+The title is measured and stepped down through three sizes until it fits, so a
+long one does not overrun. `image` is optional.
+
+**Use a path, not a URL.** Any cross-origin image taints the canvas and
+`toDataURL()` throws, which presents as the Save button doing nothing.
+
+**Bump `?v=` on `og:image` when the file changes.** Crawlers cache social
+images harder than browsers cache anything, and a card that 200s from cache
+after you replaced the file is the most common way a share looks stale.
 
 ## Verify it yourself
 
