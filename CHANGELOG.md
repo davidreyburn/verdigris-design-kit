@@ -923,6 +923,96 @@ PATCH: the printed résumé had no reachable contact on it.
   sheet they read as empty boxes drawn around text, and the URL now following each label needs the
   room.
 
+## 2.5.0 — 2026-09-15
+
+MINOR: the résumé fills its column on screen, and the printed résumé is one page instead of
+five. Both turned out to be the same kind of bug — a screen value that nobody stopped from
+reaching a context it was never meant for.
+
+### Fixed
+
+- **`.vd-resume .vd-spread__body` was 677.6px wide at every desktop width from 1280 to 1920**,
+  inside a 928px column it was meant to fill. `margin-inline:auto` on a grid item disables the
+  default `stretch`, so `max-width` plus auto margins sized it to `fit-content` — a defect
+  shipped in 2.1.1 and live for three versions.
+
+  And 677.6 was not arbitrary: it is `--vd-measure` (58ch = 537.6px) plus the role's 110px date
+  column and 30px gap. **One prose cap three levels down was setting the width of the entire
+  résumé** — the h1, the section rules, everything. `width:100%` makes the width definite so
+  `max-width` and the auto margins can do their jobs.
+
+- **`--vd-measure-read` replaces the 850px that used to be there**, and the prose cap is lifted
+  inside the résumé body. Every structural element now shares one right edge, the same token and
+  the same reason as the article view. Measured at 1440:
+
+  | | before | after |
+  |---|---|---|
+  | body, h1, section heads, role rules | 678 | **790** |
+  | bullets | 538 (58ch) | **650 (70.1ch)** |
+  | skills `dl` / `dd` | 538 / 368 | 790 / 620 |
+  | screen height | 1835 | 1685 |
+
+  The dek stays at 58ch deliberately. Widening it puts the positioning statement at 85ch.
+
+- **No form prints, on any page.** The submit control was already hidden, which left the worst of
+  both: labels, empty boxes and a challenge widget on a sheet nobody can fill in or send. On the
+  live résumé that was 453px — half a page of dead furniture on the one document whose entire
+  purpose is being acted on. A form is an interactive affordance and paper has none.
+
+- **The printed contact line was shouting.** `.vd-tag` is uppercase with `.14em` tracking and
+  `::after` inherits both, so the line under the name read
+  `LINKEDIN <HTTPS://WWW.LINKEDIN.COM/IN/DREYBURN/>`, letter-spaced. Both come off on paper.
+
+### Found
+
+- **`print.css` normalised every colour token and no metric token.** Its own comment says the
+  colour list "is EXHAUSTIVE by necessity, and that is a maintenance hazard worth naming" —
+  written for `--vd-editorial` printing teal at 2.38:1. Nobody made the same pass for
+  `--vd-size-*`, `--vd-lead-*` and `--vd-space-*`, so **the 30px screen baseline printed
+  verbatim** for the life of the stylesheet. `body{font-size:10.5pt;line-height:1.55}` was set
+  and then overridden by every `.vd-prose` rule reaching for `line-height:var(--vd-lead-1)`.
+
+  The résumé printed 12pt bullets on 22.5pt leading. Measured contribution of each fix on the
+  live content:
+
+  | | flow | pages |
+  |---|---|---|
+  | as it stood | 3005 | 3.27 |
+  | forms never print | 2552 | 2.77 |
+  | **+ the metric scale** | **1230** | **1.34** |
+  | + furniture tuned | 1114 | 1.21 |
+
+  The metric scale is worth more than everything else combined. **Live résumé: 5 PDF pages → 2,
+  with no content change.** The kit's own: 1 page, 0.61 of it used.
+
+  Lengths, not unitless ratios — a ratio breaks `calc((var(--vd-lead-1) - 18px) / 2)` silently by
+  making the declaration invalid, and a fixed leading is the system anyway: paper gets the same
+  grid idea at paper scale.
+
+- **`--vd-measure` is meaningless on paper and was still applying.** `ch` resolves against the
+  element's own font-size, so 58ch at 10.5pt is half what it is at 18px; the dek printed in a
+  340pt column inside a 500pt page. Measures are a screen construct — the `@page` margin already
+  set the measure.
+
+### Added
+
+- **`[data-vd-screen-only]`** — hides a block on paper. The kit can remove the form; only the
+  author knows whether the heading and the sentence introducing it go too. Joins `data-vd-print`
+  and `data-vd-print-alt`.
+- **`data-print-as`** — the short form a link prints instead of its raw href, with an empty value
+  suppressing the destination entirely for links whose text is already the address. Demonstrated
+  in both `resume.html` and `reader.html`.
+- **A hairline under printed section heads on `.vd-resume`.** Experience got one free — `.vd-role`
+  has a `border-top` and the first role sits under the head — and Skills had nothing, so the two
+  sections were announced two different ways on the same sheet.
+
+### Not done
+
+- **One page is still a content constraint.** With everything above, the live résumé is 1114px
+  against a 920px page: 194px over, about 10 bullet lines. Shrinking the type to 9.5pt/1.32 was
+  measured and still lands at 1.05 pages, so it buys nothing and costs legibility. The budget and
+  the per-element costs are in `AGENTS.md` and `verdigris/README.md`.
+
 ## 2.4.0 — 2026-09-15
 
 MINOR: a portrait, opt-in, and the discovery that no image on this site has ever carried the

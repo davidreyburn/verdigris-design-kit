@@ -54,16 +54,16 @@ catch(e){}
      The version query string must move with the image. Cloudflare caches this, crawlers
      cache it harder, and an og:image that 200s from cache after you have
      replaced the file is the single most common way a share looks stale. -->
-<meta property="og:image" content="https://dreyburn.com/notes/og-&lt;slug&gt;.png?v=2.4.0">
+<meta property="og:image" content="https://dreyburn.com/notes/og-&lt;slug&gt;.png?v=2.5.0">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="The article title, set over its hero image.">
 <meta property="og:site_name" content="David Reyburn">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="verdigris/verdigris.css?v=2.4.0">
-<link rel="stylesheet" href="verdigris/print.css?v=2.4.0">
-<script src="verdigris/verdigris.js?v=2.4.0" defer></script>
-<script src="verdigris/audit.js?v=2.4.0" defer></script>
+<link rel="stylesheet" href="verdigris/verdigris.css?v=2.5.0">
+<link rel="stylesheet" href="verdigris/print.css?v=2.5.0">
+<script src="verdigris/verdigris.js?v=2.5.0" defer></script>
+<script src="verdigris/audit.js?v=2.5.0" defer></script>
 </head>
 <body>
 <a class="vd-skip" href="#main">Skip to content</a>
@@ -160,7 +160,13 @@ catch(e){}
                for, and a masthead is exactly where a repo, a DOI or a live
                URL wants to go. .vd-article__meta dd a carries the height. -->
           <dt>Live</dt>
-          <dd><a href="https://github.com/davidreyburn">github.com/davidreyburn</a></dd>
+          <!-- data-print-as="" suppresses the printed destination. print.css
+               appends " <href>" to every external link, which is right when
+               the link text is a phrase and redundant when the link text is
+               already the address — as here. A short form goes in the value:
+               data-print-as="github.com/name". -->
+          <dd><a href="https://github.com/davidreyburn"
+                 data-print-as="">github.com/davidreyburn</a></dd>
         </dl>
 
         <div class="vd-article__body vd-prose">

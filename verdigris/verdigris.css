@@ -1581,7 +1581,29 @@ vd-quote figcaption{margin-top:var(--vd-space-h);font-family:var(--vd-face-mono)
    that jumped position between the homepage and the résumé would be a worse
    inconsistency than a static offset. A full-width bar over a centred sheet
    is what a document viewer looks like, and a résumé is a sheet. */
-.vd-resume .vd-spread__body{max-width:850px;margin-inline:auto}
+/* width:100% IS LOAD-BEARING, and its absence was a real defect for three
+   versions. Auto margins in the inline axis disable a grid item's default
+   stretch, so `max-width + margin-inline:auto` alone made this item size to
+   fit-content — 677.6px at every desktop width from 1280 to 1920, inside a
+   928px column it was supposed to fill.
+
+   And 677.6 was not arbitrary: it is --vd-measure (58ch = 537.6px) plus the
+   role's 110px date column and its 30px gap. One prose cap, three levels
+   down, was setting the width of the whole résumé — the h1, the section
+   rules, everything. width:100% makes the width definite so max-width and
+   the auto margins can do their jobs.
+
+   --vd-measure-read rather than the 850px that used to be here. It is the
+   same token the article view uses for its shared right edge, so the two
+   long-form documents on the site end in the same place for the same reason,
+   and 790 - 140 leaves the bullets at 70ch — mid-range rather than at a wall. */
+.vd-resume .vd-spread__body{width:100%;max-width:var(--vd-measure-read);margin-inline:auto}
+/* The column IS the measure here, so capping prose again inside it only
+   produces a second, shorter right edge. Same principle as .vd-prose--read
+   on the article. print.css has done exactly this since it was written —
+   `.vd-prose{max-width:none}` — so paper was never capped and the screen was
+   the one out of step. */
+.vd-resume .vd-spread__body .vd-prose{max-width:none}
 
 /* ── vd-cite · marginalia, uses the rail ─────────────────────────────── */
 /* Inline superscript — no box to hang a rule on, so this one takes the

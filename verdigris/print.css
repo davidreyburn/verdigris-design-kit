@@ -46,6 +46,36 @@
     --vd-warn:#1a1a17;
     --vd-control-border:#8a857a;
 
+    /* ── METRICS ───────────────────────────────────────────────────────
+       The block above normalises COLOUR tokens and says the list is
+       exhaustive by necessity. Nobody ever made the same pass for the
+       metric tokens, and the result was that the 30px screen baseline
+       printed verbatim: body was set to 10.5pt/1.55 here, and then every
+       .vd-prose rule overrode it with line-height:var(--vd-lead-1), a
+       fixed 30px. Measured on the résumé, bullets printed at 12pt with
+       22.5pt of leading — the single largest reason that document ran to
+       five pages.
+
+       LENGTHS, not unitless ratios. Two reasons. A ratio would break
+       calc((var(--vd-lead-1) - 18px) / 2) and any other rule that treats
+       leading as a measurement, silently, by making the declaration
+       invalid. And a fixed leading IS the system: the screen puts every
+       line on a 30px grid, and paper gets the same idea at paper scale —
+       10pt prose on 14pt leading, with larger type simply taking a tighter
+       ratio, which is what display type wants anyway.
+
+       Anything added to the scale in verdigris.css has to be added here
+       too, on pain of shipping a screen pixel value onto a sheet of A4. */
+    --vd-size-micro:7.5pt; --vd-size-xs:8.5pt; --vd-size-s:10pt;
+    --vd-size-m:11.5pt;    --vd-size-read:10.5pt;
+    --vd-size-section:13pt; --vd-size-xl:18pt; --vd-size-2xl:20pt;
+
+    --vd-lead-half:11pt; --vd-lead-1:14pt; --vd-lead-1h:18pt;
+    --vd-lead-2:20pt;    --vd-lead-hero:22pt;
+
+    --vd-space-q:2pt; --vd-space-h:4pt; --vd-space-1:8pt;
+    --vd-space-2:12pt; --vd-space-3:14pt; --vd-space-4:16pt; --vd-space-5:18pt;
+
     --vd-theme:print;
   }
 
@@ -58,6 +88,26 @@
   .vd-form__trap,.vd-form__result,
   .vd-btn,.vd-nav__list{display:none !important}
 
+  /* NO FORM EVER PRINTS. The submit control was already hidden, which left
+     the worst of both: labels, empty boxes and a challenge widget on a sheet
+     nobody can fill in or send. On the résumé that was 453px — half a page
+     of dead furniture on the one document whose whole purpose is being acted
+     on.
+
+     A form is an interactive affordance and paper has none. This is
+     unconditional rather than résumé-scoped because a printed empty input is
+     useless on every page, documentation included. */
+  vd-form,.vd-form,.vd-field,.vd-form__legend,.vd-check,
+  .vd-input,.vd-textarea,.vd-select,.vd-field__label,.vd-field__hint,
+  .cf-turnstile,[data-vd-challenge]{display:none !important}
+
+  /* The general escape hatch, for a block that has no business on paper at
+     all — a contact section, a sign-up prompt, a live widget. The kit can
+     hide the form; only the author knows whether the heading and the
+     sentence introducing it should go too. Joins data-vd-print and
+     data-vd-print-alt as the third member of that family. */
+  [data-vd-screen-only]{display:none !important}
+
   .vd-spread{display:block}
   .vd-spread__rail{
     position:static;border-right:0;padding:0 0 6pt 0;margin-bottom:10pt;
@@ -69,11 +119,29 @@
   h1{font-size:24pt;line-height:1.1}
   h2{font-size:16pt;line-height:1.2;margin-top:18pt}
   h3{font-size:11.5pt}
-  .vd-prose,.vd-hero__inner{max-width:none}
+  /* Measures are screen constructs here. --vd-measure is 58ch, and ch
+     resolves against the element's own font-size — so on paper, where the
+     type is half the size, 58ch is half the width and the dek printed at
+     roughly 340pt inside a 500pt column. The column IS the measure on a
+     sheet; the @page margin already set it. */
+  .vd-prose,.vd-hero__inner,.vd-article__dek,.vd-article__title{max-width:none}
 
   /* Print the destination. A printed link that hides its target is a dead end. */
   a[href^="http"]::after{content:" <" attr(href) ">";font-size:8pt;color:#4a463f;word-break:break-all}
   a[href^="#"]::after{content:""}
+
+  /* An author-supplied short form, for the places where the raw href is the
+     ugly part rather than the useful part. `linkedin.com/in/name` says
+     everything `https://www.linkedin.com/in/name/` says and reads like a
+     line of type instead of a string. Opt-in per link:
+
+       <a class="vd-tag" href="https://www.linkedin.com/in/name/"
+          data-print-as="linkedin.com/in/name">LinkedIn</a>  */
+  a[data-print-as]::after{content:" " attr(data-print-as) !important}
+  /* An EMPTY value suppresses the destination entirely — for the case where
+     the link text is already the address and printing it again just says it
+     twice. Same attribute, so there is one thing to learn. */
+  a[data-print-as=""]::after{content:"" !important}
 
   /* Never break a card or a quote across a page. */
   vd-system-card,vd-note-card,vd-quote,vd-figure,vd-code{
@@ -185,10 +253,30 @@
 
   /* Flattened on paper. The border and padding make a target on screen; on
      a sheet they read as empty boxes around text, and the URL that now
-     follows each one has to sit on the same line as the label. */
+     follows each one has to sit on the same line as the label.
+
+     text-transform and letter-spacing come off too, and that is not a
+     detail. .vd-tag is uppercase with .14em tracking, and ::after content
+     inherits both — so the contact line printed
+     `LINKEDIN <HTTPS://WWW.LINKEDIN.COM/IN/DREYBURN/>`, letter-spaced. A
+     shouted, tracked-out URL was the least elegant thing on the sheet, and
+     it was the first line under the name. */
   .vd-resume a.vd-tag{
-    border:0;padding:0;margin-right:var(--vd-space-h);
+    border:0;padding:0;margin-right:var(--vd-space-1);
     display:inline;min-height:0;
+    text-transform:none;letter-spacing:normal;
+    font-size:var(--vd-size-xs);color:#1a1a17;
+  }
+  .vd-resume a.vd-tag::after{
+    text-transform:none;letter-spacing:normal;word-break:normal;
+  }
+  /* !important because the specimen's rail stacks its links with an inline
+     style, and an inline declaration outranks any selector without it. A
+     column of links is right in a 132px rail and wrong on a sheet, where
+     the same three items are one line under the name. */
+  .vd-resume .vd-spread__rail ul{
+    flex-direction:row !important;gap:var(--vd-space-1) !important;flex-wrap:wrap;
+    margin:0 !important;align-items:baseline !important;
   }
   /* One page is a content constraint, not a CSS one — nothing here can make
      too much text fit. What this does is stop the page furniture from
@@ -200,7 +288,24 @@
      so without this the résumé printed LARGER section heads than before the
      reading register was applied to it — measured 1231px against Letter's
      1056, worse than the 1192 it started at. */
-  .vd-resume h2{font-size:16pt;line-height:1.2;margin-top:12pt}
+  .vd-resume h2{
+    font-size:12pt;line-height:1.15;margin-top:11pt;margin-bottom:0;
+    /* The site says "section" with a hairline, not with space. Experience
+       already got one for free — .vd-role has a border-top and the first
+       role sits directly under the head. Skills had nothing, so the two
+       sections were announced two different ways on the same sheet. */
+    padding-bottom:2pt;border-bottom:.5pt solid #c9c4b8;
+  }
+  .vd-resume h1{font-size:19pt;line-height:1.1}
+  /* The positioning statement is three lines of prose, not a dek on an
+     essay — at the article's reading size it took five printed lines and
+     ran past the measure the roles below it keep. */
+  .vd-resume .vd-article__dek{font-size:10.5pt;line-height:1.35;margin-top:4pt}
+  /* 62pt holds "2019 to / present" on two lines in mono at 7.5pt with room
+     to spare, against 110px (82pt) inherited from the screen. The 20pt
+     recovered goes to the bullets, which is where the reading happens. */
+  .vd-role{padding:5pt 0;grid-template-columns:62pt minmax(0,1fr);gap:0 10pt}
+  .vd-role__head{gap:0 8pt}
   /* End matter is navigation. On paper there is nothing to navigate to. */
   .vd-endmatter__nav{display:none !important}
 }

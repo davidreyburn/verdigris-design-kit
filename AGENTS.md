@@ -77,7 +77,7 @@ rather than leaving the placeholder in it.
 <meta property="og:url"   content="https://dreyburn.com/work/<slug>.html">
 <meta property="og:title" content="...">   <!-- the <title>, without the site suffix -->
 <meta property="og:description" content="...">  <!-- the same text as <meta name=description> -->
-<meta property="og:image" content="https://dreyburn.com/notes/og-<slug>.png?v=2.4.0">
+<meta property="og:image" content="https://dreyburn.com/notes/og-<slug>.png?v=2.5.0">
 ```
 
 Absolute URLs, every time — a relative `og:image` is ignored by every crawler that reads it.
@@ -136,6 +136,35 @@ Two site-level consequences:
 
 Source file: WebP or AVIF at twice the rendered box — 240px for the 120px slot
 — named with the extension it actually is.
+
+### The résumé PDF is one page, and the form never goes on it
+
+`print.css` removes every form control from every printed page, so the contact
+form on `resume.html` no longer prints — that alone took the live résumé from
+**5 pages to 2** with no content change.
+
+Two things left to do on the page itself:
+
+- **Mark the whole Contact section `data-vd-screen-only`.** The kit hides the
+  form; the heading and the sentence introducing it are yours to judge. Worth
+  86px.
+- **Trim roughly 10 bullet lines.** After both of the above the résumé
+  measures 1114px against a 920px page — 194px over. A bullet line is 19px.
+  Experience is 71% of the sheet at 18 bullets across four roles; the two
+  oldest roles carry 5 bullets between them and could carry 3.
+
+Do not solve it by shrinking the type. 9.5pt/1.32 was measured and still
+lands at 1.05 pages, so it buys nothing and costs legibility.
+
+**Use `data-print-as` on the contact links.** Without it they print
+`LINKEDIN <HTTPS://WWW.LINKEDIN.COM/IN/DREYBURN/>` — uppercase and
+letter-spaced, because `.vd-tag` is both and `::after` inherits them. With it,
+one quiet line under the name. An empty value suppresses the URL where the
+link text is already the address.
+
+**Check the page count, do not estimate it.** `Page.printToPDF` over CDP
+returns the real number; `document.body.scrollHeight` at 665px wide under
+`setEmulatedMedia('print')` returns the flow against a 920px budget.
 
 ### Never put an email address on this site
 

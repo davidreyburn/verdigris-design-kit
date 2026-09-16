@@ -794,6 +794,76 @@ documents this system prints are ones being trimmed. **Do not reintroduce it
 on a résumé**; in US hiring practice a photograph on a CV is a liability, and
 the component existing is not an argument for putting it there.
 
+## Paper is a target, not a fallback
+
+`print.css` is a third target, not the light theme. Three things about it are
+worth knowing before you print anything.
+
+**No form ever prints.** Not the fields, not the labels, not the legend, not a
+challenge widget. The submit control was already hidden, which left the worst
+of both: an unfillable, unsendable form taking up half a sheet. On the résumé
+that was 453px. A form is an interactive affordance and paper has none.
+
+**`[data-vd-screen-only]` hides a whole block on paper.** The kit can remove
+the form; only you know whether the heading and the sentence introducing it
+should go with it. Put it on the section.
+
+```html
+<section data-vd-screen-only> … contact form … </section>
+```
+
+It joins `data-vd-print` (the print button) and `data-vd-print-alt` (its
+script-off substitute) as the third member of that family.
+
+**`data-print-as` controls the printed destination.** Every external link
+prints `<its href>`, because a printed underline pointing nowhere is useless.
+Sometimes the raw href is the ugly part rather than the useful part:
+
+```html
+<a href="https://www.linkedin.com/in/name/"
+   data-print-as="linkedin.com/in/name">LinkedIn</a>   <!-- short form -->
+<a href="https://dreyburn.com" data-print-as="">dreyburn.com</a>  <!-- none -->
+```
+
+An empty value suppresses it, for when the link text is already the address
+and printing it again just says it twice.
+
+### The print scale is a scale, and it is exhaustive
+
+`print.css` overrides every `--vd-size-*`, `--vd-lead-*` and `--vd-space-*`
+token in points, in the same block that overrides the colour tokens. **Any
+token added to the scale has to be added there too**, or its screen pixel
+value prints.
+
+This is not hypothetical. The colour block already carried a note saying the
+list is exhaustive by necessity; nobody made the same pass for metrics, and
+the 30px screen baseline printed verbatim for the life of the stylesheet. The
+résumé printed 12pt bullets on 22.5pt leading and ran to five pages.
+
+They are **lengths, not unitless ratios**. A ratio breaks
+`calc((var(--vd-lead-1) - 18px) / 2)` silently by making the declaration
+invalid, and a fixed leading is the system anyway: the screen puts every line
+on a 30px grid, and paper gets the same idea at paper scale — 10pt prose on
+14pt leading, with larger type taking a tighter ratio, which is what display
+type wants.
+
+### One page is a content constraint
+
+Nothing in CSS makes too much text fit. What the stylesheet does is stop the
+furniture from spending space the content needs. On Letter with an 18mm/20mm
+margin the budget is **920px of flow at 665px wide**, and it costs roughly:
+
+| | |
+|---|---|
+| A line of a bullet | 19px |
+| A role: title, dates, two bullets | 95px |
+| A section head with its hairline | 22px |
+| A skills row | 32px |
+
+Measure before trimming. `Emulation.setEmulatedMedia` plus
+`document.body.scrollHeight` at 665px wide gives the number in one call, and
+`Page.printToPDF` gives the real page count.
+
 ## Verify it yourself
 
 `verdigris/audit.js` is the measurement harness, shipped rather than kept as a dev tool. Load it
