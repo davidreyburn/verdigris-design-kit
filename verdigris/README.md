@@ -691,7 +691,7 @@ this* and paper has already answered it. `print.css` hides them and resets the
 card's grid, because `:has()` matches a hidden element and would otherwise
 leave an empty 90px column indenting every row.
 
-**Every slot is a RATIO, not a height.** This was wrong until 2.7.0 and it is
+**Every slot is a RATIO, not a height.** This was wrong until 2.7.1 and it is
 worth knowing why, because the mistake is easy to repeat: a fixed pixel height
 on a fluid-width element does not fix the crop, it makes the crop a function
 of the window. The thumbnail band ran from 1.72:1 at 320px to **4.91:1 at

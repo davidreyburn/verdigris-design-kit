@@ -923,6 +923,44 @@ PATCH: the printed résumé had no reachable contact on it.
   sheet they read as empty boxes drawn around text, and the URL now following each label needs the
   room.
 
+## 2.7.1 — 2026-09-16
+
+PATCH: the work cards' proof rule sat on the descenders of the last line of body copy.
+
+### What changes visually
+
+| | before | after |
+|---|---|---|
+| `vd-system-card`, body → proof rule | **0px** | **30px**, one baseline |
+| Rule → proof text | 15px | 15px, unchanged |
+| Card height on the reference homepage | 423 | 453 |
+| A card with no `proof` | — | unchanged |
+| Print | — | unchanged, 4 pages either way |
+
+### Fixed
+
+- **`margin-top:auto` only produces space when a card is shorter than its row**, so the card that
+  sets the row height — the one you actually read — got none at all. Measured on the live
+  homepage: the gap between the last line of body copy and the hairline was **0px on every card**,
+  with nothing but the line box's own half-leading keeping the rule off the descenders.
+
+  The minimum has to live on the body rather than the proof, because a box cannot carry both an
+  `auto` margin and a minimum one. Scoped with `:has(+ .vd-system-card__proof)` so a card without
+  a proof — `proof` is an optional attribute and the element is only built when it is non-empty —
+  does not collect 30px of trailing space inside its own border.
+
+  One baseline, not two. 45px was tried and floats the rule away from the content it belongs to
+  and toward the segment it is separating.
+
+### Corrected
+
+- **A comment that overclaimed.** `.vd-system-card__proof` said `margin-top:auto` made "every
+  proof rule in a row sit on one line." An auto top margin pins the *bottom*, so a two-line proof
+  beside a one-line proof puts its rule 45px higher — measured on the reference homepage, and
+  true since before the comment was written. The shared bottom edge is real and is the one a
+  reader's eye follows along a row; the rules were never aligned. Nothing about the behaviour
+  changed here, only the claim.
+
 ## 2.7.0 — 2026-09-16
 
 MINOR: click a figure, see the whole picture. Opt-in; nothing existing changes.

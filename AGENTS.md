@@ -36,7 +36,7 @@ be updated without touching the value it describes.
 
 `custom-elements.json` documents all **fourteen** `vd-*` elements for editors and tooling — ten
 registered custom elements and four CSS-only styling hooks (`vd-nav`, `vd-footer`, `vd-quote`,
-`vd-meta`). `vd-figure` moved from the second list to the first in 2.7.0: it is still styled
+`vd-meta`). `vd-figure` moved from the second list to the first in 2.7.1: it is still styled
 entirely by CSS, and is registered only so `expandable` has somewhere to be wired. It is hand-authored and carries a `checkedAgainst` field. If you add or
 change an element, update it — and verify against **both** the `defs` array in `verdigris.js` and
 the `vd-*` selectors in `verdigris.css`. Checking only the first is how the four CSS-only ones went
@@ -78,7 +78,7 @@ rather than leaving the placeholder in it.
 <meta property="og:url"   content="https://dreyburn.com/work/<slug>.html">
 <meta property="og:title" content="...">   <!-- the <title>, without the site suffix -->
 <meta property="og:description" content="...">  <!-- the same text as <meta name=description> -->
-<meta property="og:image" content="https://dreyburn.com/notes/og-<slug>.png?v=2.7.0">
+<meta property="og:image" content="https://dreyburn.com/notes/og-<slug>.png?v=2.7.1">
 ```
 
 Absolute URLs, every time — a relative `og:image` is ignored by every crawler that reads it.

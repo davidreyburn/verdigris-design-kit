@@ -1158,10 +1158,31 @@ vd-system-card[data-clickable]:hover .vd-system-card__title a::after,
 .vd-system-card__title a:focus-visible::after{transform:scaleX(1)}
 .vd-system-card__body{margin:var(--vd-space-h) 0 0;font-size:var(--vd-size-s);
   line-height:var(--vd-lead-1);color:var(--vd-text)}
+/* ONE BASELINE ABOVE THE PROOF RULE, and it has to live here rather than on
+   the proof, because the proof's margin-top is `auto` and a box cannot have
+   both an auto margin and a minimum one.
+
+   Measured before this: the gap between the last line of body copy and the
+   hairline was 0px on every card. `margin-top:auto` only produces space when
+   a card is shorter than its row, so the card that sets the row height — the
+   one you actually read — got nothing at all, and the rule sat on the
+   descenders.
+
+   Scoped with :has() so a card that carries no proof does not collect 30px
+   of trailing space inside its own border. `proof` is optional on
+   vd-system-card; the element is only built when the attribute is non-empty. */
+.vd-system-card__body:has(+ .vd-system-card__proof){margin-bottom:var(--vd-space-1)}
 .vd-system-card__proof{
-  /* auto, not a fixed step: pushes the proof to the foot of the card
-     whatever the body above it does, so every proof rule in a row sits on one
-     line. margin-top:auto is the whole fix. */
+  /* auto, not a fixed step: pushes the proof to the foot of the card whatever
+     the body above it does, so the proof BLOCKS in a row share a bottom edge.
+
+     Corrected in 2.7.1: this used to claim every proof RULE in a row sits on
+     one line, which is only true when the proofs are the same height. An auto
+     top margin pins the bottom, so a two-line proof beside a one-line proof
+     puts its rule 45px higher — measured on the reference homepage, and true
+     before this comment was written. Aligning the rules instead would mean
+     giving up the shared bottom edge, which is the one a reader's eye
+     actually follows along a row. */
   margin-top:auto;padding-top:var(--vd-space-h);
   border-top:var(--vd-hairline) solid var(--vd-rule);
   font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);line-height:var(--vd-lead-half);
