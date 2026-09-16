@@ -77,7 +77,7 @@ rather than leaving the placeholder in it.
 <meta property="og:url"   content="https://dreyburn.com/work/<slug>.html">
 <meta property="og:title" content="...">   <!-- the <title>, without the site suffix -->
 <meta property="og:description" content="...">  <!-- the same text as <meta name=description> -->
-<meta property="og:image" content="https://dreyburn.com/notes/og-<slug>.png?v=2.6.0">
+<meta property="og:image" content="https://dreyburn.com/notes/og-<slug>.png?v=2.6.1">
 ```
 
 Absolute URLs, every time — a relative `og:image` is ignored by every crawler that reads it.

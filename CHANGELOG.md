@@ -923,6 +923,44 @@ PATCH: the printed résumé had no reachable contact on it.
   sheet they read as empty boxes drawn around text, and the URL now following each label needs the
   room.
 
+## 2.6.1 — 2026-09-15
+
+PATCH: the note-card stamp's two spacings, both wrong for the same nine pixels.
+
+### What changes visually
+
+| | 2.6.0 | 2.6.1 |
+|---|---|---|
+| Title → dek | 24px | **15px**, what it was before the stamp existed |
+| Date → word count | 0px, the boxes touching | **7.5px** |
+| Row height | 39 | 38 |
+| 640px and below | unchanged | unchanged |
+
+### Fixed
+
+- **`align-items:baseline` was costing 9px and spending it in the wrong place.** A 12px mono
+  baseline sits about 11px from the top of its line box; an 18px title's sits about 20px from the
+  top of its. Baseline alignment shoves the date down 9px to make them meet, and the stamp's
+  second line follows it out of the bottom of the row. The row went 30 → 39, which pushed the dek
+  from 15px below the title to 24 — while the two stamp lines, having spent the budget on the
+  shove, sat flat against each other with no gap at all. One cause, both complaints.
+
+  Keeping baseline alignment cannot fix both: the shove eats exactly the room the stamp needs for
+  internal air. Measured, it lands the dek at 17px and the row at 47 — off the scale in both
+  directions, with the word count crowding the dek. `align-items:start` buys the 9px back.
+
+  The cost is that the date sits at the title's cap-height rather than on its baseline. Rendered
+  against the alternative it reads as a corner stamp, which is what it is.
+
+- **The dek's margin is a quarter step, not a half.** The row's box now ends 8px below the title,
+  so a half-step on top of that was the 24px. 8 + 7.5 = 15. This is also the value the narrow
+  layout already used, so the `max-width:640px` override is redundant and gone — one value in one
+  place.
+
+Verified identical at 1440, 900, 700 and 641; the narrow form below 640 is untouched. 15px
+between the date and the count was tried and rejected — the count detaches from the date and
+starts reading as part of the dek's row.
+
 ## 2.6.0 — 2026-09-15
 
 MINOR, with a visual change to a shared component — **`vd-note-card` moves the date.** Read the

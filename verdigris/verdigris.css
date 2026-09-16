@@ -1282,12 +1282,28 @@ vd-note-card:has(.vd-note-card__thumb){
 
    max-content on the second column, not a fixed width: "2,400 words" and
    "12 minutes" are different lengths and neither should be truncated or
-   padded to match the other. */
+   padded to match the other.
+
+   START, NOT BASELINE, and the 9px that costs is the whole reason both
+   spacings were wrong. A 12px mono baseline sits ~11px from the top of its
+   line box and an 18px title's sits ~20px from the top of its, so baseline
+   alignment shoves the date down 9px to make them meet — and the second
+   line goes with it, out of the bottom of the row. The row grew from 30 to
+   39, which pushed the dek from 15px below the title to 24px; and the two
+   stamp lines, having spent the budget on the shove, sat flat against each
+   other with no gap at all.
+
+   You cannot fix both while keeping baseline alignment: the shove eats
+   exactly the room the stamp needs for internal air. Top-aligning buys it
+   back. The cost is that the date sits at the title's cap-height rather
+   than on its baseline, which reads as a corner stamp — which is what it
+   is. */
 .vd-note-card__row{
   display:grid;
   grid-template-columns:minmax(0,1fr) max-content;
   column-gap:var(--vd-space-1);
-  align-items:baseline;
+  row-gap:var(--vd-space-q);
+  align-items:start;
 }
 .vd-note-card__date{
   font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);letter-spacing:.08em;
@@ -1311,7 +1327,12 @@ vd-note-card[data-clickable]:hover .vd-note-card__title a::after,
   color:var(--vd-text-muted);letter-spacing:.06em;
   grid-column:2;grid-row:2;justify-self:end;text-align:right;
   line-height:var(--vd-lead-half);}
-.vd-note-card__dek{margin:var(--vd-space-h) 0 0 0;max-width:var(--vd-measure);
+/* A QUARTER STEP, not a half. The row's own box now ends 8px below the
+   title — the stamp's second line lives there — so a half-step margin on top
+   of that put the dek 24px off the title instead of the 15 it had before the
+   stamp existed. 8 + 7.5 lands it back on 15. This is also the value the
+   narrow layout already used, so the two agree now instead of differing. */
+.vd-note-card__dek{margin:var(--vd-space-q) 0 0 0;max-width:var(--vd-measure);
   color:var(--vd-text-muted);font-size:var(--vd-size-s)}
 
 /* ── vd-nav ──────────────────────────────────────────────────────────── */
@@ -2728,5 +2749,5 @@ a.vd-tag{display:inline-flex;align-items:center;min-height:44px}
   .vd-note-card__date{grid-area:1/1;justify-self:start;text-align:left}
   .vd-note-card__len{grid-area:1/2;justify-self:end;text-align:right}
   .vd-note-card__title{grid-area:2/1/3/3}
-  .vd-note-card__dek{margin-top:var(--vd-space-q)}
+  /* The dek margin used to be restated here. It is the base value now. */
 }

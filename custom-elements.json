@@ -399,7 +399,7 @@
   ],
   "checkedAgainst": {
     "file": "verdigris/verdigris.js and verdigris/verdigris.css",
-    "version": "2.6.0",
+    "version": "2.6.1",
     "date": "2026-09-13",
     "note": "Hand-authored, so it can drift. 14 vd-* tags exist: 9 registered custom elements, 5 CSS-only styling hooks with no JS (customElement:false). To re-verify, check BOTH sources and re-stamp this block. (1) The defs array at the bottom of verdigris.js must match the 9 entries marked customElement:true. (2) Every vd-* used as an ELEMENT selector in verdigris.css must appear here — note that vd-cite, vd-diagram, vd-note, vd-ol and vd-tag look like tags in a grep but are comment headers and CSS counter names, and vd-form, vd-swatch and vd-toc are registered elements styled only through classes. Checking the defs array alone reports a false exact match and misses all 5 CSS-only hooks."
   }
