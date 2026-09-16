@@ -923,6 +923,75 @@ PATCH: the printed résumé had no reachable contact on it.
   sheet they read as empty boxes drawn around text, and the URL now following each label needs the
   room.
 
+## 2.6.2 — 2026-09-16
+
+PATCH: two crops and a title size, all three of them a fixed number standing in for a fit.
+
+### What changes visually
+
+| | before | after |
+|---|---|---|
+| `.vd-note-card__thumb`, 860 and below | 160px tall, so 1.72:1 at 320px and **4.91:1 at 860** | **16:9 at every width** |
+| `.vd-article__hero` | 300px tall desktop / 210 mobile, so 1.31:1 to **3.73:1** | **2:1 at every width.** 395px at the 790 column cap, against 300 before |
+| Share-card title, short | 62px, one line, four fifths of its box empty | **116px, two lines** |
+| Share-card title, longest real one | 52px, three lines | 56px, three lines, 144px clear of the meta |
+| `og.png`, the site card | — | unchanged |
+
+### Fixed
+
+- **A fixed pixel height on a fluid-width element does not fix a crop — it makes the crop a
+  function of the viewport.** Both image slots did this, and the thumbnail's comment claimed the
+  opposite: *"90px is three baselines and square, the one shape that survives any source ratio."*
+  It is, at 90px. Below 860 the same file went full-bleed at 160px tall:
+
+  | viewport | thumbnail slot | crop from a 1:1 source |
+  |---|---|---|
+  | 320 | 275×160 | 1.72:1 |
+  | 393 | 348×160 | 2.17:1 |
+  | 640 | 565×160 | 3.53:1 |
+  | 860 | 785×160 | **4.91:1** |
+  | 861 | 90×90 | 1:1 |
+
+  A square photo sliced to a fifth of its height, then whole again one pixel wider. A face below
+  centre lost its jaw to the default `50% 50%`.
+
+  The hero ran 1.31:1 to **3.73:1** on a 1466×812 source and jumped *backwards* at the
+  breakpoint — 784×210 at 859px, 594×300 at 861. `aspect-ratio` gives what both comments already
+  promised.
+
+  Ratios chosen: **2:1** for the hero, because a source is normally 16:9 or 3:2 and both survive
+  it nearly uncropped, and because at the 790px column cap it lands at 395 — the closest of the
+  sane options to the 300 it was. **16:9** for the thumbnail band, because that slot is a picture
+  rather than a band and 16:9 is what a hero file already is, so a thumbnail pointed at the hero
+  crops to nothing there.
+
+  Stated cost: 300px was ten baselines and 395 is not a baseline multiple. The grid loses. A crop
+  that changes with the window was never what the baseline rule was protecting.
+
+- **The share-card title ladder ran the wrong way.** `SIZES = [62, 52, 44]`, stepped down from
+  62 — so nothing ever asked whether a short title could be bigger. "Babel Revisited" set at 62
+  on one line: 463px of a 540px column with 282px of vertical slack under it, **a fifth of the
+  space it was given**. At thumbnail size in a message thread it came out no larger than the
+  platform's own caption printed beneath the card.
+
+  It now searches down from 120 and takes the largest size satisfying **two** constraints. The
+  old test checked height only, so an unbreakable long word could overrun the column with nothing
+  to catch it — `lines()` puts a too-long word on its own line regardless of width.
+
+  `BOX_H` is 285, not 300: at 300 the longest real title took four lines at 60px and left 60px to
+  the meta line, which reads as crowding; at 285 it drops to three lines at 56 with 144px of air.
+  Leading tightens with size — 1.10 above 90px, 1.16 above 68 — because a 116px line set at 1.24
+  is body-copy leading on display type.
+
+  The site card is a separate branch of three hand-set lines and is untouched.
+
+### Changed
+
+- **Docs now say to point `image=` at the hero file rather than a small crop.** The thumbnail is
+  90px on a desktop and full-bleed on a phone, a nine-fold spread; a 180px file cut for the
+  square slot is upscaled about 4× on mobile and looks it. The hero is already large and already
+  on disk.
+
 ## 2.6.1 — 2026-09-15
 
 PATCH: the note-card stamp's two spacings, both wrong for the same nine pixels.

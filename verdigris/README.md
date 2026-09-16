@@ -642,7 +642,7 @@ deduplicate them:
 | Where | What renders it |
 |---|---|
 | The article | `.vd-article__hero` on a `vd-figure` or a bare `<img>` |
-| The listing | `image=` on `vd-note-card`, drawn at 90px square |
+| The listing | `image=` on `vd-note-card` — a 90px square above 860px, a full-bleed 16:9 band below it |
 | The share card | `tools/og.html?image=…`, saved as a PNG and pointed at by `og:image` |
 
 All three are optional and independently so. A piece with no picture renders a
@@ -651,8 +651,8 @@ fills the panel — which is the point. **Nothing in the kit degrades when the
 image is absent**; it degrades when the image is mandatory, because then every
 piece needs one.
 
-**The crop is declared once and copied twice.** A 1.91:1 card and a 300px band
-and a 90px square cannot all show the whole picture, so something has to
+**The crop is declared once and copied twice.** A 1.91:1 card, a 2:1 hero and
+a 90px square cannot all show the whole picture, so something has to
 choose. `--vd-hero-focus` is that choice, in `object-position` terms:
 
 ```html
@@ -689,6 +689,26 @@ this* and paper has already answered it. `print.css` hides them and resets the
 card's grid, because `:has()` matches a hidden element and would otherwise
 leave an empty 90px column indenting every row.
 
+**Every slot is a RATIO, not a height.** This was wrong until 2.6.2 and it is
+worth knowing why, because the mistake is easy to repeat: a fixed pixel height
+on a fluid-width element does not fix the crop, it makes the crop a function
+of the window. The thumbnail band ran from 1.72:1 at 320px to **4.91:1 at
+860** — a square photo sliced to a fifth of its height — and then snapped back
+to 1:1 one pixel wider.
+
+| Slot | Ratio | Widest it is ever drawn |
+|---|---|---|
+| `.vd-article__hero` | 2:1 | 790px (the read measure) |
+| `.vd-note-card__thumb`, above 860 | 1:1 | 90px |
+| `.vd-note-card__thumb`, 860 and below | 16:9 | the content column |
+
+**Size the source for the widest row, not the narrowest.** The thumbnail is
+90px on a desktop and full-bleed on a phone, a nine-fold spread, so a file cut
+to 180px for the square slot is upscaled about 4× on mobile and looks it.
+**Point `image=` at the hero file** — it already exists, it is already large,
+and the browser downsamples for the 90px square for free. One file, sharp in
+both places.
+
 ### Per-article share cards
 
 `og:image` is per-article; the site card is the fallback, not the default.
@@ -701,8 +721,11 @@ tools/og.html?title=The%20GM%E2%80%99s%20Assistant
              &image=/images/thing.webp&focus=50,35
 ```
 
-The title is measured and stepped down through three sizes until it fits, so a
-long one does not overrun. `image` is optional.
+The title is **fitted**, not picked from a list: the harness searches down from
+120px and takes the largest size where every line fits the column *and* the
+block fits the box. A short title therefore gets big — "Babel Revisited" sets
+at 116px over two lines, where it used to set at 62 on one and leave four
+fifths of its space empty. `image` is optional.
 
 **Use a path, not a URL.** Any cross-origin image taints the canvas and
 `toDataURL()` throws, which presents as the Save button doing nothing.

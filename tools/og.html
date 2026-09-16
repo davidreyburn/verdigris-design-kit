@@ -36,7 +36,7 @@
      noindex. It is here rather than in .private because regenerating the
      card must be reproducible by whoever holds the repo next. -->
 
-<link rel="stylesheet" href="../verdigris/verdigris.css?v=2.6.1">
+<link rel="stylesheet" href="../verdigris/verdigris.css?v=2.6.2">
 <style>
   body{padding:var(--vd-space-2);max-width:1240px;margin:0 auto}
   /* Laid out at true size: Field.resize() reads getBoundingClientRect, so
@@ -78,7 +78,7 @@
 
 <img id="preview" alt="Preview of the generated card">
 
-<script src="../verdigris/topolang.js?v=2.6.1"></script>
+<script src="../verdigris/topolang.js?v=2.6.2"></script>
 <script>
 (function () {
   const W = 1200, H = 630, SEED = 20260801;
@@ -212,18 +212,41 @@
 
     /* The site card's headline is three hand-set lines and stays that way.
        An article title is whatever the author wrote, so it is measured and
-       stepped down through three sizes until it fits the space between the
-       byline and the meta line. Below 44 it would stop looking like the site
-       card, so the smallest size just takes as many lines as it needs. */
+       fitted to the space between the byline and the meta line.
+
+       THE LADDER RUNS DOWN FROM 120, NOT UP FROM 62, and that was the bug.
+       It used to start at 62 and only step down, so nothing ever asked
+       whether a short title could be bigger. "Babel Revisited" set at 62 on
+       one line: 463px of a 540px column, with 282px of vertical slack under
+       it — a fifth of the space it was given. At thumbnail size in a message
+       thread it came out no larger than the platform's own caption beneath
+       the card, which is the report that started this.
+
+       TWO CONSTRAINTS, not one. The old test checked height only, so an
+       unbreakable long word could overrun the column with nothing to catch
+       it — lines() puts a too-long word on its own line regardless of width.
+       Now a size has to satisfy both before it is accepted.
+
+       BOX_H is 285, not 300. At 300 the longest real title took four lines
+       at 60px and left 60px to the meta line, which reads as crowding; at
+       285 the same title drops to three lines at 56 with 144px of air. Four
+       points of type for a composition that holds is the right trade.
+
+       Leading tightens as the size grows. A 116px line set at 1.24 is body
+       copy leading on display type. */
     ctx.fillStyle = TEXT;
     let head, lead;
     if (TITLE) {
-      const SIZES = [62, 52, 44];
-      for (let i = 0; i < SIZES.length; i++) {
-        ctx.font = '700 ' + SIZES[i] + 'px Chivo, system-ui, sans-serif';
-        head = lines(TITLE, COL_W);
-        lead = Math.round(SIZES[i] * 1.24);
-        if (head.length * lead <= 300) { break; }
+      const BOX_H = 285;
+      for (let s = 120; s >= 40; s -= 4) {
+        ctx.font = '700 ' + s + 'px Chivo, system-ui, sans-serif';
+        const ls = lines(TITLE, COL_W);
+        const ld = Math.round(s * (s >= 90 ? 1.10 : s >= 68 ? 1.16 : 1.24));
+        const widest = Math.max.apply(null, ls.map(function (l) {
+          return ctx.measureText(l).width;
+        }));
+        head = ls; lead = ld;
+        if (widest <= COL_W && ls.length * ld <= BOX_H) { break; }
       }
     } else {
       ctx.font = '700 62px Chivo, system-ui, sans-serif';

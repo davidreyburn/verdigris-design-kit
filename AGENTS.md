@@ -77,7 +77,7 @@ rather than leaving the placeholder in it.
 <meta property="og:url"   content="https://dreyburn.com/work/<slug>.html">
 <meta property="og:title" content="...">   <!-- the <title>, without the site suffix -->
 <meta property="og:description" content="...">  <!-- the same text as <meta name=description> -->
-<meta property="og:image" content="https://dreyburn.com/notes/og-<slug>.png?v=2.6.1">
+<meta property="og:image" content="https://dreyburn.com/notes/og-<slug>.png?v=2.6.2">
 ```
 
 Absolute URLs, every time — a relative `og:image` is ignored by every crawler that reads it.
@@ -105,6 +105,14 @@ When there is one, it is the *same* picture and the *same* crop in all three pla
 
 Nothing deduplicates these. Changing the picture or the focus means changing three files, and
 the share card is the one that will be forgotten, because it is a binary nobody re-reads.
+
+**Point `image=` at the hero file, not a small crop of it.** The thumbnail is a 90px square on
+a desktop and a full-bleed 16:9 band on a phone — a nine-fold spread — so a 180px file cut for
+the square slot is upscaled about 4× on mobile and looks soft. The hero is already large and
+already on disk; the browser downsamples it for the square for free.
+
+**Set `--vd-thumb-focus` when the subject is off-centre.** The square slot crops to the middle
+by default, which takes the middle of a portrait and can cut a face in half.
 
 **Drawing the card.** Serve the repo, open the harness with those parameters, press Save, put
 the PNG beside the article, and bump its `?v=` in `og:image`. Use a *path* for `image=` — a

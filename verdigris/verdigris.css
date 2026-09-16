@@ -2225,10 +2225,27 @@ vd-figure figcaption{margin-top:var(--vd-space-h);font-family:var(--vd-face-mono
    layout error, not as a full bleed — a full bleed has to leave the column
    entirely to be legible as one, and this one cannot. */
 .vd-article__hero{margin:var(--vd-space-2) 0 0;max-width:var(--vd-measure-read)}
+/* A RATIO, NOT A HEIGHT, and this is a correction. A fixed pixel height on
+   a fluid-width element does not fix the crop — it makes the crop a function
+   of the viewport. Measured on a 1466x812 hero before this change:
+
+     320px viewport   275x210   1.31:1
+     859px viewport   784x210   3.73:1   <- more than half the height gone
+     861px viewport   594x300   1.98:1   <- and it jumps BACK at the breakpoint
+
+   The comment above promised a predictable crop; the height delivered the
+   opposite. aspect-ratio delivers it. 2:1 because a hero source is normally
+   16:9 or 3:2 and both survive it almost uncropped, and because at the 790px
+   column cap it lands at 395 — the closest of the sane ratios to the 300 this
+   used to be.
+
+   The cost, stated: 300px was ten baselines and 395 is not a baseline
+   multiple. The grid loses here. A crop that changes with the window was
+   never what the baseline rule was protecting. */
 .vd-article__hero img,
 img.vd-article__hero{
   display:block;width:100%;max-width:100%;
-  height:300px;object-fit:cover;
+  aspect-ratio:2 / 1;height:auto;object-fit:cover;
   object-position:var(--vd-hero-focus,50% 50%);
   border-radius:var(--vd-radius);
 }
@@ -2661,17 +2678,26 @@ a.vd-tag{display:inline-flex;align-items:center;min-height:44px}
      against a column that is already the measure. */
   .vd-grid{--vd-grid-cols:1;max-width:none}
 
-  /* The hero loses a third of its height below 860 — 7 baselines against 10.
-     A 300px band on a 568px screen is half the viewport before a word. */
-  .vd-article__hero img,
-  img.vd-article__hero{height:210px}
+  /* The hero no longer needs a narrow-screen height. It is a ratio now, so it
+     shrinks with the column on its own — 196px at 393, 160 at 320 — and the
+     old override existed only to stop a fixed 300px band eating half a phone
+     screen. Keeping it would put the viewport back into the crop. */
 
   /* The thumbnail stops being a column and becomes a band above the text.
      90px beside a title at this width leaves the title about 12 characters,
      which wraps to four lines and reads worse than no image at all. */
   vd-note-card:has(.vd-note-card__thumb){grid-template-columns:minmax(0,1fr)}
+  /* Same correction as the hero, and this one was worse. height:160px on a
+     full-width band made the crop run from 1.72:1 at 320 to 4.91:1 at 860 —
+     a square source sliced to a fifth of its height — and then snap back to
+     1:1 one pixel wider. A face below centre lost its jaw.
+
+     16:9 rather than the hero's 2:1: this slot is a picture, not a band, and
+     16:9 is what a hero file already is, so a thumbnail pointed at the hero
+     crops to nothing here. */
   .vd-note-card__thumb{
-    grid-row:auto;width:100%;height:160px;margin-bottom:var(--vd-space-h);
+    grid-row:auto;width:100%;height:auto;aspect-ratio:16 / 9;
+    margin-bottom:var(--vd-space-h);
   }
 
   /* Three baselines instead of four. The rail is a horizontal strip here,
