@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-/* ── the three-load audit, driven ────────────────────────────────────────
-   Runs verdigrisAudit() over every page in ink, paper and at 320px — the
-   three loads AGENTS.md requires, one theme per load, as a real navigation
-   each time rather than a theme switch inside one page.
+/* ── the multi-load audit, driven ───────────────────────────────────────
+   Runs verdigrisAudit() over every page in ink, in paper, and at one width
+   just inside each declared breakpoint — one theme per load, as a real
+   navigation each time rather than a theme switch inside one page.
+   See CONDITIONS below for why the narrow widths are the ones they are.
 
    Zero dependencies: Node's global WebSocket speaking CDP. No npm, which is
    the same rule the rest of the repository follows.
@@ -24,11 +25,23 @@ const BASE  = process.env.BASE || 'http://127.0.0.1:8787';
 const PAGES = (process.env.PAGES ||
   'index.html,docs/index.html,resume.html,reader.html,template.html,404.html').split(',');
 
-/* ink and paper run at a desktop width; the third load is the narrow one.
-   320 is the WCAG 1.4.10 figure. Emulation gives the page a real viewport,
-   so media queries fire — constraining an element does not, and proves
-   nothing about a layout that changes character at 860px. */
-const CONDITIONS = [['ink', 'dark', 1280], ['paper', 'light', 1280], ['320', 'dark', 320]];
+/* ink and paper run at a desktop width; the rest are narrow loads. 320 is
+   the WCAG 1.4.10 figure. Emulation gives the page a real viewport, so media
+   queries fire — constraining an element does not, and proves nothing about
+   a layout that changes character at 860px.
+
+   859 AND 639 ARE NOT ARBITRARY: they are one pixel inside each breakpoint
+   this system declares. Sampling 1280 and 320 alone tests the two ends and
+   neither middle, and a nav that overflowed by 149px across the whole
+   641-860 band survived five sweeps because of it — two blocks disagreed
+   about whether the bar wraps, and no load ever landed where they disagreed.
+
+   A breakpoint is a seam. Add one to verdigris.css and add a sample just
+   inside it here, or the next mismatch is invisible in the same way. */
+const CONDITIONS = [
+  ['ink', 'dark', 1280], ['paper', 'light', 1280],
+  ['859', 'dark', 859], ['639', 'dark', 639], ['320', 'dark', 320],
+];
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -137,6 +150,6 @@ for (const page of PAGES) {
 
 console.log(JSON.stringify(results, null, 1));
 console.error(failures === 0
-  ? `\nPASS — ${PAGES.length} pages x 3 loads, no measured failures.`
+  ? `\nPASS — ${PAGES.length} pages x ${CONDITIONS.length} loads, no measured failures.`
   : `\nFAIL — ${failures} measured failure(s). Notes are not failures; see AGENTS.md.`);
 process.exit(failures === 0 ? 0 : 1);

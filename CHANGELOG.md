@@ -923,6 +923,62 @@ PATCH: the printed résumé had no reachable contact on it.
   sheet they read as empty boxes drawn around text, and the URL now following each label needs the
   room.
 
+## 2.6.0 — 2026-09-15
+
+MINOR, with a visual change to a shared component — **`vd-note-card` moves the date.** Read the
+table below before pulling. Also: a 1.4.10 failure that survived five sweeps, and the reason it
+did.
+
+### What changes visually
+
+| | before | after |
+|---|---|---|
+| `vd-note-card`, above 640px | date · title · word count, all on one baseline | title on the left; **date over word count** as a right-hand stamp |
+| `vd-note-card`, 640px and below | unchanged — date and count pair on one line, title below | unchanged |
+| `vd-nav`, 641–860px | four links overflowing the viewport by 149px | a two-row bar, no overflow |
+| Card height | — | 8px shorter per card; nothing else moved |
+
+Markup and reading order are untouched. The row is a grid with explicit placement rather than
+source order, so the DOM stays date → title → count and a screen reader still hears the date
+first.
+
+### Changed
+
+- **`.vd-note-card__row` is a grid.** Two mono lines at `--vd-lead-half` are 30px, exactly one
+  line of the title at `--vd-lead-1`, so the stamp occupies one baseline and a one-line card is
+  no taller than it was. The second column is `max-content`, not a fixed width: "2,400 words" and
+  "12 minutes" are different lengths and neither should be padded to match the other.
+
+  The small-screen form is unchanged and now says so in its own comment — a stamp wide enough for
+  "3,100 words" leaves the title about twelve characters at 320px, which wraps to four lines.
+  Under 640 the same three parts turn a quarter turn instead.
+
+### Fixed
+
+- **`vd-nav` overflowed the viewport by 149px across the whole 641–860 band**, on every page, in
+  both themes. `@media(max-width:860px)` describes a two-row bar — mark on row one, links on row
+  two — and every rule in it assumes wrapping, but `flex-wrap:wrap` was only ever declared at
+  640. Between the two breakpoints `flex:1 1 100%` on the mark took the entire line inside a
+  `nowrap` container, the list collapsed to zero width against `flex:1 1 0;min-width:0`, and its
+  four links spilled off the right edge. A 1.4.10 failure, and the published reflow guarantee was
+  wrong for that band.
+
+  The wrap moved to 860, where the rules that depend on it live. The 640 block now tightens gaps
+  and nothing else — stating the same layout twice is how the two drifted apart.
+
+### Found
+
+- **The audit sampled both ends and neither middle.** `CONDITIONS` was ink@1280, paper@1280 and
+  320 — so no load ever landed between 641 and 860, which is exactly where two blocks disagreed
+  about the same layout. Five sweeps found nothing because none of them looked.
+
+  It now also loads **859 and 639, one pixel inside each declared breakpoint**. A breakpoint is a
+  seam; add one to `verdigris.css` and add a sample just inside it, or the next mismatch is
+  invisible in the same way. `README.md`'s reflow row says what is actually tested now rather
+  than quoting the 320px figure alone.
+
+  6 pages × 5 loads, PASS.
+
 ## 2.5.0 — 2026-09-15
 
 MINOR: the résumé fills its column on screen, and the printed résumé is one page instead of

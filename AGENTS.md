@@ -77,7 +77,7 @@ rather than leaving the placeholder in it.
 <meta property="og:url"   content="https://dreyburn.com/work/<slug>.html">
 <meta property="og:title" content="...">   <!-- the <title>, without the site suffix -->
 <meta property="og:description" content="...">  <!-- the same text as <meta name=description> -->
-<meta property="og:image" content="https://dreyburn.com/notes/og-<slug>.png?v=2.5.0">
+<meta property="og:image" content="https://dreyburn.com/notes/og-<slug>.png?v=2.6.0">
 ```
 
 Absolute URLs, every time — a relative `og:image` is ignored by every crawler that reads it.
@@ -296,7 +296,7 @@ Spacing exception, under which an undersized target still conforms if a 44px cir
 does not overlap another's. A narrow but well-spaced nav link appears in `notes` without being a
 failure. Do not report notes as violations.
 
-`tools/audit.mjs` drives all of it — every page, all three loads — over the DevTools protocol
+`tools/audit.mjs` drives all of it — every page, every load — over the DevTools protocol
 using Node's built-in WebSocket, so it adds no dependency:
 
 ```sh
@@ -495,7 +495,7 @@ template.html       starter page — copy this. A specimen, not a page
 reader.html         case study / Field Note template. A specimen, not a page
 preview-mobile.html width harness. ?w=320,390 picks widths, &y= sets scroll
 tools/og.html       redraws the hero field at 1200×630 and saves og.png
-tools/audit.mjs     drives the three-load audit over every page. See Verify your work
+tools/audit.mjs     drives the audit over every page in both themes and at every breakpoint. See Verify your work
 
 verdigris/          the kit: verdigris.css, verdigris.js, topolang.js, print.css, audit.js
 custom-elements.json  the element manifest. Hand-authored; carries checkedAgainst

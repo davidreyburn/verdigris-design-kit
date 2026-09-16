@@ -85,7 +85,7 @@ conformance checks live from the running tokens rather than printing a stored ta
 | Check | Result |
 |---|---|
 | Contrast, all text tokens | AAA, 7:1 or better, in both themes |
-| Reflow, WCAG 1.4.10 | Passes at 320 CSS px. Document scroll width 305 against a 305 client width — zero overflow — on every page, both themes |
+| Reflow, WCAG 1.4.10 | Zero overflow on every page, in both themes, at 320px **and at one width just inside each declared breakpoint**. The narrow samples are the point: a 149px nav overflow lived in the 641–860 band for five sweeps because only 320 and 1280 were ever loaded |
 | Target size, 2.5.8 AA | Every target passes |
 | Target size, 2.5.5 AAA | Every standalone control and card passes. The card is the target, with the click forwarded under drag, selection and nested-interactive guards |
 | Form controls, 1.4.11 | Every control boundary 3:1 or better against its adjacent surface, both themes |

@@ -573,7 +573,7 @@ from the running CSS. To check this table has not gone stale, diff it against
 | `.vd-footer__inner` `.vd-footer__sig` | Footer internals |
 | `.vd-hero__*` | Hero internals: `thesis`, `sub`, `caption`, `inner`, `field`, `fieldwrap` |
 | `.vd-system-card__*` | Work card internals: `index`, `title`, `body`, `proof` |
-| `.vd-note-card__*` | Note card internals: `row`, `date`, `title`, `len`, `dek`, `thumb` |
+| `.vd-note-card__*` | Note card internals: `row`, `date`, `title`, `len`, `dek`, `thumb`. The row is a grid: title on the left, `date` over `len` as a right-hand stamp. Placement is explicit, so the DOM stays date → title → count and the reading order is unchanged |
 | `.vd-readout` `.vd-readout__key` `.vd-readout__value` | Rail readouts |
 | `.vd-readout__value--grade` | A readout holding a grade rather than a quantity — deliberately not the data colour |
 | `.vd-swatch__*` | Swatch internals, built by `vd-swatch` |
