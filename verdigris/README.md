@@ -581,6 +581,8 @@ from the running CSS. To check this table has not gone stale, diff it against
 | `.vd-code__bar` `.vd-code__copy` | Code block header and copy control |
 | `.vd-portrait` | A photograph of a person, at rail scale. Grayscale, square, grained. Optional |
 | `.vd-portrait--colour` `.vd-portrait--cutout` | Keep the photograph as shot; or drop the box for a background-removed source |
+| `.vd-figure__expand` | The button `vd-figure[expandable]` wraps its image in. No chrome — the affordance is the cursor and the focus ring |
+| `.vd-lightbox__*` | The expanded view: `frame`, `img`, `caption`, `close`. One dialog per page, built on first use |
 | `.vd-node` `.vd-node--active` | Diagram primitives |
 
 Classes marked `__` are internals written by a custom element. You will rarely author them by
@@ -689,7 +691,7 @@ this* and paper has already answered it. `print.css` hides them and resets the
 card's grid, because `:has()` matches a hidden element and would otherwise
 leave an empty 90px column indenting every row.
 
-**Every slot is a RATIO, not a height.** This was wrong until 2.6.2 and it is
+**Every slot is a RATIO, not a height.** This was wrong until 2.7.0 and it is
 worth knowing why, because the mistake is easy to repeat: a fixed pixel height
 on a fluid-width element does not fix the crop, it makes the crop a function
 of the window. The thumbnail band ran from 1.72:1 at 320px to **4.91:1 at
@@ -886,6 +888,78 @@ margin the budget is **920px of flow at 665px wide**, and it costs roughly:
 Measure before trimming. `Emulation.setEmulatedMedia` plus
 `document.body.scrollHeight` at 665px wide gives the number in one call, and
 `Page.printToPDF` gives the real page count.
+
+## Click the picture, see the picture
+
+```html
+<vd-figure expandable>
+  <img src="/images/atlas.webp" alt="Six cells and six storeys around the origin."
+       width="1466" height="812">
+  <figcaption>The dark hexes are shafts and reading rooms.</figcaption>
+</vd-figure>
+```
+
+**Opt-in, and that is the whole design.** The article slots crop —
+`.vd-article__hero` to 2:1, the mobile thumbnail to 16:9, both `object-fit:
+cover` — so the page has been showing a window onto the picture. This is
+where the reader gets the frame. A diagram already at full width gains
+nothing from it, and making every figure a control would add a tab stop to
+every published page at once.
+
+**With JavaScript off the figure is exactly what it was.** The attribute does
+nothing on its own.
+
+**A real `<button>`, not a click handler on the `<img>`.** That is the
+difference between something a keyboard can reach and something that
+mysteriously responds to Enter — and it makes the whole picture the target,
+which clears 2.5.5 without a single extra pixel. A figure whose image is
+already inside a link is skipped: nesting a button in an anchor is invalid,
+and the author meant the link.
+
+**One `<dialog>` per page, built on first use and reused.** Not one per
+figure — a long essay with a dozen plates would otherwise carry a dozen
+hidden copies of the same markup. `showModal()` supplies the top layer,
+Escape, the focus trap, and focus restoration to the trigger, none of which
+is worth reimplementing and all of which hand-rolled lightboxes get wrong.
+
+**The dialog is the scrim itself**, full-viewport with its own background,
+rather than a panel over a styled `::backdrop`. Custom properties have only
+recently begun inheriting into `::backdrop` and not everywhere, so a themed
+one cannot be relied on — and with the dialog covering the viewport,
+"clicked outside the picture" is just "the click landed on the dialog".
+
+**Theme-following, not a fixed dark scrim.** A fixed palette would have been
+easier and would have introduced a third surface whose contrast nobody had
+measured. Using `--vd-surface` and `--vd-text-muted` inherits ratios this
+system has already proved. Measured in the open dialog:
+
+| | ink | paper |
+|---|---|---|
+| Caption on the scrim | 7.94:1 | 8.50:1 |
+| Close glyph | 11.06:1 | 12.23:1 |
+| Close boundary (1.4.11) | 3.33:1 | 3.35:1 |
+| Close target (2.5.5) | 44×44 | 44×44 |
+
+The close button uses `--vd-control-border` rather than `--vd-rule`: on the
+rule colour the boundary measured **1.28:1**, against the 3:1 this system
+publishes.
+
+**The accessible name comes from `alt`, never from the caption.** The caption
+is adjacent and already announced as part of the figure, so borrowing it says
+everything twice — and captions are sentences, which makes a two-hundred
+character name. A decorative image with `alt=""` gets the bare *Expand
+image*, which is honest: there is nothing more to say about it.
+
+**Body scroll is locked while open.** `showModal()` blocks interaction with
+the page behind it but does not stop that page scrolling in every browser,
+and a background scrolling under a modal is disorienting.
+
+**Deliberately absent:** no gallery, no next/previous, no zoom-and-pan (pinch
+already works where it matters), and no open animation. A lightbox that fades
+in delays the thing you just asked to see.
+
+It does not print. Paper has no top layer, and the button carries no chrome,
+so an expandable figure prints exactly as it did before it was made one.
 
 ## Verify it yourself
 

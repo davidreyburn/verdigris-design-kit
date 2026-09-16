@@ -225,6 +225,13 @@
      on a CV is a liability rather than a courtesy, and the component
      existing is not an argument for putting it there. */
   .vd-portrait{display:none}
+
+  /* The lightbox is a screen affordance and paper has no top layer. The
+     button flattens back to nothing, which it already is — it carries no
+     chrome — so the figure prints exactly as it did before it was made
+     expandable. */
+  .vd-lightbox{display:none !important}
+  .vd-figure__expand{display:block;cursor:auto}
   /* An endnote list is worth printing — a citation is the reason it exists —
      but it should not be orphaned from the article. */
   .vd-notes{break-before:avoid;page-break-before:avoid}

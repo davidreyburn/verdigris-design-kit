@@ -54,16 +54,16 @@ catch(e){}
      The version query string must move with the image. Cloudflare caches this, crawlers
      cache it harder, and an og:image that 200s from cache after you have
      replaced the file is the single most common way a share looks stale. -->
-<meta property="og:image" content="https://dreyburn.com/notes/og-&lt;slug&gt;.png?v=2.6.2">
+<meta property="og:image" content="https://dreyburn.com/notes/og-&lt;slug&gt;.png?v=2.7.0">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="The article title, set over its hero image.">
 <meta property="og:site_name" content="David Reyburn">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="verdigris/verdigris.css?v=2.6.2">
-<link rel="stylesheet" href="verdigris/print.css?v=2.6.2">
-<script src="verdigris/verdigris.js?v=2.6.2" defer></script>
-<script src="verdigris/audit.js?v=2.6.2" defer></script>
+<link rel="stylesheet" href="verdigris/verdigris.css?v=2.7.0">
+<link rel="stylesheet" href="verdigris/print.css?v=2.7.0">
+<script src="verdigris/verdigris.js?v=2.7.0" defer></script>
+<script src="verdigris/audit.js?v=2.7.0" defer></script>
 </head>
 <body>
 <a class="vd-skip" href="#main">Skip to content</a>
@@ -130,7 +130,7 @@ catch(e){}
              No loading="lazy" here — the hero is above the fold by
              definition, and lazy on an LCP element delays the thing the
              score is measured against. -->
-        <vd-figure class="vd-article__hero" style="--vd-hero-focus:50% 35%">
+        <vd-figure class="vd-article__hero" expandable style="--vd-hero-focus:50% 35%">
           <img alt="" width="1600" height="900"
                src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'1600'%20height%3D'900'%3E%3Crect%20width%3D'1600'%20height%3D'900'%20fill%3D'%232c2b28'%2F%3E%3Ctext%20x%3D'50%25'%20y%3D'52%25'%20fill%3D'%23B2AB9C'%20text-anchor%3D'middle'%20font-family%3D'monospace'%20font-size%3D'34'%3Ehero%20placeholder%2016%3A9%3C%2Ftext%3E%3C%2Fsvg%3E">
           <figcaption>Optional. A hero with a caption is a figure; one without is
@@ -187,8 +187,18 @@ catch(e){}
           </ul>
 
           <!-- Figures are BARE — no frame. What makes this a figure rather than
-               an image is the caption. -->
-          <vd-figure>
+               an image is the caption.
+
+               `expandable` is OPT-IN, and that is the point of it being an
+               attribute rather than a default: the article slots crop
+               (.vd-article__hero to 2:1, the mobile thumbnail to 16:9), and
+               this is where a reader sees the whole frame. A diagram already
+               at full width gains nothing from it, and turning every figure
+               into a control would add a tab stop to every page at once.
+
+               No JS, no problem: the figure renders exactly as it does here
+               and the attribute does nothing. -->
+          <vd-figure expandable>
             <img alt="Four layers: source files, indexing, agent instructions, and a review gate before deploy."
                  width="900" height="120"
                  src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'900'%20height%3D'120'%3E%3Crect%20width%3D'900'%20height%3D'120'%20fill%3D'%232c2b28'%2F%3E%3Ctext%20x%3D'18'%20y%3D'68'%20fill%3D'%23B2AB9C'%20font-family%3D'monospace'%20font-size%3D'15'%3Efigure%20placeholder%3C%2Ftext%3E%3C%2Fsvg%3E">

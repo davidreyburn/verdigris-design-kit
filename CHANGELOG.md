@@ -923,6 +923,81 @@ PATCH: the printed résumé had no reachable contact on it.
   sheet they read as empty boxes drawn around text, and the URL now following each label needs the
   room.
 
+## 2.7.0 — 2026-09-16
+
+MINOR: click a figure, see the whole picture. Opt-in; nothing existing changes.
+
+### Added
+
+- **`vd-figure[expandable]`.** Wraps the image in a real `<button>` and opens it uncropped, with
+  its caption, in one shared modal dialog.
+
+  **Opt-in is the design, not caution.** The article slots crop — `.vd-article__hero` to 2:1, the
+  mobile thumbnail to 16:9, both `object-fit:cover` — so the page shows a window onto the picture
+  and this is where the frame is. A diagram already at full width gains nothing, and defaulting it
+  on would add a tab stop to every published page at once.
+
+  A **button**, not a click handler on the `<img>`: that is the difference between something a
+  keyboard can reach and something that mysteriously responds to Enter, and it makes the whole
+  picture the target, clearing 2.5.5 with no extra pixels. A figure whose image is already inside
+  a link is skipped — nesting a button in an anchor is invalid and the author meant the link.
+
+  **One dialog per page**, built on first use and reused. A twelve-plate essay would otherwise
+  carry twelve hidden copies of the same markup. `showModal()` gives the top layer, Escape, the
+  focus trap and focus restoration; none of it is worth reimplementing and all of it is what
+  hand-rolled lightboxes get wrong.
+
+- **`vd-figure` is now registered** — the tenth custom element, against four remaining CSS-only
+  hooks. It is still styled entirely by CSS; the class exists so `expandable` has somewhere to be
+  wired, and does nothing without it.
+
+### Measured
+
+Contrast taken inside the open dialog rather than assumed from the tokens:
+
+| | ink | paper |
+|---|---|---|
+| Caption on the scrim | 7.94:1 | 8.50:1 |
+| Close glyph | 11.06:1 | 12.23:1 |
+| Close boundary (1.4.11) | 3.33:1 | 3.35:1 |
+| Close target (2.5.5) | 44×44 | 44×44 |
+
+- **The close button's boundary measured 1.28:1 on `--vd-rule`** — against the 3:1 this system
+  publishes for a control boundary. Switched to `--vd-control-border`, which exists for exactly
+  this, for 3.33:1. The glyph inside carries 11:1 and arguably identifies the control on its own,
+  but there was a token for it and no reason to spend the argument.
+
+### Decisions worth the ink
+
+- **The dialog is the scrim**, full-viewport with its own background, rather than a panel over a
+  styled `::backdrop`. Custom properties have only recently begun inheriting into `::backdrop` and
+  not everywhere, so a themed one cannot be relied on — and with the dialog covering the viewport,
+  "clicked outside the picture" is just "the click landed on the dialog", which needs no geometry.
+
+- **Theme-following, not a fixed dark scrim.** A fixed palette was easier and would have
+  introduced a third surface whose contrast nobody had measured. `--vd-surface` and
+  `--vd-text-muted` inherit ratios already proved in both themes.
+
+- **The accessible name comes from `alt`, never from the caption.** The first build used the
+  caption as a fallback and produced this: *"Expand image: Optional. A hero with a caption is a
+  figure; one without is decoration, and then a bare &lt;img class="vd-article__hero"&gt; is
+  enough."* — newlines and all. The caption is adjacent and already announced as part of the
+  figure, so borrowing it says everything twice, and captions are sentences. `alt=""` now gets the
+  bare *Expand image*, which is honest.
+
+- **Body scroll is locked while open.** `showModal()` blocks interaction with the page behind it
+  but does not stop that page scrolling in every browser.
+
+### Not done
+
+- **No gallery, no next/previous, no zoom-and-pan, no open animation.** The first three are a
+  different component with a much larger surface; pinch already works where it matters. The
+  fourth is a lightbox that delays the thing you just asked to see.
+
+- **The audit does not see the dialog.** It is not in the DOM until the first expand, so the
+  contrast table above was taken by hand with the dialog open. Nothing in `audit.js` opens
+  modals, and making it do so would be a bigger change than this feature.
+
 ## 2.6.2 — 2026-09-16
 
 PATCH: two crops and a title size, all three of them a fixed number standing in for a fit.

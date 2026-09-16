@@ -70,7 +70,7 @@ carved out and are genuinely reusable — see below.
   into tier 1, so every value follows the theme.
 - **Two themes.** Ink and paper, both measured. The theme is a reader choice that persists, and
   falls back to `prefers-color-scheme`.
-- **Fourteen `vd-*` elements** — nine registered custom elements, five CSS-only styling hooks.
+- **Fourteen `vd-*` elements** — ten registered custom elements, four CSS-only styling hooks.
   Documented for editors and tooling in `custom-elements.json`.
 - **`topolang.js`** — a conformant topolang v1.3.2 runtime that draws the generative field.
 - **`print.css`** — paper is a real target, not a stylesheet afterthought. The résumé is

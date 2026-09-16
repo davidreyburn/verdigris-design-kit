@@ -2201,6 +2201,82 @@ vd-figure img,vd-figure svg{max-width:100%;height:auto;display:block}
 vd-figure figcaption{margin-top:var(--vd-space-h);font-family:var(--vd-face-mono);
   font-size:var(--vd-size-micro);line-height:var(--vd-lead-half);color:var(--vd-text-muted)}
 
+/* ── vd-figure[expandable] · the expand control and its dialog ─────────
+   The button is a transport, not a surface. It carries no border, no
+   padding and no background, so an expandable figure looks exactly like a
+   figure until you interact with it — which is the correct amount of
+   announcement for something whose whole promise is "the same picture,
+   bigger".
+
+   display:block and width:100% because a button is inline-block by default,
+   and an inline-block wrapper would break both `vd-figure img{width:100%}`
+   and the hero's aspect-ratio by shrink-wrapping the image. */
+.vd-figure__expand{
+  display:block;width:100%;padding:0;border:0;background:none;
+  font:inherit;color:inherit;cursor:zoom-in;
+}
+/* The affordance is the cursor and the focus ring — plus this, which is the
+   only visible chrome and only on intent. A permanent icon over every
+   expandable figure would be a badge on a picture. */
+.vd-figure__expand:hover img,
+.vd-figure__expand:focus-visible img{opacity:.88}
+.vd-figure__expand img{transition:opacity var(--vd-dur) var(--vd-ease)}
+
+/* THE DIALOG IS THE SCRIM. Full viewport, its own background, no ::backdrop
+   styling — custom properties have only recently begun inheriting into
+   ::backdrop and not everywhere, so a themed one cannot be relied on. It
+   also makes "clicked outside the picture" mean "the click landed on the
+   dialog", which needs no geometry.
+
+   THEME-FOLLOWING, deliberately. A fixed dark scrim would have been easier
+   and would have introduced a third surface whose contrast nobody has
+   measured. Using --vd-surface and --vd-text-muted means the lightbox
+   inherits ratios this system has already proved in both themes. */
+.vd-lightbox{
+  width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;
+  margin:0;padding:0;border:0;
+  background:var(--vd-surface);color:var(--vd-text);
+  display:none;
+  place-items:center;
+}
+.vd-lightbox[open]{display:grid}
+.vd-lightbox::backdrop{background:var(--vd-surface)}
+.vd-lightbox__frame{
+  margin:0;display:flex;flex-direction:column;gap:var(--vd-space-h);
+  align-items:center;max-width:92vw;cursor:auto;
+}
+/* contain, not cover. The article slots crop — the hero to 2:1, the mobile
+   thumbnail to 16:9 — and this is the one place the whole frame is shown.
+   Cropping here would defeat the only reason the control exists. */
+.vd-lightbox__img{
+  display:block;max-width:92vw;max-height:calc(100dvh - var(--vd-space-4));
+  width:auto;height:auto;object-fit:contain;
+  border-radius:var(--vd-radius);
+}
+.vd-lightbox__caption{
+  margin:0;max-width:var(--vd-measure);text-align:center;
+  font-family:var(--vd-face-mono);font-size:var(--vd-size-micro);
+  line-height:var(--vd-lead-half);color:var(--vd-text-muted);
+}
+.vd-lightbox__caption[hidden]{display:none}
+/* 44px for 2.5.5, in the corner the eye goes to last. Escape and a click
+   anywhere off the picture do the same job; this is the one a first-time
+   reader on a touch screen will look for.
+
+   --vd-control-border, not --vd-rule. Measured on the rule colour the
+   boundary came out at 1.28:1 in ink and 1.32 on paper, against the 3:1
+   this system publishes for a control boundary. The glyph inside carries
+   11:1 and arguably identifies the control on its own, but there is a token
+   that exists precisely for this and no reason to spend the argument. */
+.vd-lightbox__close{
+  position:fixed;top:var(--vd-space-h);right:var(--vd-space-h);
+  width:44px;height:44px;display:grid;place-items:center;
+  padding:0;border:var(--vd-hairline) solid var(--vd-control-border);
+  border-radius:var(--vd-radius);
+  background:var(--vd-surface);color:var(--vd-text);cursor:pointer;
+}
+.vd-lightbox__close:hover{color:var(--vd-text-max);border-color:var(--vd-text-muted)}
+
 /* ── .vd-article__hero · the one image that represents a piece ──────────
    Sits between the dek and the masthead: the words arrive first, and the
    image introduces the piece rather than fronting it.

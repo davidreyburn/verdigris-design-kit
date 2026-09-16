@@ -1075,10 +1075,118 @@
     read();
   })();
 
+  /* ── vd-figure[expandable] · click the picture, see the picture ──────
+     OPT-IN. A figure without the attribute is untouched, which matters more
+     than it looks: making every image a control silently adds a tab stop to
+     every article already published, and a diagram that is already full width
+     gains nothing by opening larger.
+
+     The point of this is the crop. .vd-article__hero is 2:1 and the mobile
+     thumbnail is 16:9, both object-fit:cover, so the page has been showing a
+     window onto the picture. This is where the whole frame is.
+
+     A REAL BUTTON, not a click handler on the <img>. That is the difference
+     between something a keyboard can reach and something that mysteriously
+     responds to Enter, and it makes the whole picture the target, which
+     clears 2.5.5 without a single extra pixel.
+
+     ONE dialog for the page, built on first use and reused. Not one per
+     figure: a long essay with a dozen plates would otherwise carry a dozen
+     hidden copies of the same markup. */
+  let lightbox = null;
+
+  function buildLightbox() {
+    const dlg = document.createElement('dialog');
+    dlg.className = 'vd-lightbox';
+    /* The dialog IS the scrim — full viewport, its own background — rather
+       than a small panel over a styled ::backdrop. Two reasons. Custom
+       properties only began inheriting into ::backdrop recently and not
+       everywhere, so a themed backdrop cannot be relied on; and with the
+       dialog covering the viewport, "clicked outside the picture" is just
+       "the click landed on the dialog itself". */
+    dlg.innerHTML =
+      '<button class="vd-lightbox__close" type="button" aria-label="Close image">' +
+        '<svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20" fill="none" ' +
+             'stroke="currentColor" stroke-width="1.5">' +
+          '<path d="M5 5 19 19M19 5 5 19"/></svg>' +
+      '</button>' +
+      '<figure class="vd-lightbox__frame">' +
+        '<img class="vd-lightbox__img" alt="">' +
+        '<figcaption class="vd-lightbox__caption"></figcaption>' +
+      '</figure>';
+
+    dlg.addEventListener('click', function (e) {
+      /* Anything that is not the picture or its caption closes. The close
+         button is included by being outside .vd-lightbox__frame. */
+      if (!e.target.closest('.vd-lightbox__frame')) close();
+    });
+    dlg.addEventListener('close', function () {
+      document.body.style.overflow = lightbox._overflow || '';
+    });
+    document.body.appendChild(dlg);
+    return dlg;
+  }
+
+  function close() { if (lightbox && lightbox.open) lightbox.close(); }
+
+  function open(img, caption) {
+    if (!lightbox) lightbox = buildLightbox();
+    const shown = lightbox.querySelector('.vd-lightbox__img');
+    const cap = lightbox.querySelector('.vd-lightbox__caption');
+    /* currentSrc, not src: if the author ever serves a srcset the browser has
+       already chosen a file, and re-reading src would fetch a second one. */
+    shown.src = img.currentSrc || img.src;
+    shown.alt = img.alt || '';
+    cap.textContent = caption || '';
+    cap.hidden = !caption;
+    /* showModal blocks interaction with the page behind it but does not stop
+       that page scrolling in every browser, and a background scrolling under
+       a modal is disorienting. Restored on close. */
+    lightbox._overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    /* Focus returns to the element that was focused when showModal ran, so
+       the trigger gets it back on close without any bookkeeping here. */
+    lightbox.showModal();
+  }
+
+  class VdFigure extends VdElement {
+    upgrade() {
+      if (!this.hasAttribute('expandable')) return;
+      const img = this.querySelector('img');
+      /* No image, or an image that is already somebody's link, is left alone.
+         Nesting a button inside an anchor is invalid and the author clearly
+         meant the link. */
+      if (!img || img.closest('a') || this.querySelector('.vd-figure__expand')) return;
+
+      const figcap = this.querySelector('figcaption');
+      /* Authored markup is indented, so a caption read straight out of the
+         DOM arrives full of newlines and runs of spaces. */
+      const caption = figcap ? figcap.textContent.replace(/\s+/g, ' ').trim() : '';
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'vd-figure__expand';
+      /* The name says what the control DOES, then what it acts on — but only
+         from alt, and never from the caption. The caption is already adjacent
+         and already announced as part of the figure, so borrowing it here
+         says everything twice; and captions are sentences, which makes for a
+         two-hundred-character accessible name. An alt is a description and is
+         the right length by construction. A decorative image with alt="" gets
+         the bare label, which is honest: there is nothing more to say about
+         it than what the control does. */
+      const alt = img.alt.replace(/\s+/g, ' ').trim();
+      btn.setAttribute('aria-label', 'Expand image' + (alt ? ': ' + alt : ''));
+      img.parentNode.insertBefore(btn, img);
+      btn.appendChild(img);
+      btn.addEventListener('click', function () { open(img, caption); });
+      this.setAttribute('data-expandable', '');
+    }
+  }
+
   const defs = [
     ['vd-hero', VdHero], ['vd-system-card', VdSystemCard], ['vd-note-card', VdNoteCard],
     ['vd-code', VdCode], ['vd-redact', VdRedact], ['vd-toc', VdToc], ['vd-swatch', VdSwatch],
-    ['vd-theme-toggle', VdThemeToggle], ['vd-form', VdForm]
+    ['vd-theme-toggle', VdThemeToggle], ['vd-form', VdForm], ['vd-figure', VdFigure]
   ];
   defs.forEach(function (d) {
     if (!customElements.get(d[0])) customElements.define(d[0], d[1]);
