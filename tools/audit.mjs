@@ -123,8 +123,57 @@ async function run(page, theme, width) {
   })`));
   if (env.present !== 'function')
     return { error: 'verdigrisAudit is not loaded — is audit.js on this page?', env };
-  return { env, report: JSON.parse(await evaluate('JSON.stringify(verdigrisAudit({json:true}))')) };
+  const report = JSON.parse(await evaluate('JSON.stringify(verdigrisAudit({json:true}))'));
+  const overlay = JSON.parse(await evaluate(`(${overlayProbe})()`));
+  if (overlay && overlay.fails.length) report.totalFailures += overlay.fails.length;
+  return { env, report, overlay };
 }
+
+/* ── the overlay check, and why it scrolls first ───────────────────────
+   audit.js cannot see the lightbox: it is not in the DOM until a figure is
+   expanded, so nothing in the in-page harness measures it. This runs out
+   here, over CDP, where a click is available.
+
+   IT SCROLLS BEFORE IT CLICKS, and that is the entire point of the check
+   rather than an implementation detail. A <dialog> left to the UA sheet
+   computes to position:absolute, which resolves against the document rather
+   than the viewport — so it pins to the top of the PAGE. At scrollY 0 that is
+   indistinguishable from correct, which is how it shipped in 2.7.0 and stayed
+   broken until someone scrolled. Measured at the time: scrollY 13,982 put the
+   dialog's top at -13,982 and left only the backdrop on screen.
+
+   So: scroll to the LAST expandable figure, open it, and require that the
+   dialog intersects the viewport and the image has real size. Serialised as a
+   string because it runs in the page, not here. */
+const overlayProbe = `async function () {
+  const btns = [...document.querySelectorAll('.vd-figure__expand')];
+  if (!btns.length) return JSON.stringify({ checked: 0, fails: [] });
+  const b = btns[btns.length - 1];
+  b.scrollIntoView({ block: 'center' });
+  await new Promise(r => setTimeout(r, 250));
+  const scrollY = Math.round(window.scrollY);
+  b.click();
+  await new Promise(r => setTimeout(r, 350));
+  const fails = [];
+  const dlg = document.querySelector('.vd-lightbox');
+  if (!dlg || !dlg.open) {
+    fails.push({ check: 'lightbox opens', scrollY });
+  } else {
+    const d = dlg.getBoundingClientRect();
+    const img = dlg.querySelector('.vd-lightbox__img');
+    const i = img ? img.getBoundingClientRect() : { width: 0, height: 0, top: 0, bottom: 0 };
+    if (d.bottom <= 0 || d.top >= innerHeight)
+      fails.push({ check: 'dialog is on screen', scrollY, dialogTop: Math.round(d.top),
+                   note: 'position resolved against the document, not the viewport' });
+    if (!(i.width > 0 && i.height > 0))
+      fails.push({ check: 'expanded image has size', scrollY,
+                   box: Math.round(i.width) + 'x' + Math.round(i.height) });
+    if (i.bottom <= 0 || i.top >= innerHeight)
+      fails.push({ check: 'expanded image is on screen', scrollY, imageTop: Math.round(i.top) });
+    dlg.close();
+  }
+  return JSON.stringify({ checked: btns.length, scrollY, fails });
+}`;
 
 const results = {};
 let failures = 0;
@@ -137,9 +186,12 @@ for (const page of PAGES) {
       const n = r.report ? r.report.totalFailures : 1;
       failures += n;
       const over = r.env.scrollWidth - r.env.clientWidth;
+      const ov = r.overlay && r.overlay.fails.length
+        ? ` OVERLAY ${r.overlay.fails.map(f => f.check).join(', ')} @scrollY=${r.overlay.scrollY}`
+        : (r.overlay && r.overlay.checked ? ` overlay:ok(${r.overlay.checked})` : '');
       console.error(`  ${page.padEnd(20)} ${label.padEnd(6)} ` +
         `fails=${n} --vd-text=${r.env.text} ` +
-        `${r.env.scrollWidth}/${r.env.clientWidth}${over > 0 ? ` OVERFLOW +${over}` : ''}`);
+        `${r.env.scrollWidth}/${r.env.clientWidth}${over > 0 ? ` OVERFLOW +${over}` : ''}${ov}`);
     } catch (err) {
       results[page][label] = { error: String(err) };
       failures++;

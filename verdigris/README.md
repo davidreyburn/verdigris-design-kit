@@ -691,7 +691,7 @@ this* and paper has already answered it. `print.css` hides them and resets the
 card's grid, because `:has()` matches a hidden element and would otherwise
 leave an empty 90px column indenting every row.
 
-**Every slot is a RATIO, not a height.** This was wrong until 2.7.1 and it is
+**Every slot is a RATIO, not a height.** This was wrong until 2.7.2 and it is
 worth knowing why, because the mistake is easy to repeat: a fixed pixel height
 on a fluid-width element does not fix the crop, it makes the crop a function
 of the window. The thumbnail band ran from 1.72:1 at 320px to **4.91:1 at
@@ -957,6 +957,20 @@ and a background scrolling under a modal is disorienting.
 **Deliberately absent:** no gallery, no next/previous, no zoom-and-pan (pinch
 already works where it matters), and no open animation. A lightbox that fades
 in delays the thing you just asked to see.
+
+**The dialog is pinned with `position:fixed; inset:0`, explicitly.** Left to
+the UA stylesheet a `<dialog>` computes to `position:absolute`, which resolves
+against the *document* rather than the viewport — so it lands at the top of
+the page, not the top of the screen. At `scrollY: 0` that looks correct, which
+is how it shipped in 2.7.0: measured on a 19,359px article with the reader two
+thirds down, the dialog's top sat at **−13,982**, leaving only the backdrop on
+screen. Never let the UA sheet position a full-viewport overlay.
+
+`tools/audit.mjs` now guards it: on any page with an expandable figure it
+**scrolls to the last one**, opens it, and requires the dialog to intersect
+the viewport with a non-zero image. Scrolling first is the whole check — at
+the top of the page a document-anchored dialog and a viewport-anchored one are
+indistinguishable.
 
 It does not print. Paper has no top layer, and the button carries no chrome,
 so an expandable figure prints exactly as it did before it was made one.

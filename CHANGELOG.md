@@ -923,6 +923,60 @@ PATCH: the printed résumé had no reachable contact on it.
   sheet they read as empty boxes drawn around text, and the URL now following each label needs the
   room.
 
+## 2.7.2 — 2026-09-17
+
+PATCH: the lightbox opened onto a blank scrim on any scrolled page. Shipped broken in 2.7.0 and
+verified in the one state where it could not fail.
+
+### Fixed
+
+- **`.vd-lightbox` left `position` and `inset` to the `<dialog>` UA stylesheet.** That computes to
+  `position:absolute`, and absolute resolves against the **initial containing block — the
+  document, not the viewport**. The dialog therefore pinned to the top of the *page*.
+
+  At `scrollY: 0` this is indistinguishable from correct. Measured on a 19,359px article with the
+  reader two thirds down:
+
+  | | before | after |
+  |---|---|---|
+  | `scrollY` at click | 13,982 | 13,982 |
+  | Dialog top, vs viewport | **−13,982** | **0** |
+  | Image visible | **false** | true |
+
+  Everything left on screen was `::backdrop`, painted in `--vd-surface` — the blank scrim. Not
+  browser-specific; plain Chrome does it, and so does a phone.
+
+  `position:fixed; inset:0` now, explicitly. `inset:0` also replaces the `width:100vw` that was
+  there, which counted the scrollbar and could push the page sideways on desktop, and
+  `max-width`/`max-height` are reset because dialog UA styles impose a `calc(100% - 6px - 2em)`
+  cap that fights viewport sizing.
+
+- **The close button moved from `position:fixed` to `position:absolute`.** The dialog is a fixed
+  containing block now, so the two land in the same place; absolute is what the control means.
+
+### Added
+
+- **The audit opens the lightbox, from a scrolled position.** `audit.js` runs inside the page and
+  cannot see a dialog that is not in the DOM until first use — recorded as a known gap in 2.7.0,
+  and it is what let this ship. `tools/audit.mjs` now scrolls to the **last** expandable figure on
+  a page, opens it, and requires the dialog to intersect the viewport and the image to have real
+  size.
+
+  **Scrolling first is the check**, not an implementation detail: at the top of the page a
+  document-anchored dialog and a viewport-anchored one render identically. Verified the guard
+  actually catches the defect — reverting the CSS fails all five loads of `reader.html` with
+  *dialog is on screen, expanded image is on screen*, and passes with it.
+
+  `AGENTS.md` now states the general rule: anything that overlays the viewport is tested from a
+  scrolled position.
+
+### Worth recording
+
+- **Every check written for 2.7.0 clicked at `scrollY: 0`.** The probe that walked all five
+  figures never scrolled either, because `.click()` does not need an element in view. The feature
+  was verified only in the state where the bug is invisible. The guard above exists because the
+  measurement discipline, not the code, is what failed.
+
 ## 2.7.1 — 2026-09-16
 
 PATCH: the work cards' proof rule sat on the descenders of the last line of body copy.

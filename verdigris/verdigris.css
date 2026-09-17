@@ -1176,7 +1176,7 @@ vd-system-card[data-clickable]:hover .vd-system-card__title a::after,
   /* auto, not a fixed step: pushes the proof to the foot of the card whatever
      the body above it does, so the proof BLOCKS in a row share a bottom edge.
 
-     Corrected in 2.7.1: this used to claim every proof RULE in a row sits on
+     Corrected in 2.7.2: this used to claim every proof RULE in a row sits on
      one line, which is only true when the proofs are the same height. An auto
      top margin pins the bottom, so a two-line proof beside a one-line proof
      puts its rule 45px higher — measured on the reference homepage, and true
@@ -2254,7 +2254,23 @@ vd-figure figcaption{margin-top:var(--vd-space-h);font-family:var(--vd-face-mono
    measured. Using --vd-surface and --vd-text-muted means the lightbox
    inherits ratios this system has already proved in both themes. */
 .vd-lightbox{
-  width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;
+  /* POSITION AND INSET ARE SET HERE, NOT LEFT TO THE UA SHEET, and leaving
+     them to it was a shipped bug. A <dialog> computes to position:absolute
+     with inset:0, and absolute resolves against the INITIAL CONTAINING BLOCK
+     — the document, not the viewport. So the dialog pins to the top of the
+     page rather than the top of the screen.
+
+     On an unscrolled page that is indistinguishable from correct. Measured on
+     a 19,359px article with the reader two thirds down: scrollY 13,982, and
+     the dialog's top at -13,982 relative to the viewport. The only thing left
+     on screen is ::backdrop, painted in --vd-surface — a blank scrim.
+
+     inset:0 also replaces the width:100vw that used to be here, which counted
+     the scrollbar and could push the page sideways on desktop. max-width and
+     max-height are reset explicitly because dialog UA styles impose a
+     calc(100% - 6px - 2em) cap that otherwise fights the viewport sizing. */
+  position:fixed;inset:0;
+  width:auto;height:auto;max-width:none;max-height:none;
   margin:0;padding:0;border:0;
   background:var(--vd-surface);color:var(--vd-text);
   display:none;
@@ -2290,7 +2306,10 @@ vd-figure figcaption{margin-top:var(--vd-space-h);font-family:var(--vd-face-mono
    11:1 and arguably identifies the control on its own, but there is a token
    that exists precisely for this and no reason to spend the argument. */
 .vd-lightbox__close{
-  position:fixed;top:var(--vd-space-h);right:var(--vd-space-h);
+  /* absolute, against the dialog, which is now the fixed containing block.
+     fixed would land in the same place and would be saying something the
+     control does not mean. */
+  position:absolute;top:var(--vd-space-h);right:var(--vd-space-h);
   width:44px;height:44px;display:grid;place-items:center;
   padding:0;border:var(--vd-hairline) solid var(--vd-control-border);
   border-radius:var(--vd-radius);
